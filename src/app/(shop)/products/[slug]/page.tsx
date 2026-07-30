@@ -1,0 +1,313 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getProductBySlug, getAllProducts } from "@/data/products";
+import { PDPClient } from "./PDPClient";
+import { HeaderNav } from "@/components/global/HeaderNav";
+import { MenuDrawer } from "@/components/global/MenuDrawer";
+import { CartDrawer } from "@/components/global/CartDrawer";
+import { FooterDirectory } from "@/components/global/FooterDirectory";
+
+/* ═══════════════════════════════════════════════════════════
+   KODŌ — Product Detail Page (Server Component)
+   Fetches product data by slug, generates dynamic metadata
+   and JSON-LD Product schema, then delegates interaction
+   to the PDPClient leaf component.
+   ═══════════════════════════════════════════════════════════ */
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+/* ── Static Path Pre-generation ────────────────────────── */
+export async function generateStaticParams() {
+  const products = getAllProducts();
+  return products.map((product) => ({
+    slug: product.slug,
+  }));
+}
+
+/* ── Dynamic Metadata Generation ───────────────────────── */
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = getProductBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+    };
+  }
+
+  return {
+    title: `${product.name} — ${product.subtitle}`,
+    description: product.description,
+    openGraph: {
+      title: `${product.name} — ${product.subtitle} | KODŌ Fragrances`,
+      description: product.description,
+      images: [
+        {
+          url: product.image,
+          width: 800,
+          height: 1067,
+          alt: `${product.name} ${product.subtitle} — KODŌ fragrance bottle`,
+        },
+      ],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} — ${product.subtitle} | KODŌ`,
+      description: product.description,
+    },
+  };
+}
+
+/* ── Page Component (RSC) ──────────────────────────────── */
+export default async function ProductPage({ params }: PageProps) {
+  const { slug } = await params;
+  const product = getProductBySlug(slug);
+
+  if (!product) {
+    notFound();
+  }
+
+  /* JSON-LD Product Schema — spec lines 6793–6816 */
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${product.name} — ${product.subtitle}`,
+    image: `https://kodo-fragrances.com${product.image}`,
+    description: product.description,
+    brand: {
+      "@type": "Brand",
+      name: "KODŌ",
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: Math.min(...product.sizes.map((s) => s.price)),
+      highPrice: Math.max(...product.sizes.map((s) => s.price)),
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      offerCount: product.sizes.length,
+    },
+  };
+
+  return (
+    <>
+      <HeaderNav />
+      <MenuDrawer />
+      <CartDrawer />
+
+      <main id="main-content">
+        {/* Breadcrumb Navigation */}
+        <nav
+          aria-label="Breadcrumb"
+          style={{
+            maxWidth: "1440px",
+            margin: "0 auto",
+            padding:
+              "var(--ref-space-12) var(--ref-space-4) var(--ref-space-2)",
+          }}
+        >
+          <ol
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--ref-space-1)",
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+            }}
+          >
+            <li>
+              <Link
+                href="/"
+                style={{
+                  color: "var(--sys-color-text-secondary)",
+                  textDecoration: "none",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Home
+              </Link>
+            </li>
+            <li
+              aria-hidden="true"
+              style={{
+                color: "var(--sys-color-text-secondary)",
+                fontSize: "0.75rem",
+              }}
+            >
+              /
+            </li>
+            <li>
+              <Link
+                href="/collections"
+                style={{
+                  color: "var(--sys-color-text-secondary)",
+                  textDecoration: "none",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Collection
+              </Link>
+            </li>
+            <li
+              aria-hidden="true"
+              style={{
+                color: "var(--sys-color-text-secondary)",
+                fontSize: "0.75rem",
+              }}
+            >
+              /
+            </li>
+            <li aria-current="page">
+              <span
+                style={{
+                  color: "var(--sys-color-text-primary)",
+                  fontSize: "0.75rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                }}
+              >
+                {product.name}
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        {/* Product Detail Layout: Split Panel */}
+        <section
+          aria-labelledby="product-title"
+          style={{
+            maxWidth: "1440px",
+            margin: "0 auto",
+            padding: "0 var(--ref-space-4) var(--ref-space-15)",
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "var(--ref-space-6)",
+          }}
+          className="pdp-grid"
+        >
+          {/* Left Column: Product Image Gallery */}
+          <div className="pdp-media-column">
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                aspectRatio: "3 / 4",
+                backgroundColor: "var(--ref-color-obsidian-20)",
+                overflow: "hidden",
+              }}
+            >
+              {/* Product image placeholder — awaiting asset pipeline */}
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: "var(--ref-space-3)",
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily:
+                      "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "clamp(4rem, 8vw, 8rem)",
+                    lineHeight: 1,
+                    color: "var(--ref-color-gold-mid)",
+                    opacity: 0.25,
+                  }}
+                >
+                  {product.name}
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase",
+                    color: "var(--sys-color-text-secondary)",
+                  }}
+                >
+                  {product.subtitle}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Interactive Client Component */}
+          <div className="pdp-info-column">
+            <PDPClient product={product} />
+          </div>
+        </section>
+      </main>
+
+      <FooterDirectory />
+
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* Breadcrumb JSON-LD Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              {
+                "@type": "ListItem",
+                position: 1,
+                name: "Home",
+                item: "https://kodo-fragrances.com",
+              },
+              {
+                "@type": "ListItem",
+                position: 2,
+                name: "Collection",
+                item: "https://kodo-fragrances.com/collections",
+              },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: `${product.name} — ${product.subtitle}`,
+                item: `https://kodo-fragrances.com/products/${product.slug}`,
+              },
+            ],
+          }),
+        }}
+      />
+
+      {/* Scoped PDP Grid Styles */}
+      <style>{`
+        @media (min-width: 768px) {
+          .pdp-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: var(--ref-space-12) !important;
+          }
+        }
+        @media (min-width: 1024px) {
+          .pdp-grid {
+            grid-template-columns: 7fr 5fr !important;
+            padding-left: var(--ref-space-12) !important;
+            padding-right: var(--ref-space-12) !important;
+          }
+        }
+      `}</style>
+    </>
+  );
+}

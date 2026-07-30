@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   KODŌ — Master Design Token System
+   OKLCH Perceptual Color Space | 8pt Spatial Grid
+   Major Third Typographic Scale | WCAG 2.2 AAA
+   ═══════════════════════════════════════════════════════════ */
+
+@theme inline {
+  /* Map KODŌ fonts to Tailwind */
+  --font-sans: var(--font-utility-sans), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-editorial-display), Georgia, serif;
+
+  /* Override Tailwind background/foreground */
+  --color-background: oklch(12% 0.01 260);
+  --color-foreground: oklch(98% 0.005 85);
+}
+
+/* ─────────────────────────────────────────────────────────
+   1. Reference Tokens — Raw Palette & Sizes
+   ───────────────────────────────────────────────────────── */
+:root {
+  /* OKLCH Color System */
+  --ref-color-obsidian-10: oklch(12% 0.01 260);
+  --ref-color-obsidian-20: oklch(18% 0.01 260);
+  --ref-color-alabaster-98: oklch(98% 0.005 85);
+  --ref-color-alabaster-75: oklch(75% 0.02 85);
+  --ref-color-gold-mid: oklch(76% 0.08 85);
+  --ref-color-crimson-error: oklch(40% 0.12 25);
+  --ref-color-border-subtle: oklch(96% 0.01 85 / 0.12);
+  --ref-color-border-active: oklch(96% 0.01 85 / 0.25);
+
+  /* 8pt Spacing Grid */
+  --ref-space-0: 0px;
+  --ref-space-0-5: 4px;
+  --ref-space-1: 8px;
+  --ref-space-2: 16px;
+  --ref-space-3: 24px;
+  --ref-space-4: 32px;
+  --ref-space-6: 48px;
+  --ref-space-8: 64px;
+  --ref-space-12: 96px;
+  --ref-space-15: 120px;
+  --ref-space-20: 160px;
+
+  /* Fluid Page Margins */
+  --ref-space-page-margin: clamp(1.5rem, 5vw, 6rem);
+  --ref-space-gutter: clamp(1rem, 2.5vw, 2rem);
+
+  /* Typography Scale (Major Third 1.250) */
+  --ref-font-size-caption: 0.75rem;    /* 12px */
+  --ref-font-size-small: 0.6875rem;    /* 11px */
+  --ref-font-size-base: clamp(1rem, 0.5vw + 0.75rem, 1.125rem);
+  --ref-font-size-body-lg: clamp(1.125rem, 0.75vw + 0.75rem, 1.25rem);
+  --ref-font-size-title: clamp(1.25rem, 1vw + 0.75rem, 1.5rem);
+  --ref-font-size-heading: clamp(1.75rem, 2vw + 1rem, 3rem);
+  --ref-font-size-display: clamp(2.5rem, 4vw + 1rem, 4.5rem);
+  --ref-font-size-hero: clamp(3.5rem, 6vw, 7.5rem);
+
+  /* Line Heights */
+  --ref-line-height-tight: 1.1;
+  --ref-line-height-body: 1.5;
+  --ref-line-height-relaxed: 1.6;
+
+  /* Letter Spacing */
+  --ref-letter-spacing-display: -0.02em;
+  --ref-letter-spacing-tight: -0.01em;
+  --ref-letter-spacing-sans: 0.04em;
+  --ref-letter-spacing-wide: 0.08em;
+  --ref-letter-spacing-ultra: 0.15em;
+  --ref-letter-spacing-label: 0.2em;
+  --ref-letter-spacing-caps: 0.25em;
+
+  /* Motion Easings */
+  --ease-decelerate: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-fluid-spring: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Shadows (Amber-tinted depth) */
+  --ref-shadow-elevation-1: 0 4px 24px -1px oklch(12% 0.01 260 / 0.12);
+  --ref-shadow-elevation-2: 0 8px 32px -2px oklch(12% 0.01 260 / 0.18);
+  --ref-shadow-elevation-3: 0 16px 48px -4px oklch(12% 0.01 260 / 0.25);
+
+  /* Touch target min (WCAG 2.5.5) */
+  --ref-touch-target: 44px;
+
+  /* Radius — Monolithic sharp edges */
+  --ref-radius-none: 0px;
+  --ref-radius-sm: 2px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   2. System Tokens — Semantic Role Mapping
+   ───────────────────────────────────────────────────────── */
+:root {
+  /* Colors — Semantic */
+  --sys-color-bg: var(--ref-color-obsidian-10);
+  --sys-color-surface: var(--ref-color-obsidian-20);
+  --sys-color-text-primary: var(--ref-color-alabaster-98);
+  --sys-color-text-secondary: var(--ref-color-alabaster-75);
+  --sys-color-text-accent: var(--ref-color-gold-mid);
+  --sys-color-border: var(--ref-color-border-subtle);
+  --sys-color-border-active: var(--ref-color-border-active);
+  --sys-color-error: var(--ref-color-crimson-error);
+
+  /* Spacing — Semantic */
+  --sys-space-gutter: var(--ref-space-gutter);
+  --sys-space-section: var(--ref-space-20);
+  --sys-space-page-margin: var(--ref-space-page-margin);
+
+  /* Layout */
+  --sys-grid-columns: 12;
+  --sys-nav-height: 80px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   3. Component Tokens
+   ───────────────────────────────────────────────────────── */
+:root {
+  --comp-nav-height: var(--sys-nav-height);
+  --comp-nav-blur: 16px;
+  --comp-nav-bg: oklch(12% 0.01 260 / 0.85);
+  --comp-button-height-primary: 54px;
+  --comp-button-height-secondary: 44px;
+  --comp-card-bg: var(--sys-color-surface);
+  --comp-card-border: var(--sys-color-border);
+  --comp-input-height: 44px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   4. Base Styles — Document-Level
+   ───────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--sys-color-bg);
+  color: var(--sys-color-text-primary);
+  font-family: var(--font-utility-sans), system-ui, -apple-system, sans-serif;
+  font-size: var(--ref-font-size-base);
+  line-height: var(--ref-line-height-body);
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────────────────────
+   5. Typography — Editorial Display & Utility Sans
+   ───────────────────────────────────────────────────────── */
+h1, h2, h3, .font-editorial {
+  font-family: var(--font-editorial-display), Georgia, serif;
+  letter-spacing: var(--ref-letter-spacing-display);
+  line-height: var(--ref-line-height-tight);
+  font-weight: 400;
+}
+
+.text-hero {
+  font-size: var(--ref-font-size-hero);
+  line-height: var(--ref-line-height-tight);
+  letter-spacing: var(--ref-letter-spacing-tight);
+  font-variation-settings: "opsz" 72;
+}
+
+.text-display {
+  font-size: var(--ref-font-size-display);
+  line-height: var(--ref-line-height-tight);
+}
+
+.text-heading {
+  font-size: var(--ref-font-size-heading);
+  line-height: var(--ref-line-height-tight);
+}
+
+.text-title {
+  font-size: var(--ref-font-size-title);
+}
+
+.text-body {
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-base);
+  line-height: var(--ref-line-height-body);
+}
+
+.text-body-lg {
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-body-lg);
+  line-height: var(--ref-line-height-relaxed);
+}
+
+.text-label {
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-small);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--ref-letter-spacing-caps);
+  color: var(--sys-color-text-accent);
+}
+
+.text-caption {
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-caption);
+  letter-spacing: var(--ref-letter-spacing-wide);
+  color: var(--sys-color-text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────
+   6. Editorial Grid — 12-Column Layout
+   ───────────────────────────────────────────────────────── */
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--sys-grid-columns), 1fr);
+  column-gap: var(--sys-space-gutter);
+  padding-inline: var(--sys-space-page-margin);
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+@media (max-width: 1024px) {
+  .editorial-grid {
+    --sys-grid-columns: 8;
+  }
+}
+
+@media (max-width: 768px) {
+  .editorial-grid {
+    --sys-grid-columns: 4;
+    column-gap: var(--ref-space-2);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   7. Glassmorphic Materials
+   ───────────────────────────────────────────────────────── */
+.glass-surface {
+  background: oklch(18% 0.01 260 / 0.85);
+  backdrop-filter: blur(var(--comp-nav-blur));
+  -webkit-backdrop-filter: blur(var(--comp-nav-blur));
+  border: 1px solid var(--sys-color-border);
+}
+
+/* ─────────────────────────────────────────────────────────
+   8. Interactive States — Buttons & Links
+   ───────────────────────────────────────────────────────── */
+.kodo-focus-ring:focus-visible {
+  outline: 2px solid var(--sys-color-text-accent);
+  outline-offset: 2px;
+}
+
+.kodo-focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─────────────────────────────────────────────────────────
+   9. Accessibility — Reduced Motion
+   ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .char-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .webgl-particle-overlay {
+    display: none !important;
+  }
+}
+
+/* Reduced transparency fallback */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface {
+    background: var(--sys-color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   10. Skip Navigation (Accessibility)
+   ───────────────────────────────────────────────────────── */
+.skip-nav {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: var(--ref-space-2) var(--ref-space-4);
+  background: var(--sys-color-text-primary);
+  color: var(--sys-color-bg);
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--ref-letter-spacing-label);
+  text-decoration: none;
+  transition: top 0.15s var(--ease-decelerate);
+}
+
+.skip-nav:focus {
+  top: var(--ref-space-2);
+}
+
+/* ─────────────────────────────────────────────────────────
+   11. Utility Classes
+   ───────────────────────────────────────────────────────── */
+.color-accent { color: var(--sys-color-text-accent); }
+.color-secondary { color: var(--sys-color-text-secondary); }
+.color-primary { color: var(--sys-color-text-primary); }
+
+.ma-space {
+  padding-block: var(--sys-space-section);
+}
+
+.section-margin {
+  margin-bottom: var(--sys-space-section);
+}
