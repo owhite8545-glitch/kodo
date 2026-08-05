@@ -109,27 +109,16 @@ export function HeaderNav() {
         {/* Cart Button */}
         <button
           onClick={toggleCart}
-          className="kodo-focus-ring"
+          className="kodo-btn-utility kodo-focus-ring"
           aria-label={`Shopping cart, ${totalItems()} items`}
           style={{
             position: "relative",
-            background: "none",
-            border: "none",
-            color: "var(--sys-color-text-secondary)",
-            fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
             fontSize: "var(--ref-font-size-small)",
-            fontWeight: 500,
-            textTransform: "uppercase",
             letterSpacing: "var(--ref-letter-spacing-ultra)",
-            cursor: "pointer",
             padding: "var(--ref-space-1) var(--ref-space-2)",
             marginRight: "var(--ref-space-2)",
-            transition: "color 150ms var(--ease-decelerate)",
             minWidth: "var(--ref-touch-target)",
             minHeight: "var(--ref-touch-target)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           Cart
@@ -148,26 +137,15 @@ export function HeaderNav() {
         {/* Menu Trigger */}
         <button
           onClick={toggleMenu}
-          className="kodo-focus-ring"
+          className="kodo-btn-utility kodo-focus-ring"
           aria-expanded={isMenuOpen}
           aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           style={{
-            background: "none",
-            border: "none",
-            color: "var(--sys-color-text-secondary)",
-            fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
             fontSize: "var(--ref-font-size-small)",
-            fontWeight: 500,
-            textTransform: "uppercase",
             letterSpacing: "var(--ref-letter-spacing-ultra)",
-            cursor: "pointer",
             padding: "var(--ref-space-1)",
-            transition: "color 150ms var(--ease-decelerate)",
             minWidth: "var(--ref-touch-target)",
             minHeight: "var(--ref-touch-target)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           {isMenuOpen ? "Close" : "Menu"}

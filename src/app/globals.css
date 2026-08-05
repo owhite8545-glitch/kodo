@@ -263,6 +263,110 @@ h1, h2, h3, .font-editorial {
   outline: none;
 }
 
+/* ── Button System ── */
+
+.kodo-btn-solid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--comp-button-height-primary);
+  padding: 0 var(--ref-space-6);
+  background-color: var(--ref-color-alabaster-98);
+  color: var(--ref-color-obsidian-10);
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--ref-letter-spacing-sans);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 240ms var(--ease-decelerate),
+    transform 240ms var(--ease-fluid-spring);
+  will-change: transform;
+}
+
+.kodo-btn-solid:hover {
+  background-color: oklch(93% 0.005 85);
+}
+
+.kodo-btn-solid:active {
+  transform: scale3d(0.97, 0.97, 1);
+}
+
+.kodo-btn-solid[disabled],
+.kodo-btn-solid.is-disabled {
+  background-color: oklch(98% 0.005 85 / 0.3);
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.kodo-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--comp-button-height-secondary);
+  padding: 0 var(--ref-space-4);
+  background-color: transparent;
+  color: var(--sys-color-text-primary);
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-size: var(--ref-font-size-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--ref-letter-spacing-sans);
+  text-decoration: none;
+  border: 1px solid var(--sys-color-border);
+  cursor: pointer;
+  transition:
+    background-color 240ms var(--ease-decelerate),
+    border-color 240ms var(--ease-decelerate),
+    transform 240ms var(--ease-fluid-spring);
+}
+
+.kodo-btn-outline:hover {
+  background-color: oklch(98% 0.005 85 / 0.08);
+  border-color: var(--sys-color-border-active);
+}
+
+.kodo-btn-outline:active {
+  transform: scale3d(0.97, 0.97, 1);
+}
+
+.kodo-btn-outline[disabled],
+.kodo-btn-outline.is-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.kodo-btn-utility {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--sys-color-text-secondary);
+  font-family: var(--font-utility-sans), system-ui, sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 240ms var(--ease-decelerate),
+    opacity 240ms var(--ease-decelerate);
+}
+
+.kodo-btn-utility:hover {
+  color: var(--sys-color-text-primary);
+}
+
+.kodo-btn-utility:active {
+  opacity: 0.6;
+}
+
 /* ─────────────────────────────────────────────────────────
    9. Accessibility — Reduced Motion
    ───────────────────────────────────────────────────────── */

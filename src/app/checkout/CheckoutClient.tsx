@@ -55,24 +55,8 @@ export function CheckoutClient() {
         </p>
         <Link
           href="/collections"
-          className="kodo-focus-ring"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "var(--comp-button-height-primary)",
-            padding: "0 var(--ref-space-6)",
-            backgroundColor: "var(--ref-color-alabaster-98)",
-            color: "var(--ref-color-obsidian-10)",
-            fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-            fontSize: "var(--ref-font-size-caption)",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "var(--ref-letter-spacing-sans)",
-            textDecoration: "none",
-            transition: "transform 150ms var(--ease-fluid-spring)",
-            marginTop: "var(--ref-space-4)",
-          }}
+          className="kodo-btn-solid kodo-focus-ring"
+          style={{ marginTop: "var(--ref-space-4)" }}
         >
           Explore Collections
         </Link>
@@ -209,19 +193,16 @@ export function CheckoutClient() {
                     onClick={() =>
                       updateQuantity(item.product.id, item.quantity - 1)
                     }
-                    className="kodo-focus-ring"
+                    className="kodo-btn-utility kodo-focus-ring"
                     aria-label={`Decrease quantity of ${item.product.name}`}
                     style={{
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "none",
+                      width: 36,
+                      height: 36,
+                      minWidth: "var(--ref-touch-target)",
+                      minHeight: "var(--ref-touch-target)",
                       border: "1px solid var(--sys-color-border)",
                       color: "var(--sys-color-text-primary)",
-                      cursor: "pointer",
-                      fontSize: "14px",
+                      fontSize: "var(--ref-font-size-caption)",
                     }}
                   >
                     −
@@ -240,37 +221,27 @@ export function CheckoutClient() {
                     onClick={() =>
                       updateQuantity(item.product.id, item.quantity + 1)
                     }
-                    className="kodo-focus-ring"
+                    className="kodo-btn-utility kodo-focus-ring"
                     aria-label={`Increase quantity of ${item.product.name}`}
                     style={{
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "none",
+                      width: 36,
+                      height: 36,
+                      minWidth: "var(--ref-touch-target)",
+                      minHeight: "var(--ref-touch-target)",
                       border: "1px solid var(--sys-color-border)",
                       color: "var(--sys-color-text-primary)",
-                      cursor: "pointer",
-                      fontSize: "14px",
+                      fontSize: "var(--ref-font-size-caption)",
                     }}
                   >
                     +
                   </button>
                   <button
                     onClick={() => removeItem(item.product.id)}
-                    className="kodo-focus-ring"
+                    className="kodo-btn-utility kodo-focus-ring"
                     aria-label={`Remove ${item.product.name} from cart`}
                     style={{
                       marginLeft: "var(--ref-space-3)",
-                      background: "none",
-                      border: "none",
-                      color: "var(--sys-color-text-secondary)",
-                      cursor: "pointer",
                       fontSize: "var(--ref-font-size-small)",
-                      fontFamily:
-                        "var(--font-utility-sans), system-ui, sans-serif",
-                      textTransform: "uppercase",
                       letterSpacing: "var(--ref-letter-spacing-wide)",
                       padding: "4px",
                     }}
@@ -366,25 +337,8 @@ export function CheckoutClient() {
         </div>
 
         <button
-          className="kodo-focus-ring"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "var(--comp-button-height-primary)",
-            padding: "0 var(--ref-space-6)",
-            width: "100%",
-            backgroundColor: "var(--ref-color-alabaster-98)",
-            color: "var(--ref-color-obsidian-10)",
-            fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-            fontSize: "var(--ref-font-size-caption)",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "var(--ref-letter-spacing-sans)",
-            border: "none",
-            cursor: "pointer",
-            transition: "transform 150ms var(--ease-fluid-spring)",
-          }}
+          className="kodo-btn-solid kodo-focus-ring"
+          style={{ width: "100%" }}
         >
           Complete Purchase
         </button>

@@ -161,16 +161,14 @@ export function PDPClient({ product }: PDPClientProps) {
                 fontSize: "var(--ref-font-size-caption)",
                 fontWeight: 500,
                 letterSpacing: "var(--ref-letter-spacing-wide)",
-                border: "none",
-                outline:
+                border:
                   selectedSize === size.variant
-                    ? "2px solid var(--sys-color-text-accent)"
+                    ? "1.5px solid var(--sys-color-text-accent)"
                     : "1px solid var(--sys-color-border)",
-                outlineOffset: selectedSize === size.variant ? "2px" : "0px",
                 cursor: size.inStock ? "pointer" : "not-allowed",
                 opacity: size.inStock ? 1 : 0.3,
                 transition:
-                  "outline 200ms var(--ease-decelerate), color 200ms var(--ease-decelerate)",
+                  "border-color 240ms var(--ease-decelerate), color 240ms var(--ease-decelerate)",
                 minWidth: "var(--ref-touch-target)",
                 minHeight: "var(--ref-touch-target)",
               }}

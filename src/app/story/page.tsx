@@ -330,23 +330,7 @@ export default function StoryPage() {
           </p>
           <Link
             href="/collections"
-            className="kodo-focus-ring"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "var(--comp-button-height-primary)",
-              padding: "0 var(--ref-space-6)",
-              backgroundColor: "var(--ref-color-alabaster-98)",
-              color: "var(--ref-color-obsidian-10)",
-              fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-              fontSize: "var(--ref-font-size-caption)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "var(--ref-letter-spacing-sans)",
-              textDecoration: "none",
-              transition: "transform 150ms var(--ease-fluid-spring)",
-            }}
+            className="kodo-btn-solid kodo-focus-ring"
           >
             Explore The Collection
           </Link>

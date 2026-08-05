@@ -85,21 +85,14 @@ export function MenuDrawer() {
       <button
         ref={closeButtonRef}
         onClick={closeMenu}
-        className="kodo-focus-ring"
+        className="kodo-btn-utility kodo-focus-ring"
         aria-label="Close navigation menu"
         style={{
           position: "absolute",
           top: "var(--ref-space-3)",
           right: "var(--sys-space-page-margin)",
-          background: "none",
-          border: "none",
-          color: "var(--sys-color-text-secondary)",
-          fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
           fontSize: "var(--ref-font-size-small)",
-          fontWeight: 500,
-          textTransform: "uppercase",
           letterSpacing: "var(--ref-letter-spacing-ultra)",
-          cursor: "pointer",
           padding: "var(--ref-space-2)",
           minWidth: "var(--ref-touch-target)",
           minHeight: "var(--ref-touch-target)",

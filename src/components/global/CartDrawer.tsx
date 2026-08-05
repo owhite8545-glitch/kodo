@@ -90,18 +90,11 @@ export function CartDrawer() {
           <span className="text-label">Your Ritual</span>
           <button
             onClick={closeCart}
-            className="kodo-focus-ring"
+            className="kodo-btn-utility kodo-focus-ring"
             aria-label="Close cart"
             style={{
-              background: "none",
-              border: "none",
-              color: "var(--sys-color-text-secondary)",
-              fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
               fontSize: "var(--ref-font-size-small)",
-              fontWeight: 500,
-              textTransform: "uppercase",
               letterSpacing: "var(--ref-letter-spacing-ultra)",
-              cursor: "pointer",
               padding: "var(--ref-space-1)",
               minWidth: "var(--ref-touch-target)",
               minHeight: "var(--ref-touch-target)",
@@ -197,19 +190,16 @@ export function CartDrawer() {
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--ref-space-2)" }}>
                       <button
                         onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="kodo-focus-ring"
+                        className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         style={{
-                          width: 32,
-                          height: 32,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: "none",
+                          width: 36,
+                          height: 36,
+                          minWidth: "var(--ref-touch-target)",
+                          minHeight: "var(--ref-touch-target)",
                           border: "1px solid var(--sys-color-border)",
                           color: "var(--sys-color-text-primary)",
-                          cursor: "pointer",
-                          fontSize: "14px",
+                          fontSize: "var(--ref-font-size-caption)",
                         }}
                       >
                         −
@@ -226,36 +216,27 @@ export function CartDrawer() {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="kodo-focus-ring"
+                        className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Increase quantity of ${item.product.name}`}
                         style={{
-                          width: 32,
-                          height: 32,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          background: "none",
+                          width: 36,
+                          height: 36,
+                          minWidth: "var(--ref-touch-target)",
+                          minHeight: "var(--ref-touch-target)",
                           border: "1px solid var(--sys-color-border)",
                           color: "var(--sys-color-text-primary)",
-                          cursor: "pointer",
-                          fontSize: "14px",
+                          fontSize: "var(--ref-font-size-caption)",
                         }}
                       >
                         +
                       </button>
                       <button
                         onClick={() => removeItem(item.product.id)}
-                        className="kodo-focus-ring"
+                        className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Remove ${item.product.name} from cart`}
                         style={{
                           marginLeft: "auto",
-                          background: "none",
-                          border: "none",
-                          color: "var(--sys-color-text-secondary)",
-                          cursor: "pointer",
                           fontSize: "var(--ref-font-size-small)",
-                          fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                          textTransform: "uppercase",
                           letterSpacing: "var(--ref-letter-spacing-wide)",
                           padding: "4px",
                         }}

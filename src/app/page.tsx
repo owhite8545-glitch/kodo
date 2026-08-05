@@ -104,46 +104,13 @@ export default function HomePage() {
             >
               <Link
                 href="/collections"
-                className="kodo-focus-ring"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "var(--comp-button-height-secondary)",
-                  padding: "0 var(--ref-space-6)",
-                  backgroundColor: "var(--ref-color-alabaster-98)",
-                  color: "var(--ref-color-obsidian-10)",
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-caption)",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--ref-letter-spacing-sans)",
-                  textDecoration: "none",
-                  transition: "transform 150ms var(--ease-fluid-spring)",
-                }}
+                className="kodo-btn-solid kodo-focus-ring"
               >
                 Explore The States
               </Link>
               <Link
                 href="/story"
-                className="kodo-focus-ring"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "var(--comp-button-height-secondary)",
-                  padding: "0 var(--ref-space-4)",
-                  backgroundColor: "transparent",
-                  color: "var(--sys-color-text-primary)",
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-caption)",
-                  fontWeight: 500,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--ref-letter-spacing-sans)",
-                  textDecoration: "none",
-                  border: "1px solid var(--sys-color-border)",
-                  transition: "background-color 150ms var(--ease-decelerate)",
-                }}
+                className="kodo-btn-outline kodo-focus-ring"
               >
                 The Story
               </Link>
@@ -286,23 +253,7 @@ export default function HomePage() {
               <div style={{ marginTop: "var(--ref-space-2)" }}>
                 <Link
                   href={`/products/${PRODUCTS[0].slug}`}
-                  className="kodo-focus-ring"
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "var(--comp-button-height-primary)",
-                    padding: "0 var(--ref-space-6)",
-                    backgroundColor: "var(--ref-color-alabaster-98)",
-                    color: "var(--ref-color-obsidian-10)",
-                    fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                    fontSize: "var(--ref-font-size-caption)",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--ref-letter-spacing-sans)",
-                    textDecoration: "none",
-                    transition: "transform 150ms var(--ease-fluid-spring)",
-                  }}
+                  className="kodo-btn-solid kodo-focus-ring"
                 >
                   Discover {PRODUCTS[0].name}
                 </Link>

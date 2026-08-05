@@ -205,25 +205,10 @@ export function ConciergeForm() {
       {/* Submit */}
       <button
         type="submit"
-        className="kodo-focus-ring"
+        className="kodo-btn-solid kodo-focus-ring"
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "var(--comp-button-height-primary)",
-          padding: "0 var(--ref-space-6)",
-          backgroundColor: "var(--ref-color-alabaster-98)",
-          color: "var(--ref-color-obsidian-10)",
-          fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-          fontSize: "var(--ref-font-size-caption)",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "var(--ref-letter-spacing-sans)",
-          border: "none",
-          cursor: "pointer",
-          transition: "transform 150ms var(--ease-fluid-spring)",
-          marginTop: "var(--ref-space-2)",
           width: "100%",
+          marginTop: "var(--ref-space-2)",
         }}
       >
         Send Inquiry
