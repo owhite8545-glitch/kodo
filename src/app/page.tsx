@@ -27,6 +27,7 @@ export default function HomePage() {
             justifyContent: "center",
             minHeight: "100vh",
             paddingTop: "var(--comp-nav-height)",
+            paddingBottom: "var(--ref-space-15)",
             textAlign: "center",
             overflow: "hidden",
           }}
@@ -54,7 +55,7 @@ export default function HomePage() {
             <p
               className="text-label"
               style={{
-                marginBottom: "var(--ref-space-4)",
+                marginBottom: "var(--ref-space-6)",
                 opacity: 0,
                 animation: "fadeSlideUp 600ms var(--ease-cinematic) 300ms forwards",
               }}
@@ -66,7 +67,7 @@ export default function HomePage() {
               className="text-hero"
               style={{
                 fontFamily: "var(--font-editorial-display), Georgia, serif",
-                marginBottom: "var(--ref-space-6)",
+                marginBottom: "var(--ref-space-8)",
                 opacity: 0,
                 animation: "fadeSlideUp 800ms var(--ease-cinematic) 500ms forwards",
               }}
@@ -79,7 +80,7 @@ export default function HomePage() {
             <p
               className="text-body-lg"
               style={{
-                maxWidth: "48ch",
+                maxWidth: "38ch",
                 marginInline: "auto",
                 color: "var(--sys-color-text-secondary)",
                 opacity: 0,
@@ -92,9 +93,9 @@ export default function HomePage() {
 
             <div
               style={{
-                marginTop: "var(--ref-space-8)",
+                marginTop: "var(--ref-space-12)",
                 display: "flex",
-                gap: "var(--ref-space-3)",
+                gap: "var(--ref-space-4)",
                 justifyContent: "center",
                 flexWrap: "wrap",
                 opacity: 0,
@@ -108,7 +109,7 @@ export default function HomePage() {
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  height: "var(--comp-button-height-primary)",
+                  height: "var(--comp-button-height-secondary)",
                   padding: "0 var(--ref-space-6)",
                   backgroundColor: "var(--ref-color-alabaster-98)",
                   color: "var(--ref-color-obsidian-10)",
@@ -154,7 +155,7 @@ export default function HomePage() {
             aria-hidden="true"
             style={{
               position: "absolute",
-              bottom: "var(--ref-space-6)",
+              bottom: "var(--ref-space-8)",
               left: "50%",
               transform: "translateX(-50%)",
               display: "flex",
