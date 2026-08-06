@@ -12,13 +12,7 @@ import { useCartStore } from "@/store/cart-store";
    Brand name on Column 1, Menu trigger on Column 12.
    ═══════════════════════════════════════════════════════════ */
 
-const NAV_LINKS = [
-  { href: "/collections", label: "Collections" },
-  { href: "/story", label: "The Story" },
-  { href: "/about", label: "About" },
-  { href: "/journal", label: "Journal" },
-  { href: "/concierge", label: "Concierge" },
-];
+import { NAV_LINKS } from "@/data/navigation";
 
 export function HeaderNav() {
   const pathname = usePathname();
@@ -95,10 +89,12 @@ export function HeaderNav() {
                   pathname === link.href
                     ? "var(--sys-color-text-primary)"
                     : "var(--sys-color-text-secondary)",
+                opacity: pathname === link.href ? 1 : 0.65,
                 textDecoration: "none",
                 padding: "var(--ref-space-1) 0",
                 position: "relative",
-                transition: "color 150ms var(--ease-decelerate)",
+                transition:
+                  "color 240ms var(--ease-decelerate), opacity 240ms var(--ease-decelerate)",
               }}
             >
               {link.label}
@@ -116,7 +112,7 @@ export function HeaderNav() {
             fontSize: "var(--ref-font-size-small)",
             letterSpacing: "var(--ref-letter-spacing-ultra)",
             padding: "var(--ref-space-1) var(--ref-space-2)",
-            marginRight: "var(--ref-space-2)",
+            marginRight: "var(--ref-space-3)",
             minWidth: "var(--ref-touch-target)",
             minHeight: "var(--ref-touch-target)",
           }}
@@ -160,6 +156,7 @@ export function HeaderNav() {
         }
         .nav-link:hover {
           color: var(--sys-color-text-primary) !important;
+          opacity: 0.85 !important;
         }
       `}</style>
     </header>

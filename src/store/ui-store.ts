@@ -45,16 +45,10 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   openMenu: () => {
     set({ isMenuOpen: true, isScrollLocked: true });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "hidden";
-    }
   },
 
   closeMenu: () => {
     set({ isMenuOpen: false, isScrollLocked: false });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "";
-    }
   },
 
   toggleMenu: () => {
@@ -68,30 +62,18 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   openSearch: () => {
     set({ isSearchOpen: true, isScrollLocked: true });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "hidden";
-    }
   },
 
   closeSearch: () => {
     set({ isSearchOpen: false, isScrollLocked: false });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "";
-    }
   },
 
   setScrollProgress: (progress) => set({ scrollProgress: progress }),
   lockScroll: () => {
     set({ isScrollLocked: true });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "hidden";
-    }
   },
   unlockScroll: () => {
     set({ isScrollLocked: false });
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "";
-    }
   },
   toggleMotionPause: () => set({ motionPaused: !get().motionPaused }),
   setWebglEnabled: (enabled) => set({ webglEnabled: enabled }),

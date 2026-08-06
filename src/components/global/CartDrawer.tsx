@@ -14,6 +14,8 @@ import Link from "next/link";
 
 export function CartDrawer() {
   const isOpen = useCartStore((s) => s.isOpen);
+  const [isMounted, setIsMounted] = React.useState(isOpen);
+  const [isClosing, setIsClosing] = React.useState(false);
   const closeCart = useCartStore((s) => s.closeCart);
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
@@ -21,14 +23,34 @@ export function CartDrawer() {
   const totalPrice = useCartStore((s) => s.totalPrice);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Lock body scroll and handle Esc
+  // Focus trap and handle Esc
   useEffect(() => {
     if (!isOpen) return;
 
     document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeCart();
+      if (e.key === "Escape") {
+        closeCart();
+        return;
+      }
+
+      // Focus trap
+      if (e.key === "Tab" && containerRef.current) {
+        const focusable = containerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -38,7 +60,16 @@ export function CartDrawer() {
     };
   }, [isOpen, closeCart]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setIsMounted(true);
+      setIsClosing(false);
+    } else if (isMounted) {
+      setIsClosing(true);
+    }
+  }, [isOpen, isMounted]);
+
+  if (!isMounted) return null;
 
   return (
     <>
@@ -52,13 +83,21 @@ export function CartDrawer() {
           zIndex: 300,
           background: "oklch(12% 0.01 260 / 0.6)",
           backdropFilter: "blur(4px)",
-          animation: "fadeIn 200ms var(--ease-decelerate) forwards",
+          animation: isClosing
+            ? "fadeOut 200ms var(--ease-decelerate) forwards"
+            : "fadeIn 200ms var(--ease-decelerate) forwards",
         }}
       />
 
       {/* Drawer */}
       <div
         ref={containerRef}
+        onAnimationEnd={(e) => {
+          if (isClosing && e.target === containerRef.current) {
+            setIsMounted(false);
+            setIsClosing(false);
+          }
+        }}
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
@@ -73,7 +112,9 @@ export function CartDrawer() {
           borderLeft: "1px solid var(--sys-color-border)",
           display: "flex",
           flexDirection: "column",
-          animation: "slideInRight 350ms var(--ease-cinematic) forwards",
+          animation: isClosing
+            ? "slideOutRight 280ms var(--ease-cinematic) forwards"
+            : "slideInRight 350ms var(--ease-cinematic) forwards",
         }}
       >
         {/* Header */}
@@ -135,11 +176,14 @@ export function CartDrawer() {
               <p className="text-caption" style={{ textAlign: "center" }}>
                 Your collection is empty. Explore our scent taxonomy to begin.
               </p>
-              <ButtonOutline onClick={closeCart}>
-                <Link href="/collections" style={{ color: "inherit", textDecoration: "none" }}>
-                  Explore Collections
-                </Link>
-              </ButtonOutline>
+              <Link
+                href="/collections"
+                onClick={closeCart}
+                className="kodo-btn-outline"
+                style={{ textDecoration: "none" }}
+              >
+                Explore Collections
+              </Link>
             </div>
           ) : (
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "var(--ref-space-4)" }}>
@@ -276,24 +320,17 @@ export function CartDrawer() {
               </span>
             </div>
             <p className="text-caption">Complimentary shipping on all orders</p>
-            <Link href="/checkout" onClick={closeCart} style={{ textDecoration: "none" }}>
-              <ButtonSolid fullWidth ariaLabel="Proceed to secure checkout">
-                Secure Checkout
-              </ButtonSolid>
+            <Link
+              href="/checkout"
+              onClick={closeCart}
+              className="kodo-btn-solid"
+              style={{ textDecoration: "none", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}
+              aria-label="Proceed to secure checkout"
+            >
+              Secure Checkout
             </Link>
           </div>
         )}
-
-        <style jsx>{`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes slideInRight {
-            from { transform: translate3d(100%, 0, 0); }
-            to { transform: translate3d(0, 0, 0); }
-          }
-        `}</style>
       </div>
     </>
   );

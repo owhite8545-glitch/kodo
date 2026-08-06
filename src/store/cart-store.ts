@@ -70,9 +70,20 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   clearCart: () => set({ items: [] }),
-  toggleCart: () => set({ isOpen: !get().isOpen }),
-  openCart: () => set({ isOpen: true }),
-  closeCart: () => set({ isOpen: false }),
+  toggleCart: () => {
+    const isOpen = get().isOpen;
+    if (isOpen) {
+      get().closeCart();
+    } else {
+      get().openCart();
+    }
+  },
+  openCart: () => {
+    set({ isOpen: true });
+  },
+  closeCart: () => {
+    set({ isOpen: false });
+  },
 
   totalItems: () => get().items.reduce((sum, item) => sum + item.quantity, 0),
   totalPrice: () =>

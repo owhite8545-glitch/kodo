@@ -7,13 +7,7 @@ import Link from "next/link";
    studio addresses, and copyright.
    ═══════════════════════════════════════════════════════════ */
 
-const FOOTER_LINKS = [
-  { href: "/collections", label: "Collections" },
-  { href: "/story", label: "The Story" },
-  { href: "/about", label: "About" },
-  { href: "/journal", label: "Journal" },
-  { href: "/concierge", label: "Concierge" },
-];
+import { NAV_LINKS as FOOTER_LINKS } from "@/data/navigation";
 
 export function FooterDirectory() {
   return (
@@ -39,7 +33,7 @@ export function FooterDirectory() {
           <p
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "1.125rem",
+              fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
               letterSpacing: "var(--ref-letter-spacing-label)",
               color: "var(--sys-color-text-primary)",
               marginBottom: "var(--ref-space-3)",
@@ -67,13 +61,13 @@ export function FooterDirectory() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="kodo-focus-ring"
+                    className="kodo-focus-ring footer-link"
                     style={{
                       fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
                       fontSize: "var(--ref-font-size-caption)",
                       color: "var(--sys-color-text-secondary)",
                       textDecoration: "none",
-                      transition: "color 150ms var(--ease-decelerate)",
+                      transition: "color 240ms var(--ease-decelerate)",
                     }}
                   >
                     {link.label}
@@ -136,6 +130,13 @@ export function FooterDirectory() {
           © {new Date().getFullYear()} KODŌ Fragrances. All rights reserved.
         </p>
       </div>
+
+      <style>{`
+        .footer-link:hover {
+          color: var(--sys-color-text-primary) !important;
+        }
+      `}</style>
     </footer>
   );
 }
+

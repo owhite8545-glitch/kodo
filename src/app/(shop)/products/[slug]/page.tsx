@@ -126,12 +126,15 @@ export default async function ProductPage({ params }: PageProps) {
             <li>
               <Link
                 href="/"
+                className="kodo-focus-ring breadcrumb-link"
                 style={{
                   color: "var(--sys-color-text-secondary)",
                   textDecoration: "none",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.15em",
+                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+                  fontSize: "var(--ref-font-size-caption)",
+                  letterSpacing: "var(--ref-letter-spacing-ultra)",
                   textTransform: "uppercase",
+                  transition: "color 240ms var(--ease-decelerate)",
                 }}
               >
                 Home
@@ -141,7 +144,7 @@ export default async function ProductPage({ params }: PageProps) {
               aria-hidden="true"
               style={{
                 color: "var(--sys-color-text-secondary)",
-                fontSize: "0.75rem",
+                fontSize: "var(--ref-font-size-caption)",
               }}
             >
               /
@@ -149,12 +152,15 @@ export default async function ProductPage({ params }: PageProps) {
             <li>
               <Link
                 href="/collections"
+                className="kodo-focus-ring breadcrumb-link"
                 style={{
                   color: "var(--sys-color-text-secondary)",
                   textDecoration: "none",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.15em",
+                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+                  fontSize: "var(--ref-font-size-caption)",
+                  letterSpacing: "var(--ref-letter-spacing-ultra)",
                   textTransform: "uppercase",
+                  transition: "color 240ms var(--ease-decelerate)",
                 }}
               >
                 Collection
@@ -164,7 +170,7 @@ export default async function ProductPage({ params }: PageProps) {
               aria-hidden="true"
               style={{
                 color: "var(--sys-color-text-secondary)",
-                fontSize: "0.75rem",
+                fontSize: "var(--ref-font-size-caption)",
               }}
             >
               /
@@ -173,8 +179,9 @@ export default async function ProductPage({ params }: PageProps) {
               <span
                 style={{
                   color: "var(--sys-color-text-primary)",
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.15em",
+                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+                  fontSize: "var(--ref-font-size-caption)",
+                  letterSpacing: "var(--ref-letter-spacing-ultra)",
                   textTransform: "uppercase",
                 }}
               >
@@ -234,8 +241,8 @@ export default async function ProductPage({ params }: PageProps) {
                 </span>
                 <span
                   style={{
-                    fontSize: "0.75rem",
-                    letterSpacing: "0.15em",
+                    fontSize: "var(--ref-font-size-caption)",
+                    letterSpacing: "var(--ref-letter-spacing-ultra)",
                     textTransform: "uppercase",
                     color: "var(--sys-color-text-secondary)",
                   }}
@@ -306,6 +313,9 @@ export default async function ProductPage({ params }: PageProps) {
             padding-left: var(--ref-space-12) !important;
             padding-right: var(--ref-space-12) !important;
           }
+        }
+        .breadcrumb-link:hover {
+          color: var(--sys-color-text-primary) !important;
         }
       `}</style>
     </>
