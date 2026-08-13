@@ -76,6 +76,16 @@
   --ease-cinematic: cubic-bezier(0.76, 0, 0.24, 1);
   --ease-fluid-spring: cubic-bezier(0.22, 1, 0.36, 1);
 
+  /* Motion Duration Tokens */
+  --motion-duration-fast: 240ms;
+  --motion-duration-base: 400ms;
+  --motion-duration-slow: 600ms;
+
+  /* Section Reveal Tokens */
+  --motion-reveal-distance: 12px;
+  --motion-reveal-duration: var(--motion-duration-slow);
+  --motion-reveal-easing: var(--ease-decelerate);
+
   /* Shadows (Amber-tinted depth) */
   --ref-shadow-elevation-1: 0 4px 24px -1px oklch(12% 0.01 260 / 0.12);
   --ref-shadow-elevation-2: 0 8px 32px -2px oklch(12% 0.01 260 / 0.18);
@@ -391,6 +401,16 @@ h1, h2, h3, .font-editorial {
   .webgl-particle-overlay {
     display: none !important;
   }
+
+  /* Section Reveal: remove spatial displacement */
+  .kodo-reveal.kodo-reveal--initialized {
+    transform: none !important;
+  }
+
+  /* Product card hover: remove spatial transform */
+  .collections-card-link:hover .collections-card-image {
+    transform: none !important;
+  }
 }
 
 /* Reduced transparency fallback */
@@ -442,6 +462,27 @@ h1, h2, h3, .font-editorial {
   margin-bottom: var(--sys-space-section);
 }
 
+/* Header Navigation Links */
+.nav-link {
+  color: var(--sys-color-text-secondary);
+  opacity: 0.65;
+  transition: color 240ms var(--ease-decelerate), opacity 240ms var(--ease-decelerate);
+}
+.nav-link[data-active="true"] {
+  color: var(--sys-color-text-primary);
+  opacity: 1;
+}
+.nav-link:hover {
+  color: var(--sys-color-text-primary);
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .nav-desktop-links {
+    display: none !important;
+  }
+}
+
 /* ─────────────────────────────────────────────────────────
    12. Global Animations
    ───────────────────────────────────────────────────────── */
@@ -490,4 +531,26 @@ h1, h2, h3, .font-editorial {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
+}
+
+/* ─────────────────────────────────────────────────────────
+   13. Section Reveal System
+   ───────────────────────────────────────────────────────── */
+.kodo-reveal {
+  /* Base: content visible — JS fallback safe */
+}
+
+.kodo-reveal.kodo-reveal--initialized {
+  opacity: 0;
+  transform: translate3d(0, var(--motion-reveal-distance), 0);
+  transition:
+    opacity var(--motion-reveal-duration) var(--motion-reveal-easing),
+    transform var(--motion-reveal-duration) var(--motion-reveal-easing);
+  will-change: opacity, transform;
+}
+
+.kodo-reveal.kodo-reveal--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
 }

@@ -72,7 +72,7 @@ export default function CollectionsPage() {
               <article key={product.id}>
                 <Link
                   href={`/products/${product.slug}`}
-                  className="kodo-focus-ring"
+                  className="kodo-focus-ring collections-card-link"
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -82,16 +82,18 @@ export default function CollectionsPage() {
                 >
                   {/* Image container */}
                   <div
+                    className="collections-card-image"
                     style={{
                       aspectRatio: "3/4",
                       backgroundColor: "var(--sys-color-surface)",
                       position: "relative",
                       overflow: "hidden",
                       marginBottom: "var(--ref-space-3)",
-                      transition: "transform 300ms var(--ease-cinematic)",
+                      transition: "transform var(--motion-duration-base) var(--ease-decelerate)",
                     }}
                   >
                     <div
+                      className="collections-card-overlay"
                       aria-hidden="true"
                       style={{
                         position: "absolute",
@@ -170,6 +172,15 @@ export default function CollectionsPage() {
       </main>
 
       <style>{`
+        .collections-card-overlay {
+          transition: opacity var(--motion-duration-base) var(--ease-decelerate);
+        }
+        .collections-card-link:hover .collections-card-image {
+          transform: scale(1.02);
+        }
+        .collections-card-link:hover .collections-card-overlay {
+          opacity: 0.6;
+        }
         @media (max-width: 1024px) {
           .collections-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }

@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { PRODUCTS } from "@/data/products";
 import { HomeClient } from "./HomeClient";
+import { SectionReveal } from "@/components/shared/SectionReveal";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — Homepage (Server Component)
@@ -150,6 +151,7 @@ export default function HomePage() {
         <div className="ma-space" />
 
         {/* ─── ACT II: Asymmetric Product Showcase ─── */}
+        <SectionReveal>
         <section
           aria-label="Featured Scent"
           style={{
@@ -261,11 +263,13 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </SectionReveal>
 
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
         {/* ─── ACT III: Bento Grid — The Four States ─── */}
+        <SectionReveal>
         <section
           aria-label="The Four States of Resin"
           style={{
@@ -390,11 +394,13 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+        </SectionReveal>
 
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
         {/* ─── Editorial Statement ─── */}
+        <SectionReveal>
         <section
           aria-label="Brand philosophy"
           style={{
@@ -421,6 +427,7 @@ export default function HomePage() {
             — KODŌ Studio, 2026
           </p>
         </section>
+        </SectionReveal>
       </main>
 
       <style>{`

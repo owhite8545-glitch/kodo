@@ -83,6 +83,7 @@ export function CartDrawer() {
           zIndex: 300,
           background: "oklch(12% 0.01 260 / 0.6)",
           backdropFilter: "blur(4px)",
+          pointerEvents: isClosing ? "none" : "auto",
           animation: isClosing
             ? "fadeOut 200ms var(--ease-decelerate) forwards"
             : "fadeIn 200ms var(--ease-decelerate) forwards",
@@ -112,6 +113,7 @@ export function CartDrawer() {
           borderLeft: "1px solid var(--sys-color-border)",
           display: "flex",
           flexDirection: "column",
+          pointerEvents: isClosing ? "none" : "auto",
           animation: isClosing
             ? "slideOutRight 280ms var(--ease-cinematic) forwards"
             : "slideInRight 350ms var(--ease-cinematic) forwards",

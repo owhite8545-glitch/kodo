@@ -79,22 +79,16 @@ export function HeaderNav() {
               href={link.href}
               className="kodo-focus-ring nav-link"
               aria-current={pathname === link.href ? "page" : undefined}
+              data-active={pathname === link.href}
               style={{
                 fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
                 fontSize: "var(--ref-font-size-small)",
                 fontWeight: 500,
                 textTransform: "uppercase",
                 letterSpacing: "var(--ref-letter-spacing-ultra)",
-                color:
-                  pathname === link.href
-                    ? "var(--sys-color-text-primary)"
-                    : "var(--sys-color-text-secondary)",
-                opacity: pathname === link.href ? 1 : 0.65,
                 textDecoration: "none",
                 padding: "var(--ref-space-1) 0",
                 position: "relative",
-                transition:
-                  "color 240ms var(--ease-decelerate), opacity 240ms var(--ease-decelerate)",
               }}
             >
               {link.label}
@@ -147,18 +141,6 @@ export function HeaderNav() {
           {isMenuOpen ? "Close" : "Menu"}
         </button>
       </nav>
-
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .nav-desktop-links {
-            display: none !important;
-          }
-        }
-        .nav-link:hover {
-          color: var(--sys-color-text-primary) !important;
-          opacity: 0.85 !important;
-        }
-      `}</style>
     </header>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { HomeClient } from "../HomeClient";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
+import { SectionReveal } from "@/components/shared/SectionReveal";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — The Story Page (Server Component)
@@ -64,6 +65,7 @@ export default function StoryPage() {
         <div className="ma-space" />
 
         {/* ─── Chapter I: The Ancient Way ─── */}
+        <SectionReveal>
         <section
           aria-label="The Ancient Way of Incense"
           style={{
@@ -168,11 +170,13 @@ export default function StoryPage() {
             </div>
           </div>
         </section>
+        </SectionReveal>
 
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
         {/* ─── Chapter II: Structural Geometry ─── */}
+        <SectionReveal>
         <section
           aria-label="Structural Geometry"
           style={{
@@ -275,11 +279,13 @@ export default function StoryPage() {
             </div>
           </div>
         </section>
+        </SectionReveal>
 
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
         {/* ─── Chapter III: Four States ─── */}
+        <SectionReveal>
         <section
           aria-label="The Four States"
           style={{
@@ -335,11 +341,13 @@ export default function StoryPage() {
             Explore The Collection
           </Link>
         </section>
+        </SectionReveal>
 
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
         {/* ─── Editorial Quote ─── */}
+        <SectionReveal>
         <section
           aria-label="Brand philosophy"
           style={{
@@ -366,6 +374,7 @@ export default function StoryPage() {
             — [Founder Name], [Role Title]
           </p>
         </section>
+        </SectionReveal>
       </main>
 
       <FooterDirectory />
