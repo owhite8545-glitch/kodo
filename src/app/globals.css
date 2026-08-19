@@ -532,6 +532,10 @@ h1, h2, h3, .font-editorial {
     transform: translate3d(0, 0, 0);
   }
 }
+@keyframes ctaFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
 /* ─────────────────────────────────────────────────────────
    13. Section Reveal System
@@ -553,4 +557,19 @@ h1, h2, h3, .font-editorial {
   opacity: 1;
   transform: translate3d(0, 0, 0);
   will-change: auto;
+}
+
+/* Stagger offset for paired SectionReveal choreography */
+.kodo-reveal--delay-1.kodo-reveal--initialized {
+  transition-delay: 120ms;
+}
+.kodo-reveal--delay-1.kodo-reveal--visible {
+  transition-delay: 0ms;
+}
+
+/* ─────────────────────────────────────────────────────────
+   14. Form Input States
+   ───────────────────────────────────────────────────────── */
+.kodo-input:focus {
+  border-color: var(--sys-color-border-active);
 }

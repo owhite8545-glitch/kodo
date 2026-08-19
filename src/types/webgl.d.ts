@@ -52,6 +52,18 @@ export type ScentFamily = "mineral" | "botanical" | "resinous" | "aquatic";
 
 export type ScentVariant = "30ml" | "50ml" | "100ml";
 
+export interface ProductImages {
+  hero: string;
+  pureProduct: string;
+  detail: string;
+  socialOg: string;
+}
+
+export interface OgDimensions {
+  width: number;
+  height: number;
+}
+
 export interface ScentProduct {
   id: string;
   name: string;
@@ -62,6 +74,8 @@ export interface ScentProduct {
   size: ScentVariant;
   sizes: { variant: ScentVariant; price: number; inStock: boolean }[];
   image: string;
+  images: ProductImages;
+  ogDimensions: OgDimensions;
   notes: {
     top: string[];
     heart: string[];

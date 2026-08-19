@@ -5,6 +5,7 @@ import { useCartStore } from "@/store/cart-store";
 import { ButtonSolid } from "@/components/shared/ButtonSolid";
 import { ButtonOutline } from "@/components/shared/ButtonOutline";
 import Link from "next/link";
+import Image from "next/image";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — CartDrawer
@@ -85,8 +86,8 @@ export function CartDrawer() {
           backdropFilter: "blur(4px)",
           pointerEvents: isClosing ? "none" : "auto",
           animation: isClosing
-            ? "fadeOut 200ms var(--ease-decelerate) forwards"
-            : "fadeIn 200ms var(--ease-decelerate) forwards",
+            ? "fadeOut 200ms var(--ease-cinematic) forwards"
+            : "fadeIn 200ms var(--ease-cinematic) forwards",
         }}
       />
 
@@ -199,15 +200,25 @@ export function CartDrawer() {
                     borderBottom: "1px solid var(--sys-color-border)",
                   }}
                 >
-                  {/* Product thumbnail placeholder */}
+                  {/* Product thumbnail */}
                   <div
                     style={{
                       width: 80,
-                      height: 100,
+                      height: 107,
+                      position: "relative",
                       backgroundColor: "var(--sys-color-surface)",
                       flexShrink: 0,
+                      overflow: "hidden",
                     }}
-                  />
+                  >
+                    <Image
+                      src={item.product.images.pureProduct}
+                      alt={`KODŌ ${item.product.name} Eau de Parfum`}
+                      fill
+                      sizes="80px"
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
                   <div style={{ flex: 1 }}>
                     <p
                       style={{

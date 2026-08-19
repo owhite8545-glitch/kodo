@@ -95,7 +95,7 @@ export function MenuDrawer() {
         WebkitBackdropFilter: "blur(16px)",
         animation: isClosing
           ? "menuSlideOut 300ms var(--ease-cinematic) forwards"
-          : "menuSlideIn 450ms var(--ease-decelerate) forwards",
+          : "menuSlideIn 450ms var(--ease-cinematic) forwards",
       }}
     >
       {/* Top Bar matching HeaderNav */}
@@ -177,7 +177,7 @@ export function MenuDrawer() {
 
       <style jsx>{`
         .menu-link:hover {
-          opacity: 0.5 !important;
+          opacity: 0.85 !important;
         }
       `}</style>
     </div>

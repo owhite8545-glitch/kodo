@@ -43,7 +43,7 @@ export function GlassmorphicCard({
         border: "1px solid var(--comp-card-border)",
         overflow: "hidden",
         transition: hoverable
-          ? "transform 300ms var(--ease-cinematic), box-shadow 300ms var(--ease-cinematic)"
+          ? "transform var(--motion-duration-base) var(--ease-cinematic), box-shadow var(--motion-duration-base) var(--ease-cinematic)"
           : "none",
         cursor: onClick ? "pointer" : "default",
         ...style,

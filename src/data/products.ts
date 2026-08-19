@@ -20,7 +20,17 @@ export const PRODUCTS: ScentProduct[] = [
       { variant: "50ml", price: 180, inStock: true },
       { variant: "100ml", price: 240, inStock: true },
     ],
-    image: "/products/so-bottle.jpg",
+    image: "/images/products/so/pure-product.jpg",
+    images: {
+      hero: "/images/products/so/hero.jpg",
+      pureProduct: "/images/products/so/pure-product.jpg",
+      detail: "/images/products/so/detail.jpg",
+      socialOg: "/images/products/so/social-og.png",
+    },
+    ogDimensions: {
+      width: 1024,
+      height: 539,
+    },
     notes: {
       top: ["Sea Salt Crystal", "Green Cardamom", "Cold Aldehyde"],
       heart: ["Vetiver Root", "Ambergris Accord", "Mineral Musk"],
@@ -42,7 +52,17 @@ export const PRODUCTS: ScentProduct[] = [
       { variant: "50ml", price: 210, inStock: true },
       { variant: "100ml", price: 280, inStock: true },
     ],
-    image: "/products/moku-bottle.jpg",
+    image: "/images/products/moku/pure-product.jpg",
+    images: {
+      hero: "/images/products/moku/hero.jpg",
+      pureProduct: "/images/products/moku/pure-product.jpg",
+      detail: "/images/products/moku/detail.jpg",
+      socialOg: "/images/products/moku/social-og.png",
+    },
+    ogDimensions: {
+      width: 1024,
+      height: 535,
+    },
     notes: {
       top: ["Black Pepper", "Cardamom Oil (Grasse)", "Pink Grapefruit"],
       heart: ["Rose de Mai Absolute", "Cedarwood Resin (Hokkaido)", "Iris Root"],
@@ -64,7 +84,17 @@ export const PRODUCTS: ScentProduct[] = [
       { variant: "50ml", price: 220, inStock: true },
       { variant: "100ml", price: 300, inStock: true },
     ],
-    image: "/products/en-bottle.jpg",
+    image: "/images/products/en/pure-product.jpg",
+    images: {
+      hero: "/images/products/en/hero.jpg",
+      pureProduct: "/images/products/en/pure-product.jpg",
+      detail: "/images/products/en/detail.jpg",
+      socialOg: "/images/products/en/social-og.png",
+    },
+    ogDimensions: {
+      width: 1024,
+      height: 539,
+    },
     notes: {
       top: ["Saffron Threads", "Elemi Resin", "Bergamot"],
       heart: ["Sacred Sandalwood", "Incense Smoke", "Labdanum"],
@@ -86,7 +116,17 @@ export const PRODUCTS: ScentProduct[] = [
       { variant: "50ml", price: 240, inStock: true },
       { variant: "100ml", price: 320, inStock: true },
     ],
-    image: "/products/kin-bottle.jpg",
+    image: "/images/products/kin/pure-product.jpg",
+    images: {
+      hero: "/images/products/kin/hero.jpg",
+      pureProduct: "/images/products/kin/pure-product.jpg",
+      detail: "/images/products/kin/detail.jpg",
+      socialOg: "/images/products/kin/social-og.png",
+    },
+    ogDimensions: {
+      width: 1024,
+      height: 538,
+    },
     notes: {
       top: ["Volatile Saffron", "Cinnamon Bark", "Blood Orange"],
       heart: ["Ethiopian Myrrh", "Honey Absolute", "Jasmine Sambac"],

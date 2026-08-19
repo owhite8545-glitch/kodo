@@ -9,7 +9,7 @@ import { useRef, useEffect, type ReactNode } from "react";
    and under prefers-reduced-motion.
    ═══════════════════════════════════════════════════════════ */
 
-export function SectionReveal({ children }: { children: ReactNode }) {
+export function SectionReveal({ children, className }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function SectionReveal({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div ref={ref} className="kodo-reveal">
+    <div ref={ref} className={`kodo-reveal${className ? ` ${className}` : ""}`}>
       {children}
     </div>
   );

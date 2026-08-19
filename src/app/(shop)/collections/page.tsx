@@ -1,7 +1,9 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PRODUCTS } from "@/data/products";
 import { HomeClient } from "../../HomeClient";
+import { SectionReveal } from "@/components/shared/SectionReveal";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — Collections Page (Server Component)
@@ -51,6 +53,7 @@ export default function CollectionsPage() {
         </section>
 
         {/* Product Grid */}
+        <SectionReveal>
         <section
           aria-label="Product collection"
           style={{
@@ -92,6 +95,13 @@ export default function CollectionsPage() {
                       transition: "transform var(--motion-duration-base) var(--ease-decelerate)",
                     }}
                   >
+                    <Image
+                      src={product.images.pureProduct}
+                      alt={`KODŌ ${product.name} Eau de Parfum`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      style={{ objectFit: "contain" }}
+                    />
                     <div
                       className="collections-card-overlay"
                       aria-hidden="true"
@@ -100,29 +110,9 @@ export default function CollectionsPage() {
                         inset: 0,
                         background:
                           "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.5) 100%)",
+                        pointerEvents: "none",
                       }}
                     />
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: "var(--font-editorial-display), Georgia, serif",
-                          fontSize: "clamp(5rem, 10vw, 8rem)",
-                          color: "oklch(98% 0.005 85 / 0.04)",
-                          fontWeight: 300,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Card meta */}
@@ -169,6 +159,7 @@ export default function CollectionsPage() {
             ))}
           </div>
         </section>
+        </SectionReveal>
       </main>
 
       <style>{`

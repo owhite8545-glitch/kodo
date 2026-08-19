@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { getProductBySlug, getAllProducts } from "@/data/products";
 import { PDPClient } from "./PDPClient";
 import { HeaderNav } from "@/components/global/HeaderNav";
 import { MenuDrawer } from "@/components/global/MenuDrawer";
 import { CartDrawer } from "@/components/global/CartDrawer";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
+import { SectionReveal } from "@/components/shared/SectionReveal";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — Product Detail Page (Server Component)
@@ -48,10 +50,10 @@ export async function generateMetadata({
       description: product.description,
       images: [
         {
-          url: product.image,
-          width: 800,
-          height: 1067,
-          alt: `${product.name} ${product.subtitle} — KODŌ fragrance bottle`,
+          url: product.images.socialOg,
+          width: product.ogDimensions.width,
+          height: product.ogDimensions.height,
+          alt: `KODŌ ${product.name} Eau de Parfum`,
         },
       ],
       type: "website",
@@ -60,6 +62,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${product.name} — ${product.subtitle} | KODŌ`,
       description: product.description,
+      images: [product.images.socialOg],
     },
   };
 }
@@ -78,7 +81,7 @@ export default async function ProductPage({ params }: PageProps) {
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${product.name} — ${product.subtitle}`,
-    image: `https://kodo-fragrances.com${product.image}`,
+    image: `https://kodo-fragrances.com${product.images.pureProduct}`,
     description: product.description,
     brand: {
       "@type": "Brand",
@@ -205,7 +208,16 @@ export default async function ProductPage({ params }: PageProps) {
           className="pdp-grid"
         >
           {/* Left Column: Product Image Gallery */}
-          <div className="pdp-media-column">
+          <SectionReveal>
+          <div
+            className="pdp-media-column"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-6)",
+            }}
+          >
+            {/* Primary Hero Editorial View */}
             <div
               style={{
                 position: "relative",
@@ -215,48 +227,43 @@ export default async function ProductPage({ params }: PageProps) {
                 overflow: "hidden",
               }}
             >
-              {/* Product image placeholder — awaiting asset pipeline */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: "var(--ref-space-3)",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily:
-                      "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "clamp(4rem, 8vw, 8rem)",
-                    lineHeight: 1,
-                    color: "var(--ref-color-gold-mid)",
-                    opacity: 0.25,
-                  }}
-                >
-                  {product.name}
-                </span>
-                <span
-                  style={{
-                    fontSize: "var(--ref-font-size-caption)",
-                    letterSpacing: "var(--ref-letter-spacing-ultra)",
-                    textTransform: "uppercase",
-                    color: "var(--sys-color-text-secondary)",
-                  }}
-                >
-                  {product.subtitle}
-                </span>
-              </div>
+              <Image
+                src={product.images.hero}
+                alt={`KODŌ ${product.name} Eau de Parfum`}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+
+            {/* Close-up / Macro Detail View */}
+            <div
+              style={{
+                position: "relative",
+                width: "100%",
+                aspectRatio: "3 / 4",
+                backgroundColor: "var(--ref-color-obsidian-20)",
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src={product.images.detail}
+                alt={`KODŌ ${product.name} Eau de Parfum — Detail`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
+                style={{ objectFit: "contain" }}
+              />
             </div>
           </div>
+          </SectionReveal>
 
           {/* Right Column: Interactive Client Component */}
+          <SectionReveal className="kodo-reveal--delay-1">
           <div className="pdp-info-column">
             <PDPClient product={product} />
           </div>
+          </SectionReveal>
         </section>
       </main>
 
@@ -305,6 +312,11 @@ export default async function ProductPage({ params }: PageProps) {
           .pdp-grid {
             grid-template-columns: 1fr 1fr !important;
             gap: var(--ref-space-12) !important;
+            align-items: start !important;
+          }
+          .pdp-info-column {
+            position: sticky;
+            top: calc(var(--comp-nav-height) + var(--ref-space-6));
           }
         }
         @media (min-width: 1024px) {

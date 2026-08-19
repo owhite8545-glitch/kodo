@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useCartStore } from "@/store/cart-store";
 
 /* ═══════════════════════════════════════════════════════════
@@ -100,7 +101,7 @@ export function CheckoutClient() {
             style={{
               color: "var(--sys-color-text-secondary)",
               textDecoration: "none",
-              transition: "color 150ms var(--ease-decelerate)",
+              transition: "color 240ms var(--ease-decelerate)",
             }}
           >
             Continue Shopping
@@ -136,27 +137,13 @@ export function CheckoutClient() {
                   overflow: "hidden",
                 }}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily:
-                        "var(--font-editorial-display), Georgia, serif",
-                      fontSize: "1.5rem",
-                      color: "oklch(98% 0.005 85 / 0.06)",
-                      fontWeight: 300,
-                    }}
-                  >
-                    K
-                  </span>
-                </div>
+                <Image
+                  src={item.product.images.pureProduct}
+                  alt={`KODŌ ${item.product.name} Eau de Parfum`}
+                  fill
+                  sizes="100px"
+                  style={{ objectFit: "contain" }}
+                />
               </div>
 
               {/* Details */}

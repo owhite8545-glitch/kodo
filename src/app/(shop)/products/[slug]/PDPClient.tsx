@@ -185,7 +185,15 @@ export function PDPClient({ product }: PDPClientProps) {
         fullWidth
         ariaLabel={`Add ${product.name} ${selectedSize} to your ritual`}
       >
-        {addedToCart ? "✓ Ritual Engaged" : "Add to Ritual"}
+        <span
+          key={addedToCart ? "confirmed" : "default"}
+          style={{
+            display: "inline-block",
+            animation: "ctaFadeIn var(--motion-duration-fast) var(--ease-decelerate)",
+          }}
+        >
+          {addedToCart ? "✓ Ritual Engaged" : "Add to Ritual"}
+        </span>
       </ButtonSolid>
 
       {/* Accordion Details */}
@@ -230,7 +238,7 @@ export function PDPClient({ product }: PDPClientProps) {
                 style={{
                   transform:
                     openAccordion === section.id ? "rotate(90deg)" : "rotate(0deg)",
-                  transition: "transform 300ms var(--ease-cinematic)",
+                  transition: "transform var(--motion-duration-base) var(--ease-cinematic)",
                   fontSize: "18px",
                   color: "var(--sys-color-text-secondary)",
                 }}
@@ -244,7 +252,7 @@ export function PDPClient({ product }: PDPClientProps) {
               style={{
                 display: "grid",
                 gridTemplateRows: openAccordion === section.id ? "1fr" : "0fr",
-                transition: "grid-template-rows 300ms var(--ease-cinematic)",
+                transition: "grid-template-rows var(--motion-duration-base) var(--ease-cinematic)",
               }}
             >
               <div style={{ overflow: "hidden" }}>
@@ -257,7 +265,7 @@ export function PDPClient({ product }: PDPClientProps) {
                         ? "translate3d(0, 0, 0)"
                         : "translate3d(0, -10px, 0)",
                     transition:
-                      "opacity 300ms var(--ease-cinematic), transform 300ms var(--ease-cinematic)",
+                      "opacity var(--motion-duration-base) var(--ease-cinematic), transform var(--motion-duration-base) var(--ease-cinematic)",
                   }}
                 >
                   {section.content}

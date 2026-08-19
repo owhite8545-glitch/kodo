@@ -44,7 +44,7 @@ export function ConciergeForm() {
     fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
     fontSize: "var(--ref-font-size-base)",
     outline: "none",
-    transition: "border-color 150ms var(--ease-decelerate)",
+    transition: "border-color var(--motion-duration-fast) var(--ease-decelerate)",
   };
 
   const labelStyles: React.CSSProperties = {
@@ -113,7 +113,7 @@ export function ConciergeForm() {
           onChange={(e) =>
             setFormData({ ...formData, inquiryType: e.target.value as ConciergeFormData["inquiryType"] })
           }
-          className="kodo-focus-ring"
+          className="kodo-focus-ring kodo-input"
           style={{
             ...inputStyles,
             appearance: "none",
@@ -139,7 +139,7 @@ export function ConciergeForm() {
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="kodo-focus-ring"
+          className="kodo-focus-ring kodo-input"
           placeholder="Your name"
           style={inputStyles}
         />
@@ -156,7 +156,7 @@ export function ConciergeForm() {
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="kodo-focus-ring"
+          className="kodo-focus-ring kodo-input"
           placeholder="your@email.com"
           style={inputStyles}
         />
@@ -173,7 +173,7 @@ export function ConciergeForm() {
           required
           value={formData.subject}
           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-          className="kodo-focus-ring"
+          className="kodo-focus-ring kodo-input"
           placeholder="How may we assist you?"
           style={inputStyles}
         />
@@ -190,7 +190,7 @@ export function ConciergeForm() {
           rows={6}
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          className="kodo-focus-ring"
+          className="kodo-focus-ring kodo-input"
           placeholder="Please describe your inquiry in detail..."
           style={{
             ...inputStyles,

@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { PRODUCTS } from "@/data/products";
 import { HomeClient } from "./HomeClient";
 import { SectionReveal } from "@/components/shared/SectionReveal";
@@ -58,7 +59,7 @@ export default function HomePage() {
               style={{
                 marginBottom: "var(--ref-space-6)",
                 opacity: 0,
-                animation: "fadeSlideUp 600ms var(--ease-cinematic) 300ms forwards",
+                animation: "fadeSlideUp 600ms var(--ease-cinematic) 200ms forwards",
               }}
             >
               The Geometry of Memory
@@ -70,7 +71,7 @@ export default function HomePage() {
                 fontFamily: "var(--font-editorial-display), Georgia, serif",
                 marginBottom: "var(--ref-space-8)",
                 opacity: 0,
-                animation: "fadeSlideUp 800ms var(--ease-cinematic) 500ms forwards",
+                animation: "fadeSlideUp 800ms var(--ease-cinematic) 400ms forwards",
               }}
             >
               Where Scent Becomes
@@ -85,7 +86,7 @@ export default function HomePage() {
                 marginInline: "auto",
                 color: "var(--sys-color-text-secondary)",
                 opacity: 0,
-                animation: "fadeSlideUp 600ms var(--ease-cinematic) 700ms forwards",
+                animation: "fadeSlideUp 600ms var(--ease-cinematic) 600ms forwards",
               }}
             >
               Four distillations. Each a meditation on raw material and empty
@@ -100,7 +101,7 @@ export default function HomePage() {
                 justifyContent: "center",
                 flexWrap: "wrap",
                 opacity: 0,
-                animation: "fadeSlideUp 600ms var(--ease-cinematic) 900ms forwards",
+                animation: "fadeSlideUp 600ms var(--ease-cinematic) 800ms forwards",
               }}
             >
               <Link
@@ -131,7 +132,7 @@ export default function HomePage() {
               alignItems: "center",
               gap: "var(--ref-space-1)",
               opacity: 0,
-              animation: "fadeSlideUp 600ms var(--ease-cinematic) 1200ms forwards",
+              animation: "fadeSlideUp 600ms var(--ease-cinematic) 1100ms forwards",
             }}
           >
             <span className="text-caption">Scroll</span>
@@ -141,7 +142,6 @@ export default function HomePage() {
                 height: 32,
                 backgroundColor: "var(--sys-color-text-accent)",
                 opacity: 0.4,
-                animation: "scrollPulse 2s ease-in-out infinite",
               }}
             />
           </div>
@@ -178,6 +178,14 @@ export default function HomePage() {
                 overflow: "hidden",
               }}
             >
+              <Image
+                src={PRODUCTS[0].images.hero}
+                alt={`KODŌ ${PRODUCTS[0].name} Eau de Parfum`}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                style={{ objectFit: "contain" }}
+              />
               {/* Atmospheric gradient overlay */}
               <div
                 aria-hidden="true"
@@ -186,31 +194,9 @@ export default function HomePage() {
                   inset: 0,
                   background:
                     "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.6) 100%)",
+                  pointerEvents: "none",
                 }}
               />
-              {/* Centered product number */}
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "clamp(6rem, 15vw, 12rem)",
-                    color: "oklch(98% 0.005 85 / 0.04)",
-                    fontWeight: 300,
-                    lineHeight: 1,
-                  }}
-                >
-                  01
-                </span>
-              </div>
             </div>
 
             {/* Right: Editorial Copy */}
@@ -323,6 +309,13 @@ export default function HomePage() {
                     marginBottom: "var(--ref-space-3)",
                   }}
                 >
+                  <Image
+                    src={product.images.pureProduct}
+                    alt={`KODŌ ${product.name} Eau de Parfum`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    style={{ objectFit: "contain" }}
+                  />
                   <div
                     aria-hidden="true"
                     style={{
@@ -330,30 +323,9 @@ export default function HomePage() {
                       inset: 0,
                       background:
                         "linear-gradient(180deg, transparent 60%, oklch(12% 0.01 260 / 0.5) 100%)",
+                      pointerEvents: "none",
                     }}
                   />
-                  {/* Display number */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-editorial-display), Georgia, serif",
-                        fontSize: "clamp(4rem, 8vw, 6rem)",
-                        color: "oklch(98% 0.005 85 / 0.04)",
-                        fontWeight: 300,
-                        lineHeight: 1,
-                      }}
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Card Text */}
@@ -434,16 +406,12 @@ export default function HomePage() {
         @keyframes fadeSlideUp {
           from {
             opacity: 0;
-            transform: translate3d(0, 16px, 0);
+            transform: translate3d(0, var(--motion-reveal-distance), 0);
           }
           to {
             opacity: 1;
             transform: translate3d(0, 0, 0);
           }
-        }
-        @keyframes scrollPulse {
-          0%, 100% { opacity: 0.2; transform: scaleY(0.6); }
-          50% { opacity: 0.6; transform: scaleY(1); }
         }
         @keyframes spin {
           to { transform: rotate(360deg); }
