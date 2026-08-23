@@ -2,7 +2,21 @@ import type { Metadata, Viewport } from "next";
 import { fontDisplay, fontSans } from "@/styles/fonts";
 import "./globals.css";
 
+/* ── Strict metadataBase Resolution ─────────────────────── */
+const baseUrl =
+  process.env.NEXT_PUBLIC_BASE_URL ??
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : undefined);
+
+if (!baseUrl) {
+  throw new Error(
+    "Critical Configuration Missing: NEXT_PUBLIC_BASE_URL must be defined in production for canonical metadata resolution."
+  );
+}
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: {
     default: "KODŌ — The Geometry of Memory",
     template: "%s | KODŌ Fragrances",
@@ -21,7 +35,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://kodo-fragrances.com",
+    url: baseUrl,
     siteName: "KODŌ Fragrances",
     title: "KODŌ — The Geometry of Memory",
     description:

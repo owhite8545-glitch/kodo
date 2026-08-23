@@ -86,8 +86,91 @@ export interface ScentProduct {
 }
 
 export interface CartItem {
+  lineKey: string; // "so-001::50ml" — composite productId::variant
   product: ScentProduct;
   quantity: number;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 4b. Order & Checkout Models
+// ═══════════════════════════════════════════════════════════
+
+export type OrderStatus =
+  | "pending"
+  | "paid"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+
+export interface OrderLineItem {
+  productId: string;
+  productName: string;
+  variant: ScentVariant;
+  quantity: number;
+  unitPriceCents: number;
+  lineTotalCents: number;
+}
+
+export interface OrderRecord {
+  id: string;
+  idempotencyKey: string;
+  mode: "demo" | "live";
+  stripeSessionId: string | null;
+  stripePaymentIntentId: string | null;
+
+  customer: {
+    name: string;
+    email: string;
+    phone: string | null;
+  };
+
+  shipping: {
+    addressLine1: string;
+    addressLine2: string | null;
+    city: string;
+    stateOrRegion: string | null;
+    postalCode: string;
+    country: string;
+  };
+
+  lineItems: OrderLineItem[];
+
+  financials: {
+    currency: string;
+    subtotalCents: number;
+    shippingCents: number;
+    taxCents: number;
+    totalCents: number;
+  };
+
+  status: OrderStatus;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface CheckoutSubmission {
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  shipping: {
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    stateOrRegion: string;
+    postalCode: string;
+    country: string;
+  };
+  cartItems: {
+    lineKey: string;
+    productId: string;
+    variant: ScentVariant;
+    quantity: number;
+  }[];
+  idempotencyKey: string;
 }
 
 // ═══════════════════════════════════════════════════════════

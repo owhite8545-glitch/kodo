@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useCartStore } from "@/store/cart-store";
-import { ButtonSolid } from "@/components/shared/ButtonSolid";
-import { ButtonOutline } from "@/components/shared/ButtonOutline";
+import { formatPrice, COMMERCE_CONFIG } from "@/config/commerce";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -192,7 +191,7 @@ export function CartDrawer() {
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "var(--ref-space-4)" }}>
               {items.map((item) => (
                 <li
-                  key={item.product.id}
+                  key={item.lineKey}
                   style={{
                     display: "flex",
                     gap: "var(--ref-space-3)",
@@ -241,12 +240,12 @@ export function CartDrawer() {
                         marginBottom: "var(--ref-space-2)",
                       }}
                     >
-                      ${item.product.price}
+                      {formatPrice(Math.round(item.product.price * 100))}
                     </p>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--ref-space-2)" }}>
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        onClick={() => updateQuantity(item.lineKey, item.quantity - 1)}
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         style={{
@@ -272,7 +271,7 @@ export function CartDrawer() {
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.lineKey, item.quantity + 1)}
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Increase quantity of ${item.product.name}`}
                         style={{
@@ -288,7 +287,7 @@ export function CartDrawer() {
                         +
                       </button>
                       <button
-                        onClick={() => removeItem(item.product.id)}
+                        onClick={() => removeItem(item.lineKey)}
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Remove ${item.product.name} from cart`}
                         style={{
@@ -329,10 +328,10 @@ export function CartDrawer() {
                   color: "var(--sys-color-text-primary)",
                 }}
               >
-                ${totalPrice()}
+                {formatPrice(Math.round(totalPrice() * 100))}
               </span>
             </div>
-            <p className="text-caption">Complimentary shipping on all orders</p>
+            <p className="text-caption">{COMMERCE_CONFIG.shipping.policyLabel}</p>
             <Link
               href="/checkout"
               onClick={closeCart}

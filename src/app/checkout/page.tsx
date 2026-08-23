@@ -12,7 +12,7 @@ import { CheckoutClient } from "./CheckoutClient";
 export const metadata: Metadata = {
   title: "Checkout",
   description:
-    "Complete your KODŌ order. Secure checkout with complimentary worldwide shipping.",
+    "Complete your KODŌ order. Secure checkout.",
 };
 
 export default function CheckoutPage() {
