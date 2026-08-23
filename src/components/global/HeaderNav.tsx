@@ -43,8 +43,16 @@ export function HeaderNav() {
         borderBottom: "1px solid var(--sys-color-border)",
       }}
     >
-      <nav aria-label="KODŌ Global Navigation" style={{ display: "flex", alignItems: "center", width: "100%" }}>
-        {/* Brand Mark */}
+      <nav
+        aria-label="KODŌ Global Navigation"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        {/* Brand Mark — Left Anchor */}
         <Link
           href="/"
           className="kodo-focus-ring"
@@ -57,89 +65,98 @@ export function HeaderNav() {
             color: "var(--sys-color-text-primary)",
             textDecoration: "none",
             textTransform: "uppercase",
+            flexShrink: 0,
           }}
         >
           K O D Ō
         </Link>
 
-        {/* Desktop Navigation Links */}
+        {/* Right Navigation Group */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "var(--ref-space-4)",
             marginLeft: "auto",
-            marginRight: "var(--ref-space-4)",
           }}
-          className="nav-desktop-links"
         >
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="kodo-focus-ring nav-link"
-              aria-current={pathname === link.href ? "page" : undefined}
-              data-active={pathname === link.href}
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-small)",
-                fontWeight: 500,
-                textTransform: "uppercase",
-                letterSpacing: "var(--ref-letter-spacing-ultra)",
-                textDecoration: "none",
-                padding: "var(--ref-space-1) 0",
-                position: "relative",
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {/* Desktop Navigation Links */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--ref-space-4)",
+              marginRight: "var(--ref-space-4)",
+            }}
+            className="nav-desktop-links"
+          >
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="kodo-focus-ring nav-link"
+                aria-current={pathname === link.href ? "page" : undefined}
+                data-active={pathname === link.href}
+                style={{
+                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+                  fontSize: "var(--ref-font-size-small)",
+                  fontWeight: 500,
+                  textTransform: "uppercase",
+                  letterSpacing: "var(--ref-letter-spacing-ultra)",
+                  textDecoration: "none",
+                  padding: "var(--ref-space-1) 0",
+                  position: "relative",
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Cart Button */}
+          <button
+            onClick={toggleCart}
+            className="kodo-btn-utility kodo-focus-ring"
+            aria-label={`Shopping cart, ${totalItems()} items`}
+            style={{
+              position: "relative",
+              fontSize: "var(--ref-font-size-small)",
+              letterSpacing: "var(--ref-letter-spacing-ultra)",
+              padding: "var(--ref-space-1) var(--ref-space-2)",
+              marginRight: "var(--ref-space-3)",
+              minWidth: "var(--ref-touch-target)",
+              minHeight: "var(--ref-touch-target)",
+            }}
+          >
+            Cart
+            {totalItems() > 0 && (
+              <span
+                style={{
+                  marginLeft: "4px",
+                  color: "var(--sys-color-text-accent)",
+                }}
+              >
+                ({totalItems()})
+              </span>
+            )}
+          </button>
+
+          {/* Menu Trigger */}
+          <button
+            onClick={toggleMenu}
+            className="kodo-btn-utility kodo-focus-ring"
+            aria-expanded={isMenuOpen}
+            aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            style={{
+              fontSize: "var(--ref-font-size-small)",
+              letterSpacing: "var(--ref-letter-spacing-ultra)",
+              padding: "var(--ref-space-1)",
+              minWidth: "var(--ref-touch-target)",
+              minHeight: "var(--ref-touch-target)",
+            }}
+          >
+            {isMenuOpen ? "Close" : "Menu"}
+          </button>
         </div>
-
-        {/* Cart Button */}
-        <button
-          onClick={toggleCart}
-          className="kodo-btn-utility kodo-focus-ring"
-          aria-label={`Shopping cart, ${totalItems()} items`}
-          style={{
-            position: "relative",
-            fontSize: "var(--ref-font-size-small)",
-            letterSpacing: "var(--ref-letter-spacing-ultra)",
-            padding: "var(--ref-space-1) var(--ref-space-2)",
-            marginRight: "var(--ref-space-3)",
-            minWidth: "var(--ref-touch-target)",
-            minHeight: "var(--ref-touch-target)",
-          }}
-        >
-          Cart
-          {totalItems() > 0 && (
-            <span
-              style={{
-                marginLeft: "4px",
-                color: "var(--sys-color-text-accent)",
-              }}
-            >
-              ({totalItems()})
-            </span>
-          )}
-        </button>
-
-        {/* Menu Trigger */}
-        <button
-          onClick={toggleMenu}
-          className="kodo-btn-utility kodo-focus-ring"
-          aria-expanded={isMenuOpen}
-          aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-          style={{
-            fontSize: "var(--ref-font-size-small)",
-            letterSpacing: "var(--ref-letter-spacing-ultra)",
-            padding: "var(--ref-space-1)",
-            minWidth: "var(--ref-touch-target)",
-            minHeight: "var(--ref-touch-target)",
-          }}
-        >
-          {isMenuOpen ? "Close" : "Menu"}
-        </button>
       </nav>
     </header>
   );
