@@ -78,17 +78,20 @@ export default function HomePage() {
             <div className="hero-editorial-grid">
               {/* Primary Typography Anchor Plane */}
               <div className="hero-typography-plane">
-                {/* 1. Brand Eyebrow */}
+                {/* 1. Brand Eyebrow (150ms–750ms) */}
                 <p
                   className="text-label hero-eyebrow"
                   style={{
                     marginBottom: "var(--ref-space-3)",
+                    opacity: 0,
+                    animation:
+                      "heroEyebrowReveal 600ms var(--ease-cinematic) 150ms forwards",
                   }}
                 >
                   {SITE_CONFIG.brand.heroEyebrow}
                 </p>
 
-                {/* 2. Architectural Headline */}
+                {/* 2. Architectural Masked Staged Headline (300ms–1300ms) */}
                 <h1
                   className="text-hero hero-main-heading"
                   style={{
@@ -99,30 +102,59 @@ export default function HomePage() {
                     marginBottom: "var(--ref-space-4)",
                   }}
                 >
-                  <span style={{ display: "block" }}>
-                    {SITE_CONFIG.brand.heroTitleLine1}
+                  <span
+                    style={{
+                      display: "block",
+                      overflow: "hidden",
+                      paddingBottom: "3px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "block",
+                        opacity: 0,
+                        animation:
+                          "heroLineReveal 850ms var(--ease-cinematic) 300ms forwards",
+                      }}
+                    >
+                      {SITE_CONFIG.brand.heroTitleLine1}
+                    </span>
                   </span>
                   <span
                     style={{
                       display: "block",
-                      color: "var(--sys-color-text-accent)",
+                      overflow: "hidden",
+                      paddingBottom: "3px",
                     }}
                   >
-                    {SITE_CONFIG.brand.heroTitleLine2}
+                    <span
+                      style={{
+                        display: "block",
+                        color: "var(--sys-color-text-accent)",
+                        opacity: 0,
+                        animation:
+                          "heroLineReveal 850ms var(--ease-cinematic) 450ms forwards",
+                      }}
+                    >
+                      {SITE_CONFIG.brand.heroTitleLine2}
+                    </span>
                   </span>
                 </h1>
 
-                {/* 3. Concrete Supporting Line */}
+                {/* 3. Concrete Supporting Line (700ms–1400ms) */}
                 <p
                   className="text-body-lg hero-supporting-copy"
                   style={{
                     color: "var(--sys-color-text-secondary)",
+                    opacity: 0,
+                    animation:
+                      "heroFadeSlideUp 700ms var(--ease-cinematic) 700ms forwards",
                   }}
                 >
                   {SITE_CONFIG.brand.heroSubtitle}
                 </p>
 
-                {/* 4. Primary & Secondary CTAs */}
+                {/* 4. Primary & Secondary CTAs (850ms–1550ms) */}
                 <div
                   className="hero-cta-group"
                   style={{
@@ -130,6 +162,9 @@ export default function HomePage() {
                     gap: "var(--ref-space-4)",
                     alignItems: "center",
                     flexWrap: "wrap",
+                    opacity: 0,
+                    animation:
+                      "heroFadeSlideUp 700ms var(--ease-cinematic) 850ms forwards",
                   }}
                 >
                   <Link
@@ -166,7 +201,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 5. Scroll Beacon */}
+          {/* 5. Scroll Beacon (1000ms–1600ms) */}
           <div
             aria-hidden="true"
             className="hero-scroll-beacon"
@@ -179,6 +214,9 @@ export default function HomePage() {
               flexDirection: "column",
               alignItems: "center",
               gap: "var(--ref-space-1)",
+              opacity: 0,
+              animation:
+                "heroFadeSlideUp 600ms var(--ease-cinematic) 1000ms forwards",
             }}
           >
             <span
@@ -752,6 +790,9 @@ export default function HomePage() {
           z-index: 0;
           pointer-events: none;
           overflow: hidden;
+          opacity: 0;
+          animation: heroPortalUnveil 1300ms var(--ease-cinematic) 0ms forwards;
+          will-change: opacity, transform;
         }
 
         .hero-ma-image {
@@ -794,6 +835,8 @@ export default function HomePage() {
           letter-spacing: 0.04em;
           pointer-events: none;
           user-select: none;
+          opacity: 0;
+          animation: heroEyebrowReveal 700ms var(--ease-cinematic) 950ms forwards;
         }
 
         .hero-editorial-grid {
@@ -834,6 +877,20 @@ export default function HomePage() {
 
         .hero-flacon-wrapper {
           width: clamp(280px, 26vw, 380px) !important;
+          opacity: 0;
+          animation: heroBottleUnveil 1100ms var(--ease-cinematic) 450ms forwards;
+          will-change: transform, opacity;
+        }
+
+        @keyframes heroPortalUnveil {
+          0% {
+            opacity: 0;
+            transform: scale3d(1.04, 1.04, 1);
+          }
+          100% {
+            opacity: 1;
+            transform: scale3d(1, 1, 1);
+          }
         }
 
         @keyframes heroLineReveal {
@@ -1063,6 +1120,8 @@ export default function HomePage() {
             animation: none !important;
             opacity: 0.7 !important;
           }
+          .hero-ma-stage,
+          .hero-ma-seal,
           .hero-flacon-wrapper {
             animation: none !important;
             opacity: 1 !important;
