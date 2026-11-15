@@ -4,9 +4,19 @@ import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatCatalogPrice } from "@/config/commerce";
+import {
+  KodoListbox,
+  type KodoListboxOption,
+} from "@/components/shared/KodoListbox";
 import type { ScentProduct } from "@/types/webgl";
 
 type SortKey = "curated" | "price-asc" | "price-desc";
+
+const SORT_OPTIONS: readonly KodoListboxOption<SortKey>[] = [
+  { value: "curated", label: "Curated Order" },
+  { value: "price-asc", label: "Price: Low to High" },
+  { value: "price-desc", label: "Price: High to Low" },
+];
 
 interface CollectionsGalleryProps {
   products: readonly ScentProduct[];
@@ -65,6 +75,8 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
       {/* Minimal Filter & Sort Controls */}
       <div
         style={{
+          position: "relative",
+          zIndex: 10,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -112,34 +124,24 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
 
         <div style={{ display: "flex", alignItems: "center", gap: "var(--ref-space-2)" }}>
           <label
+            id="collections-sort-label"
             htmlFor="collections-sort"
             className="text-caption"
             style={{ textTransform: "uppercase", letterSpacing: "var(--ref-letter-spacing-wide)" }}
           >
             Sort
           </label>
-          <select
+          <KodoListbox
             id="collections-sort"
+            labelId="collections-sort-label"
+            options={SORT_OPTIONS}
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortKey)}
-            className="kodo-select kodo-focus-ring"
-            style={{
-              height: "44px",
-              minWidth: "188px",
-              padding: "0 16px",
-              lineHeight: "42px",
-              backgroundColor: "var(--sys-color-surface)",
-              border: "1px solid var(--sys-color-border)",
-              fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-              fontSize: "var(--ref-font-size-small)",
-              letterSpacing: "var(--ref-letter-spacing-wide)",
-              textTransform: "uppercase",
-            }}
-          >
-            <option value="curated">Curated Order</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-          </select>
+            onChange={setSortBy}
+            minWidth="208px"
+            height="44px"
+            uppercase
+            align="right"
+          />
         </div>
       </div>
 

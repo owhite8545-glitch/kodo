@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCartStore } from "@/store/cart-store";
@@ -9,6 +9,7 @@ import {
   COMMERCE_CONFIG,
   formatCents,
 } from "@/config/commerce";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 import { useHydrated } from "@/hooks/use-hydrated";
 
 export function CartDrawer() {
@@ -18,24 +19,13 @@ export function CartDrawer() {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const isHydrated = useHydrated();
+  const panelRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeCart();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [isOpen, closeCart]);
+  useFocusTrap({
+    isOpen,
+    containerRef: panelRef,
+    onClose: closeCart,
+  });
 
   const activeItems = isHydrated ? items : [];
   const financials = calculateOrderFinancials(
@@ -55,6 +45,8 @@ export function CartDrawer() {
       />
 
       <aside
+        ref={panelRef}
+        tabIndex={-1}
         className="kodo-cart-panel"
         data-open={isOpen}
         role={isOpen ? "dialog" : undefined}

@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useMemo, useState, useTransition } from "react";
 import { SITE_CONFIG } from "@/config/site";
 import { INQUIRY_LABELS, type InquiryType } from "@/lib/concierge-schema";
+import {
+  KodoListbox,
+  type KodoListboxOption,
+} from "@/components/shared/KodoListbox";
 import { submitConciergeInquiry } from "./actions";
 
 const fieldStyle: React.CSSProperties = {
@@ -39,6 +43,15 @@ export function ConciergeForm() {
     message: "",
     website: "",
   });
+
+  const inquiryOptions = useMemo<KodoListboxOption<InquiryType>[]>(
+    () =>
+      (Object.keys(INQUIRY_LABELS) as InquiryType[]).map((key) => ({
+        value: key,
+        label: INQUIRY_LABELS[key],
+      })),
+    []
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,36 +197,25 @@ export function ConciergeForm() {
       {/* Inquiry Type */}
       <div>
         <label
+          id="inquiryType-label"
           htmlFor="inquiryType"
           className="text-label"
           style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
         >
           Inquiry Type
         </label>
-        <select
+        <KodoListbox
           id="inquiryType"
-          name="inquiryType"
+          labelId="inquiryType-label"
+          options={inquiryOptions}
           value={formData.inquiryType}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              inquiryType: e.target.value as InquiryType,
-            })
+          onChange={(inquiryType) =>
+            setFormData({ ...formData, inquiryType })
           }
-          className="kodo-select kodo-focus-ring"
-          style={{
-            ...fieldStyle,
-            height: "48px",
-            padding: "0 16px",
-            lineHeight: "46px",
-          }}
-        >
-          {(Object.keys(INQUIRY_LABELS) as InquiryType[]).map((key) => (
-            <option key={key} value={key}>
-              {INQUIRY_LABELS[key]}
-            </option>
-          ))}
-        </select>
+          fullWidth
+          height="48px"
+          align="left"
+        />
         {fieldErrors.inquiryType && (
           <p style={errorTextStyle}>{fieldErrors.inquiryType}</p>
         )}

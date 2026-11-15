@@ -611,6 +611,27 @@ h1, h2, h3, .font-editorial {
   color: var(--sys-color-text-primary);
 }
 
+.kodo-listbox-panel {
+  animation: kodoMenuUnveil 180ms var(--ease-decelerate) both;
+}
+
+@keyframes kodoMenuUnveil {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kodo-listbox-panel {
+    animation: none;
+  }
+}
+
 @keyframes kodoSpin {
   to {
     transform: rotate(360deg);

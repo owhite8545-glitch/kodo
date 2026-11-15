@@ -1,35 +1,27 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 import { useUIStore } from "@/store/ui-store";
 import { MENU_LINKS } from "@/data/navigation";
 import { SITE_CONFIG } from "@/config/site";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 export function MenuDrawer() {
   const isOpen = useUIStore((s) => s.isMenuOpen);
   const closeMenu = useUIStore((s) => s.closeMenu);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        closeMenu();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [isOpen, closeMenu]);
+  useFocusTrap({
+    isOpen,
+    containerRef: overlayRef,
+    onClose: closeMenu,
+  });
 
   return (
     <div
+      ref={overlayRef}
+      tabIndex={-1}
       className="kodo-menu-overlay"
       data-open={isOpen}
       role={isOpen ? "dialog" : undefined}
