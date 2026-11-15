@@ -204,7 +204,7 @@ export function PDPClient({ product }: PDPClientProps) {
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
-                Extrait de Parfum · 28%
+                Extrait de Parfum · {product.concentration}
               </span>
             </div>
 

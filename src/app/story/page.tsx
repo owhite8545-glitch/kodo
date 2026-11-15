@@ -4,6 +4,8 @@ import Image from "next/image";
 import { HomeClient } from "../HomeClient";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { SectionReveal } from "@/components/shared/SectionReveal";
+import { PhotographySystemShowcase } from "@/components/shared/PhotographySystemShowcase";
+import { PRODUCTS } from "@/data/products";
 import { SITE_CONFIG } from "@/config/site";
 
 export const metadata = {
@@ -310,6 +312,11 @@ export default function StoryPage() {
               </div>
             </div>
           </section>
+        </SectionReveal>
+
+        {/* Chapter 4: Archival Photography Spec & Widescreen Study */}
+        <SectionReveal>
+          <PhotographySystemShowcase products={PRODUCTS} />
         </SectionReveal>
 
         <SectionReveal>

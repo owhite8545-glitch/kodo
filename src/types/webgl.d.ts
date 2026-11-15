@@ -56,6 +56,7 @@ export interface ProductImages {
   hero: string;
   pureProduct: string;
   detail: string;
+  scale: string;
   socialOg: string;
 }
 
@@ -68,6 +69,8 @@ export interface ScentProduct {
   id: string;
   name: string;
   subtitle: string;
+  scaleReference: string;
+  concentration: string;
   family: ScentFamily;
   description: string;
   price: number;

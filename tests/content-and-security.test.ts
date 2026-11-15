@@ -107,6 +107,7 @@ describe("Catalog and Journal data + asset integrity", () => {
       assertAssetExists(product.image, `${product.slug}.image`);
       assertAssetExists(product.images.hero, `${product.slug}.images.hero`);
       assertAssetExists(product.images.detail, `${product.slug}.images.detail`);
+      assertAssetExists(product.images.scale, `${product.slug}.images.scale`);
       assertAssetExists(
         product.images.socialOg,
         `${product.slug}.images.socialOg`
@@ -130,6 +131,7 @@ describe("Catalog and Journal data + asset integrity", () => {
       "/images/editorial/raw-material.jpg",
       "/images/editorial/hinoki-distillation.jpg",
       "/images/editorial/borosilicate-craft.jpg",
+      "/images/editorial/so-campaign-wide.jpg",
     ];
     for (const plate of editorialPlates) {
       assertAssetExists(plate, `editorial/${path.basename(plate)}`);

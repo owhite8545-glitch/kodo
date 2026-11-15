@@ -220,53 +220,76 @@ export default async function ProductPage({ params }: PageProps) {
         >
           {/* Left Column: Product Image Gallery */}
           <SectionReveal>
-          <div
-            className="pdp-media-column"
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--ref-space-6)",
-            }}
-          >
-            {/* Primary Hero Editorial View */}
             <div
+              className="pdp-media-column"
               style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "3 / 4",
-                backgroundColor: "var(--ref-color-obsidian-20)",
-                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-6)",
               }}
             >
-              <Image
-                src={product.images.hero}
-                alt={`KODŌ ${product.name} Eau de Parfum`}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
-                style={{ objectFit: "contain" }}
-              />
+              {[
+                {
+                  src: product.images.hero,
+                  alt: `KODŌ ${product.name} Eau de Parfum`,
+                  label: `01 · Editorial Presence`,
+                  priority: true,
+                },
+                {
+                  src: product.images.detail,
+                  alt: `KODŌ ${product.name} Eau de Parfum — Detail`,
+                  label: `02 · Vessel & Joinery Detail`,
+                  priority: false,
+                },
+                {
+                  src: product.images.scale,
+                  alt: `KODŌ ${product.name} scale study beside ${product.scaleReference}`,
+                  label: `03 · Scale Context — ${product.scaleReference}`,
+                  priority: false,
+                },
+              ].map((plate) => (
+                <figure
+                  key={plate.label}
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: "3 / 4",
+                    backgroundColor: "var(--ref-color-obsidian-20)",
+                    border: "1px solid var(--sys-color-border)",
+                    overflow: "hidden",
+                    margin: 0,
+                  }}
+                >
+                  <Image
+                    src={plate.src}
+                    alt={plate.alt}
+                    fill
+                    priority={plate.priority}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <figcaption
+                    style={{
+                      position: "absolute",
+                      left: "16px",
+                      bottom: "16px",
+                      padding: "6px 12px",
+                      backgroundColor: "oklch(12% 0.01 260 / 0.82)",
+                      backdropFilter: "blur(10px)",
+                      WebkitBackdropFilter: "blur(10px)",
+                      border: "1px solid oklch(82% 0.06 85 / 0.25)",
+                      fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+                      fontSize: "10px",
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--sys-color-text-primary)",
+                    }}
+                  >
+                    {plate.label}
+                  </figcaption>
+                </figure>
+              ))}
             </div>
-
-            {/* Close-up / Macro Detail View */}
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "3 / 4",
-                backgroundColor: "var(--ref-color-obsidian-20)",
-                overflow: "hidden",
-              }}
-            >
-              <Image
-                src={product.images.detail}
-                alt={`KODŌ ${product.name} Eau de Parfum — Detail`}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
-                style={{ objectFit: "contain" }}
-              />
-            </div>
-          </div>
           </SectionReveal>
 
           {/* Right Column: Interactive Client Component */}

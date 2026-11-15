@@ -15,6 +15,8 @@ export const PRODUCTS: ScentProduct[] = [
     id: "so-001",
     name: "SŌ",
     subtitle: "Mineral Vapor",
+    scaleReference: "Slate Tray & Carrara Marble Sphere",
+    concentration: "22%",
     family: "mineral",
     description:
       "A raw distillation of oceanic minerals and volatile sea salt, captured at the instant of evaporation. SŌ opens with a crystalline burst of cold marine aldehydes that dissolve into a weathered vetiver base, leaving a clean, elemental trail.",
@@ -29,6 +31,7 @@ export const PRODUCTS: ScentProduct[] = [
       hero: "/images/products/so/hero.jpg",
       pureProduct: "/images/products/so/pure-product.jpg",
       detail: "/images/products/so/detail.jpg",
+      scale: "/images/products/so/scale.jpg",
       socialOg: "/images/products/so/social-og.png",
     },
     ogDimensions: {
@@ -47,6 +50,8 @@ export const PRODUCTS: ScentProduct[] = [
     id: "moku-002",
     name: "MOKU",
     subtitle: "Cedar & Black Amber",
+    scaleReference: "Honed Travertine & Aged Driftwood",
+    concentration: "24%",
     family: "botanical",
     description:
       "An intense, tactile exploration of dry heat. Moku pairs the aromatic resin of cedarwood with the dark warmth of caramelized amber and dry black pepper, creating a persistent, masculine aura.",
@@ -61,6 +66,7 @@ export const PRODUCTS: ScentProduct[] = [
       hero: "/images/products/moku/hero.jpg",
       pureProduct: "/images/products/moku/pure-product.jpg",
       detail: "/images/products/moku/detail.jpg",
+      scale: "/images/products/moku/scale.jpg",
       socialOg: "/images/products/moku/social-og.png",
     },
     ogDimensions: {
@@ -79,6 +85,8 @@ export const PRODUCTS: ScentProduct[] = [
     id: "en-003",
     name: "EN",
     subtitle: "Smoke & Sandalwood",
+    scaleReference: "Architectural Stone & Volcanic Basalt",
+    concentration: "26%",
     family: "resinous",
     description:
       "The memory of ceremonial incense. En captures the ethereal thread of sacred smoke — charred cedar bark dissolving into a bed of mystic sandalwood and dark oud, creating a contemplative atmosphere.",
@@ -93,6 +101,7 @@ export const PRODUCTS: ScentProduct[] = [
       hero: "/images/products/en/hero.jpg",
       pureProduct: "/images/products/en/pure-product.jpg",
       detail: "/images/products/en/detail.jpg",
+      scale: "/images/products/en/scale.jpg",
       socialOg: "/images/products/en/social-og.png",
     },
     ogDimensions: {
@@ -111,6 +120,8 @@ export const PRODUCTS: ScentProduct[] = [
     id: "kin-004",
     name: "KIN",
     subtitle: "Saffron & Myrrh",
+    scaleReference: "Honed Limestone & Brushed Brass Cylinder",
+    concentration: "26%",
     family: "resinous",
     description:
       "The weight of precious metal. Kin fuses the ancient warmth of crocus saffron with the bitumen depth of Ethiopian myrrh, wrapped in a golden veil of honey absolute and heated amber.",
@@ -125,6 +136,7 @@ export const PRODUCTS: ScentProduct[] = [
       hero: "/images/products/kin/hero.jpg",
       pureProduct: "/images/products/kin/pure-product.jpg",
       detail: "/images/products/kin/detail.jpg",
+      scale: "/images/products/kin/scale.jpg",
       socialOg: "/images/products/kin/social-og.png",
     },
     ogDimensions: {
