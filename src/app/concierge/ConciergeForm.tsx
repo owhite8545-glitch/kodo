@@ -7,7 +7,8 @@ import { submitConciergeInquiry } from "./actions";
 
 const fieldStyle: React.CSSProperties = {
   width: "100%",
-  padding: "var(--ref-space-3) var(--ref-space-4)",
+  minHeight: "48px",
+  padding: "12px 16px",
   backgroundColor: "var(--sys-color-surface)",
   border: "1px solid var(--sys-color-border)",
   color: "var(--sys-color-text-primary)",
@@ -202,7 +203,9 @@ export function ConciergeForm() {
           className="kodo-select kodo-focus-ring"
           style={{
             ...fieldStyle,
-            backgroundColor: "var(--ref-color-obsidian-50)",
+            height: "48px",
+            padding: "0 16px",
+            lineHeight: "46px",
           }}
         >
           {(Object.keys(INQUIRY_LABELS) as InquiryType[]).map((key) => (

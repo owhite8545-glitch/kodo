@@ -71,7 +71,7 @@ export default function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body>
-        <a href="#main-content" className="skip-to-main">
+        <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>
 

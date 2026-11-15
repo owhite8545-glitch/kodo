@@ -155,25 +155,25 @@ export function CartDrawer() {
                     borderBottom: "1px solid var(--sys-color-border)",
                   }}
                 >
-                  <div
-                    style={{
-                      width: "72px",
-                      height: "92px",
-                      flexShrink: 0,
-                      overflow: "hidden",
-                      position: "relative",
-                      background: "var(--ref-color-obsidian-50)",
-                      border: "1px solid var(--sys-color-border)",
-                    }}
-                  >
-                    <Image
-                      src={item.product.image}
-                      alt={`KODŌ ${item.product.name} Eau de Parfum`}
-                      fill
-                      sizes="72px"
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
+                    <div
+                      style={{
+                        width: "72px",
+                        height: "92px",
+                        flexShrink: 0,
+                        overflow: "hidden",
+                        position: "relative",
+                        background: "var(--sys-color-bg)",
+                        border: "1px solid var(--sys-color-border)",
+                      }}
+                    >
+                      <Image
+                        src={item.product.image}
+                        alt={`KODŌ ${item.product.name} Eau de Parfum`}
+                        fill
+                        sizes="72px"
+                        style={{ objectFit: "contain", padding: "4px" }}
+                      />
+                    </div>
 
                   <div
                     style={{
@@ -220,7 +220,8 @@ export function CartDrawer() {
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "var(--ref-space-2)",
+                        flexWrap: "wrap",
+                        gap: "var(--ref-space-1)",
                         marginTop: "var(--ref-space-2)",
                       }}
                     >

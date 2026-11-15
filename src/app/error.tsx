@@ -26,7 +26,8 @@ export default function RouteError({ error, unstable_retry }: RouteErrorProps) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: "var(--ref-space-16) var(--ref-space-4)",
+          padding:
+            "calc(var(--comp-nav-height) + var(--ref-space-12)) var(--sys-space-page-margin) var(--ref-space-12)",
           textAlign: "center",
         }}
       >

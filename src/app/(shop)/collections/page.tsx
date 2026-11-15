@@ -73,19 +73,32 @@ export default function CollectionsPage() {
       <FooterDirectory />
 
       <style>{`
-        .collections-card-overlay {
-          transition: opacity var(--motion-duration-base) var(--ease-decelerate);
+        .collections-card-overlay,
+        .collections-card-cta {
+          transition:
+            opacity var(--motion-duration-base) var(--ease-decelerate),
+            color var(--motion-duration-base) var(--ease-decelerate);
+        }
+        .collections-card-cta {
+          color: var(--sys-color-text-secondary);
+        }
+        .collections-card-link:hover {
+          border-color: var(--sys-color-border-active) !important;
+          transform: translateY(-4px);
         }
         .collections-card-link:hover .collections-card-image {
-          transform: scale(1.02);
+          transform: scale(1.03);
         }
         .collections-card-link:hover .collections-card-overlay {
-          opacity: 0.6;
+          opacity: 0.65;
         }
-        @media (max-width: 1024px) {
+        .collections-card-link:hover .collections-card-cta {
+          color: var(--sys-color-text-accent);
+        }
+        @media (max-width: 1120px) {
           .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .collections-grid { grid-template-columns: minmax(0, 1fr) !important; max-width: 400px; margin-inline: auto; }
         }
       `}</style>

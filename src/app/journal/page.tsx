@@ -260,7 +260,7 @@ export default function JournalPage() {
         .journal-card:hover {
           border-color: var(--sys-color-border-active);
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .journal-card-link {
             grid-template-columns: 1fr !important;
           }

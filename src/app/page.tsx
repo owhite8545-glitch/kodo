@@ -388,11 +388,11 @@ export default function HomePage() {
                 style={{
                   display: "flex",
                   flexDirection: "column",
+                  height: "100%",
                   textDecoration: "none",
                   color: "inherit",
                   border: "1px solid var(--sys-color-border)",
                   backgroundColor: "var(--sys-color-surface)",
-                  paddingBottom: "var(--ref-space-4)",
                   transition:
                     "transform 300ms var(--ease-cinematic), border-color 300ms var(--ease-cinematic)",
                 }}
@@ -402,17 +402,17 @@ export default function HomePage() {
                   className="bento-card-media"
                   style={{
                     aspectRatio: "3/4",
-                    backgroundColor: "var(--sys-color-surface)",
+                    backgroundColor: "#09090b",
+                    borderBottom: "1px solid var(--sys-color-border)",
                     position: "relative",
                     overflow: "hidden",
-                    marginBottom: "var(--ref-space-3)",
                   }}
                 >
                   <Image
                     src={product.images.pureProduct}
                     alt={`KODŌ ${product.name} Eau de Parfum`}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 767px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     style={{
                       objectFit: "contain",
                       transition: "transform 480ms var(--ease-cinematic)",
@@ -424,14 +424,21 @@ export default function HomePage() {
                       position: "absolute",
                       inset: 0,
                       background:
-                        "linear-gradient(180deg, transparent 60%, oklch(12% 0.01 260 / 0.5) 100%)",
+                        "linear-gradient(180deg, transparent 60%, oklch(14% 0.01 260 / 0.8) 100%)",
                       pointerEvents: "none",
                     }}
                   />
                 </div>
 
                 {/* Card Text */}
-                <div style={{ padding: "0 var(--ref-space-3)" }}>
+                <div
+                  style={{
+                    padding: "var(--ref-space-4) var(--ref-space-3)",
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
+                  }}
+                >
                   <p className="text-label" style={{ marginBottom: "4px" }}>
                     State {String(index + 1).padStart(2, "0")}
                   </p>
@@ -448,21 +455,39 @@ export default function HomePage() {
                   <p
                     className="text-caption"
                     style={{
-                      marginBottom: "var(--ref-space-1)",
+                      marginBottom: "var(--ref-space-3)",
                     }}
                   >
                     {product.subtitle}
                   </p>
-                  <span
+                  <div
                     style={{
-                      fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                      fontSize: "var(--ref-font-size-caption)",
-                      color: "var(--sys-color-text-accent)",
-                      fontVariantNumeric: "tabular-nums",
+                      marginTop: "auto",
+                      paddingTop: "var(--ref-space-2)",
+                      borderTop: "1px solid var(--sys-color-border)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
                     }}
                   >
-                    From ${product.sizes[0].price}
-                  </span>
+                    <span
+                      style={{
+                        fontFamily:
+                          "var(--font-utility-sans), system-ui, sans-serif",
+                        fontSize: "var(--ref-font-size-caption)",
+                        color: "var(--sys-color-text-accent)",
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
+                      From ${product.sizes[0].price}
+                    </span>
+                    <span
+                      className="text-label"
+                      style={{ fontSize: "0.6875rem", opacity: 0.72 }}
+                    >
+                      Discover &rarr;
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}
@@ -610,6 +635,7 @@ export default function HomePage() {
                   style={{
                     display: "flex",
                     flexDirection: "column",
+                    height: "100%",
                     textDecoration: "none",
                     color: "inherit",
                     border: "1px solid var(--sys-color-border)",
@@ -623,6 +649,8 @@ export default function HomePage() {
                     style={{
                       position: "relative",
                       aspectRatio: "16/9",
+                      backgroundColor: "#0a0a0c",
+                      borderBottom: "1px solid var(--sys-color-border)",
                       overflow: "hidden",
                     }}
                   >
@@ -630,14 +658,21 @@ export default function HomePage() {
                       src={studio.image}
                       alt={studio.imageAlt}
                       fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="(max-width: 767px) 100vw, 50vw"
                       style={{
                         objectFit: "cover",
                         transition: "transform 480ms var(--ease-cinematic)",
                       }}
                     />
                   </div>
-                  <div style={{ padding: "var(--ref-space-5)" }}>
+                  <div
+                    style={{
+                      padding: "var(--ref-space-6)",
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
+                    }}
+                  >
                     <p className="text-label" style={{ marginBottom: "4px" }}>
                       {studio.district} · {studio.region}
                     </p>
@@ -647,16 +682,30 @@ export default function HomePage() {
                           "var(--font-editorial-display), Georgia, serif",
                         fontSize: "var(--ref-font-size-title)",
                         fontWeight: 400,
-                        marginBottom: "4px",
+                        marginBottom: "6px",
                       }}
                     >
                       {studio.title}
                     </h3>
                     <p
                       className="text-caption"
-                      style={{ color: "var(--sys-color-text-secondary)" }}
+                      style={{
+                        color: "var(--sys-color-text-secondary)",
+                        marginBottom: "var(--ref-space-4)",
+                      }}
                     >
                       {studio.street}, {studio.cityPostal}
+                    </p>
+                    <p
+                      className="text-caption"
+                      style={{
+                        color: "var(--sys-color-text-accent)",
+                        marginTop: "auto",
+                        paddingTop: "var(--ref-space-2)",
+                        borderTop: "1px solid var(--sys-color-border)",
+                      }}
+                    >
+                      {studio.hours}
                     </p>
                   </div>
                 </Link>
@@ -1021,7 +1070,7 @@ export default function HomePage() {
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .hero-ma-stage {
             top: var(--comp-nav-height);
             right: 0;

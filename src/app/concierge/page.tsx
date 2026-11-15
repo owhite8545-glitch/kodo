@@ -99,7 +99,11 @@ export default function ConciergePage() {
                   <a
                     href={`mailto:${SITE_CONFIG.contact.conciergeEmail}`}
                     className="kodo-focus-ring"
-                    style={{ color: "inherit", textDecoration: "none" }}
+                    style={{
+                      color: "inherit",
+                      textDecoration: "none",
+                      overflowWrap: "anywhere",
+                    }}
                   >
                     {SITE_CONFIG.contact.conciergeEmail}
                   </a>
@@ -202,7 +206,7 @@ export default function ConciergePage() {
           gap: var(--ref-space-12);
           align-items: start;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .concierge-grid { grid-template-columns: 1fr; gap: var(--ref-space-8); }
         }
       `}</style>

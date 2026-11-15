@@ -476,8 +476,9 @@ export function CheckoutClient({ mode, isCanceled = false }: CheckoutClientProps
                 aria-invalid={Boolean(fieldErrors["shipping.country"])}
                 style={{
                   ...inputStyle,
-                  appearance: "none",
-                  paddingRight: "var(--ref-space-8)",
+                  height: "48px",
+                  padding: "0 16px",
+                  lineHeight: "46px",
                   cursor: "pointer",
                   borderColor: fieldErrors["shipping.country"]
                     ? "var(--sys-color-error)"
@@ -685,7 +686,7 @@ export function CheckoutClient({ mode, isCanceled = false }: CheckoutClientProps
                     position: "relative",
                     flexShrink: 0,
                     overflow: "hidden",
-                    backgroundColor: "var(--ref-color-obsidian-20)",
+                    backgroundColor: "var(--sys-color-bg)",
                     border: "1px solid var(--sys-color-border)",
                   }}
                 >
@@ -694,7 +695,7 @@ export function CheckoutClient({ mode, isCanceled = false }: CheckoutClientProps
                     alt={`KODŌ ${item.product.name}`}
                     fill
                     sizes="52px"
-                    style={{ objectFit: "cover" }}
+                    style={{ objectFit: "contain", padding: "3px" }}
                   />
                 </div>
 

@@ -12,6 +12,26 @@ interface CollectionsGalleryProps {
   products: readonly ScentProduct[];
 }
 
+function summarizeDescription(text: string, maxLength = 104): string {
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const excerpt = sentences[0] ?? text;
+
+  if (excerpt.length < 56 && sentences[1]) {
+    const combined = `${excerpt} ${sentences[1]}`;
+    if (combined.length <= maxLength) {
+      return combined;
+    }
+  }
+
+  if (excerpt.length <= maxLength) {
+    return excerpt;
+  }
+
+  const trimmed = excerpt.slice(0, maxLength - 1);
+  const lastSpace = trimmed.lastIndexOf(" ");
+  return `${(lastSpace > 40 ? trimmed.slice(0, lastSpace) : trimmed).replace(/[.,;:—-]+$/, "")}…`;
+}
+
 export function CollectionsGallery({ products }: CollectionsGalleryProps) {
   const [selectedFamily, setSelectedFamily] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortKey>("curated");
@@ -105,13 +125,15 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
             className="kodo-select kodo-focus-ring"
             style={{
               height: "44px",
-              paddingInline: "12px",
+              minWidth: "188px",
+              padding: "0 16px",
+              lineHeight: "42px",
+              backgroundColor: "var(--sys-color-surface)",
               border: "1px solid var(--sys-color-border)",
               fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
               fontSize: "var(--ref-font-size-small)",
               letterSpacing: "var(--ref-letter-spacing-wide)",
               textTransform: "uppercase",
-              cursor: "pointer",
             }}
           >
             <option value="curated">Curated Order</option>
@@ -128,45 +150,69 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
           display: "grid",
           gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
           gap: "var(--ref-space-4)",
+          alignItems: "stretch",
         }}
       >
         {filteredProducts.map((product) => {
           const stateNumber = products.findIndex((p) => p.id === product.id) + 1;
           const startingPrice = product.sizes[0]?.price ?? product.price;
+          const signatureAccords = [
+            product.notes.top[0],
+            product.notes.heart[0],
+            product.notes.base[0],
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          const volumesLabel = product.sizes
+            .map((s) => s.variant.toUpperCase())
+            .join(" / ");
+
           return (
-            <article key={product.id}>
+            <article key={product.id} style={{ display: "flex" }}>
               <Link
                 href={`/products/${product.slug}`}
                 className="kodo-focus-ring collections-card-link"
                 style={{
                   display: "flex",
                   flexDirection: "column",
+                  width: "100%",
+                  height: "100%",
                   textDecoration: "none",
                   color: "inherit",
                   border: "1px solid var(--sys-color-border)",
                   backgroundColor: "var(--sys-color-surface)",
-                  paddingBottom: "var(--ref-space-5)",
+                  transition:
+                    "transform 320ms var(--ease-cinematic), border-color 320ms var(--ease-cinematic)",
                 }}
               >
                 <div
-                  className="collections-card-image"
+                  className="collections-card-image-frame"
                   style={{
                     aspectRatio: "3/4",
-                    backgroundColor: "var(--sys-color-surface)",
+                    backgroundColor: "#09090b",
                     position: "relative",
                     overflow: "hidden",
-                    marginBottom: "var(--ref-space-4)",
-                    transition:
-                      "transform var(--motion-duration-base) var(--ease-decelerate)",
+                    borderBottom: "1px solid var(--sys-color-border)",
                   }}
                 >
-                  <Image
-                    src={product.images.pureProduct}
-                    alt={`KODŌ ${product.name} Eau de Parfum`}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    style={{ objectFit: "contain" }}
-                  />
+                  <div
+                    className="collections-card-image"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      transition:
+                        "transform var(--motion-duration-base) var(--ease-cinematic)",
+                    }}
+                  >
+                    <Image
+                      src={product.images.pureProduct}
+                      alt={`KODŌ ${product.name} Eau de Parfum`}
+                      fill
+                      priority
+                      sizes="(max-width: 767px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      style={{ objectFit: "contain" }}
+                    />
+                  </div>
                   <div
                     className="collections-card-overlay"
                     aria-hidden="true"
@@ -174,54 +220,114 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                       position: "absolute",
                       inset: 0,
                       background:
-                        "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.5) 100%)",
+                        "linear-gradient(180deg, transparent 58%, oklch(14% 0.01 260 / 0.85) 100%)",
                       pointerEvents: "none",
                     }}
                   />
                 </div>
 
-                <div style={{ paddingInline: "var(--ref-space-4)", display: "flex", flexDirection: "column", flex: 1 }}>
-                <p className="text-label" style={{ marginBottom: "4px" }}>
-                  {product.family.toUpperCase()} / STATE{" "}
-                  {String(stateNumber).padStart(2, "0")}
-                </p>
-                <h2
+                <div
                   style={{
-                    fontFamily: "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "var(--ref-font-size-heading)",
-                    fontWeight: 400,
-                    marginBottom: "4px",
+                    padding: "var(--ref-space-4)",
+                    display: "flex",
+                    flexDirection: "column",
+                    flex: 1,
                   }}
                 >
-                  {product.name}
-                </h2>
-                <p
-                  className="text-caption"
-                  style={{ marginBottom: "var(--ref-space-2)" }}
-                >
-                  {product.subtitle}
-                </p>
-                <p
-                  className="text-body"
-                  style={{
-                    color: "var(--sys-color-text-secondary)",
-                    marginBottom: "var(--ref-space-3)",
-                    maxWidth: "32ch",
-                  }}
-                >
-                  {product.description.slice(0, 118)}…
-                </p>
-                <span
-                  style={{
-                    fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                    fontSize: "var(--ref-font-size-title)",
-                    fontVariantNumeric: "tabular-nums",
-                    color: "var(--sys-color-text-accent)",
-                    marginTop: "auto",
-                  }}
-                >
-                  From {formatCatalogPrice(startingPrice)}
-                </span>
+                  <p className="text-label" style={{ marginBottom: "6px" }}>
+                    {product.family.toUpperCase()} / STATE{" "}
+                    {String(stateNumber).padStart(2, "0")}
+                  </p>
+                  <h2
+                    style={{
+                      fontFamily:
+                        "var(--font-editorial-display), Georgia, serif",
+                      fontSize: "var(--ref-font-size-heading)",
+                      fontWeight: 400,
+                      lineHeight: 1.08,
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {product.name}
+                  </h2>
+                  <p
+                    className="text-caption"
+                    style={{
+                      color: "var(--sys-color-text-primary)",
+                      opacity: 0.78,
+                      marginBottom: "var(--ref-space-2)",
+                    }}
+                  >
+                    {product.subtitle}
+                  </p>
+                  <p
+                    className="text-body"
+                    style={{
+                      color: "var(--sys-color-text-secondary)",
+                      fontSize: "0.9375rem",
+                      lineHeight: 1.55,
+                      marginBottom: "var(--ref-space-3)",
+                    }}
+                  >
+                    {summarizeDescription(product.description)}
+                  </p>
+
+                  <div
+                    style={{
+                      marginTop: "auto",
+                      paddingTop: "var(--ref-space-2)",
+                      borderTop: "1px solid var(--sys-color-border)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "var(--ref-space-1)",
+                    }}
+                  >
+                    <p
+                      className="text-caption"
+                      style={{
+                        color: "var(--sys-color-text-secondary)",
+                        opacity: 0.75,
+                        letterSpacing: "var(--ref-letter-spacing-wide)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {signatureAccords}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        justifyContent: "space-between",
+                        gap: "var(--ref-space-2)",
+                        marginTop: "4px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily:
+                            "var(--font-utility-sans), system-ui, sans-serif",
+                          fontSize: "var(--ref-font-size-title)",
+                          fontVariantNumeric: "tabular-nums",
+                          color: "var(--sys-color-text-accent)",
+                        }}
+                      >
+                        From {formatCatalogPrice(startingPrice)}
+                      </span>
+                      <span
+                        className="collections-card-cta text-label"
+                        style={{
+                          fontSize: "0.6875rem",
+                          letterSpacing: "var(--ref-letter-spacing-ultra)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <span>{volumesLabel}</span>
+                        <span aria-hidden="true">&rarr;</span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </Link>
             </article>

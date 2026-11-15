@@ -234,24 +234,35 @@ export default function AboutPage() {
                     border: "1px solid var(--sys-color-border)",
                     background: "var(--sys-color-surface)",
                     overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
                   }}
                 >
                   <div
                     style={{
                       aspectRatio: "16/9",
                       position: "relative",
-                      background: "var(--ref-color-obsidian-50)",
+                      background: "#0a0a0c",
+                      borderBottom: "1px solid var(--sys-color-border)",
                     }}
                   >
                     <Image
                       src={studio.image}
                       alt={studio.imageAlt}
                       fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
+                      sizes="(max-width: 767px) 100vw, 50vw"
                       style={{ objectFit: "cover" }}
                     />
                   </div>
-                  <div style={{ padding: "var(--ref-space-6)" }}>
+                  <div
+                    style={{
+                      padding: "var(--ref-space-6)",
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
+                    }}
+                  >
                     <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
                       {studio.region}
                     </p>
@@ -278,12 +289,20 @@ export default function AboutPage() {
                       className="text-caption"
                       style={{
                         color: "var(--sys-color-text-secondary)",
-                        marginBottom: "var(--ref-space-3)",
+                        marginBottom: "var(--ref-space-4)",
                       }}
                     >
                       {studio.appointmentsNote}
                     </p>
-                    <p className="text-caption" style={{ color: "var(--sys-color-text-accent)" }}>
+                    <p
+                      className="text-caption"
+                      style={{
+                        color: "var(--sys-color-text-accent)",
+                        marginTop: "auto",
+                        paddingTop: "var(--ref-space-2)",
+                        borderTop: "1px solid var(--sys-color-border)",
+                      }}
+                    >
                       {studio.hours}
                     </p>
                   </div>
@@ -385,7 +404,7 @@ export default function AboutPage() {
         @media (max-width: 900px) {
           .about-team-grid { grid-template-columns: 1fr; }
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .about-craft-split { grid-template-columns: 1fr; gap: var(--ref-space-6); }
           .about-principles-grid { grid-template-columns: 1fr; }
           .about-studios-grid { grid-template-columns: 1fr; }

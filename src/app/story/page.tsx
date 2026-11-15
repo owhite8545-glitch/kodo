@@ -360,7 +360,7 @@ export default function StoryPage() {
           gap: var(--ref-space-12);
           align-items: center;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 767px) {
           .story-split { grid-template-columns: 1fr; gap: var(--ref-space-6); }
           .story-split--reverse > :first-child { order: 2; }
         }

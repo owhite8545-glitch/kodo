@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { useUIStore } from "@/store/ui-store";
 import { NAV_LINKS } from "@/data/navigation";
@@ -9,6 +10,7 @@ import { SITE_CONFIG } from "@/config/site";
 import { useHydrated } from "@/hooks/use-hydrated";
 
 export function HeaderNav() {
+  const pathname = usePathname();
   const isHydrated = useHydrated();
   const items = useCartStore((s) => s.items);
   const openCart = useCartStore((s) => s.openCart);
@@ -68,37 +70,49 @@ export function HeaderNav() {
           style={{
             display: "flex",
             alignItems: "center",
+            gap: "var(--ref-space-1)",
             marginLeft: "auto",
           }}
         >
           <div
             style={{
               alignItems: "center",
-              gap: "var(--ref-space-4)",
-              marginRight: "var(--ref-space-4)",
+              gap: "clamp(1rem, 2.2vw, 2rem)",
+              marginRight: "clamp(0.75rem, 2vw, 1.75rem)",
             }}
             className="nav-desktop-links"
           >
-            {NAV_LINKS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="kodo-focus-ring"
-                style={{
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-small)",
-                  fontWeight: 500,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--ref-letter-spacing-wide)",
-                  color: "var(--sys-color-text-secondary)",
-                  textDecoration: "none",
-                  transition: "color var(--motion-duration-fast)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(item.href));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="nav-link kodo-focus-ring"
+                  data-active={isActive}
+                  aria-current={isActive ? "page" : undefined}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    minHeight: "var(--ref-touch-target)",
+                    paddingInline: "4px",
+                    fontFamily:
+                      "var(--font-utility-sans), system-ui, sans-serif",
+                    fontSize: "var(--ref-font-size-small)",
+                    fontWeight: 500,
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--ref-letter-spacing-wide)",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           <button

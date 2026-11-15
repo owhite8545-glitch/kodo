@@ -118,11 +118,13 @@ export default async function ProductPage({ params }: PageProps) {
         {/* Breadcrumb Navigation */}
         <nav
           aria-label="Breadcrumb"
+          className="pdp-breadcrumb"
           style={{
             maxWidth: "1440px",
             margin: "0 auto",
-            padding:
-              "var(--ref-space-12) var(--ref-space-4) var(--ref-space-2)",
+            paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-4))",
+            paddingBottom: "var(--ref-space-3)",
+            paddingInline: "var(--sys-space-page-margin)",
           }}
         >
           <ol
@@ -330,20 +332,23 @@ export default async function ProductPage({ params }: PageProps) {
                   <Link
                     key={rel.id}
                     href={`/products/${rel.slug}`}
-                    className="kodo-focus-ring"
+                    className="kodo-focus-ring pdp-related-card"
                     style={{
                       display: "flex",
                       flexDirection: "column",
+                      height: "100%",
                       textDecoration: "none",
                       color: "inherit",
-                      gap: "var(--ref-space-2)",
+                      border: "1px solid var(--sys-color-border)",
+                      backgroundColor: "var(--sys-color-surface)",
                     }}
                   >
                     <div
                       style={{
                         position: "relative",
                         aspectRatio: "3 / 4",
-                        backgroundColor: "var(--ref-color-obsidian-20)",
+                        backgroundColor: "#09090b",
+                        borderBottom: "1px solid var(--sys-color-border)",
                         overflow: "hidden",
                       }}
                     >
@@ -351,29 +356,41 @@ export default async function ProductPage({ params }: PageProps) {
                         src={rel.images.pureProduct}
                         alt={`KODŌ ${rel.name} Eau de Parfum`}
                         fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
+                        sizes="(max-width: 767px) 100vw, 33vw"
                         style={{ objectFit: "contain" }}
                       />
                     </div>
-                    <p className="text-label" style={{ marginTop: "4px" }}>
-                      {rel.family}
-                    </p>
-                    <h3
+                    <div
                       style={{
-                        fontFamily:
-                          "var(--font-editorial-display), Georgia, serif",
-                        fontSize: "var(--ref-font-size-title)",
-                        fontWeight: 400,
+                        padding: "var(--ref-space-4)",
+                        display: "flex",
+                        flexDirection: "column",
+                        flex: 1,
+                        gap: "var(--ref-space-1)",
                       }}
                     >
-                      {rel.name} — {rel.subtitle}
-                    </h3>
-                    <p
-                      className="text-caption"
-                      style={{ color: "var(--sys-color-text-accent)" }}
-                    >
-                      From {formatCatalogPrice(rel.sizes[0]?.price ?? rel.price)}
-                    </p>
+                      <p className="text-label">{rel.family}</p>
+                      <h3
+                        style={{
+                          fontFamily:
+                            "var(--font-editorial-display), Georgia, serif",
+                          fontSize: "var(--ref-font-size-title)",
+                          fontWeight: 400,
+                          marginBottom: "var(--ref-space-2)",
+                        }}
+                      >
+                        {rel.name} — {rel.subtitle}
+                      </h3>
+                      <p
+                        className="text-caption"
+                        style={{
+                          color: "var(--sys-color-text-accent)",
+                          marginTop: "auto",
+                        }}
+                      >
+                        From {formatCatalogPrice(rel.sizes[0]?.price ?? rel.price)}
+                      </p>
+                    </div>
                   </Link>
                 ))}
               </div>
@@ -445,6 +462,10 @@ export default async function ProductPage({ params }: PageProps) {
           }
         }
         @media (min-width: 1024px) {
+          .pdp-breadcrumb {
+            padding-left: var(--ref-space-12) !important;
+            padding-right: var(--ref-space-12) !important;
+          }
           .pdp-grid {
             grid-template-columns: 7fr 5fr !important;
             padding-left: var(--ref-space-12) !important;
