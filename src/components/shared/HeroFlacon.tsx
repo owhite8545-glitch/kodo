@@ -128,8 +128,8 @@ export function HeroFlacon({
           position: "absolute",
           inset: "-15%",
           background:
-            "radial-gradient(ellipse 70% 70% at 50% 50%, oklch(76% 0.08 85 / 0.14), transparent 72%)",
-          filter: "blur(28px)",
+            "radial-gradient(ellipse 66% 66% at 50% 50%, oklch(76% 0.08 85 / 0.14), transparent 72%)",
+          filter: "blur(26px)",
           pointerEvents: "none",
           zIndex: 0,
           transition: "background 300ms ease-out",
@@ -148,9 +148,9 @@ export function HeroFlacon({
           willChange: "transform",
           transformStyle: "preserve-3d",
           WebkitMaskImage:
-            "radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 96%)",
+            "radial-gradient(ellipse 46% 62% at 50% 54%, black 42%, oklch(0% 0 0 / 0.55) 60%, transparent 82%)",
           maskImage:
-            "radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 96%)",
+            "radial-gradient(ellipse 46% 62% at 50% 54%, black 42%, oklch(0% 0 0 / 0.55) 60%, transparent 82%)",
         }}
       >
         <Image

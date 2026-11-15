@@ -36,38 +36,19 @@ export default function HomePage() {
             overflow: "hidden",
           }}
         >
-          {/* Architectural Concrete & Amber Depth Backdrop */}
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
-              overflow: "hidden",
-              zIndex: 0,
-            }}
-          >
+          {/* Customized Brutalist Concrete Portal (Ma · 間) Backdrop */}
+          <div aria-hidden="true" className="hero-ma-stage">
             <Image
-              src="/images/editorial/hero-amber.jpg"
+              src="/images/editorial/philosophy-ma.jpg"
               alt=""
               fill
               priority
-              sizes="100vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "62% center",
-                opacity: 0.18,
-                filter: "contrast(1.05) brightness(0.88)",
-              }}
+              sizes="(max-width: 768px) 100vw, 66vw"
+              className="hero-ma-image"
             />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(90deg, var(--sys-color-background) 18%, oklch(12% 0.008 260 / 0.56) 56%, var(--sys-color-background) 98%), linear-gradient(180deg, var(--sys-color-background) 0%, transparent 18%, transparent 78%, var(--sys-color-background) 100%)",
-              }}
-            />
+            <div className="hero-ma-scrim" />
+            <div className="hero-ma-frame-line" />
+            <span className="hero-ma-seal">間</span>
           </div>
 
           {/* Atmospheric breathing gradient background */}
@@ -723,7 +704,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Framed Brutalist Concrete Portal Plate */}
+            {/* Framed Raw Resin & Concrete Light Plate */}
             <div
               className="homepage-ma-frame"
               style={{
@@ -731,16 +712,16 @@ export default function HomePage() {
                 aspectRatio: "4/5",
                 width: "100%",
                 backgroundColor: "var(--sys-color-surface)",
-                border: "1px solid oklch(98% 0.005 85 / 0.22)",
+                border: "1px solid var(--sys-color-border)",
                 overflow: "hidden",
               }}
             >
               <Image
-                src="/images/editorial/philosophy-ma.jpg"
-                alt="Monolithic concrete portal framing empty sunlit space embodying the Japanese philosophy of Ma"
+                src="/images/editorial/hero-amber.jpg"
+                alt="Monolithic concrete chamber illuminated by an amber ray resting upon raw fossilized resin"
                 fill
                 sizes="(max-width: 768px) 100vw, 460px"
-                style={{ objectFit: "cover" }}
+                style={{ objectFit: "cover", objectPosition: "52% 62%" }}
               />
               <div
                 aria-hidden="true"
@@ -748,27 +729,10 @@ export default function HomePage() {
                   position: "absolute",
                   inset: 0,
                   background:
-                    "linear-gradient(180deg, transparent 74%, oklch(8% 0.01 260 / 0.55) 100%)",
+                    "linear-gradient(180deg, transparent 70%, oklch(8% 0.01 260 / 0.45) 100%)",
                   pointerEvents: "none",
                 }}
               />
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  bottom: "18px",
-                  right: "22px",
-                  fontFamily: "var(--font-editorial-display), 'Noto Serif JP', serif",
-                  fontSize: "clamp(1.35rem, 2vw, 1.75rem)",
-                  lineHeight: 1,
-                  color: "oklch(94% 0.006 85 / 0.82)",
-                  letterSpacing: "0.02em",
-                  pointerEvents: "none",
-                  userSelect: "none",
-                }}
-              >
-                間
-              </span>
             </div>
           </div>
         </section>
@@ -779,6 +743,59 @@ export default function HomePage() {
 
       <style>{`
         /* ─── Hero Asymmetric Editorial Layout ─── */
+        .hero-ma-stage {
+          position: absolute;
+          top: calc(var(--comp-nav-height) + var(--ref-space-2));
+          right: clamp(16px, 3vw, 48px);
+          bottom: var(--ref-space-4);
+          width: clamp(540px, 58vw, 820px);
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden;
+        }
+
+        .hero-ma-image {
+          object-fit: cover;
+          object-position: 56% 52%;
+          opacity: 0.68;
+          filter: contrast(1.08) brightness(0.86);
+        }
+
+        .hero-ma-scrim {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, var(--sys-color-bg) 0%, oklch(12% 0.01 260 / 0.72) 22%, transparent 52%, transparent 90%, var(--sys-color-bg) 100%),
+            linear-gradient(180deg, var(--sys-color-bg) 0%, transparent 16%, transparent 82%, var(--sys-color-bg) 100%);
+          pointer-events: none;
+        }
+
+        .hero-ma-frame-line {
+          position: absolute;
+          top: 12%;
+          right: 12px;
+          bottom: 12px;
+          width: 42%;
+          border-right: 1px solid oklch(98% 0.005 85 / 0.12);
+          border-bottom: 1px solid oklch(98% 0.005 85 / 0.12);
+          -webkit-mask-image: linear-gradient(135deg, transparent 35%, black 85%);
+          mask-image: linear-gradient(135deg, transparent 35%, black 85%);
+          pointer-events: none;
+        }
+
+        .hero-ma-seal {
+          position: absolute;
+          bottom: 24px;
+          right: 28px;
+          font-family: var(--font-editorial-display), Georgia, serif;
+          font-size: clamp(1.35rem, 2vw, 1.85rem);
+          line-height: 1;
+          color: oklch(94% 0.006 85 / 0.78);
+          letter-spacing: 0.04em;
+          pointer-events: none;
+          user-select: none;
+        }
+
         .hero-editorial-grid {
           display: grid;
           grid-template-columns: 1.15fr 0.85fr;
@@ -948,15 +965,45 @@ export default function HomePage() {
         }
 
         @media (max-width: 768px) {
+          .hero-ma-stage {
+            top: var(--comp-nav-height);
+            right: 0;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+          }
+
+          .hero-ma-image {
+            object-position: 62% 52%;
+            opacity: 0.44;
+          }
+
+          .hero-ma-scrim {
+            background:
+              linear-gradient(180deg, var(--sys-color-bg) 0%, oklch(12% 0.01 260 / 0.62) 34%, oklch(12% 0.01 260 / 0.36) 66%, var(--sys-color-bg) 100%),
+              linear-gradient(90deg, oklch(12% 0.01 260 / 0.55) 0%, transparent 25%, transparent 75%, oklch(12% 0.01 260 / 0.55) 100%);
+          }
+
+          .hero-ma-frame-line {
+            display: none;
+          }
+
+          .hero-ma-seal {
+            bottom: 28px;
+            right: 20px;
+            font-size: 1.2rem;
+            z-index: 2;
+          }
+
           .hero-editorial-grid {
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             text-align: center !important;
-            gap: var(--ref-space-6) !important;
+            gap: var(--ref-space-5) !important;
             min-height: auto !important;
-            padding-top: var(--ref-space-4) !important;
-            padding-bottom: var(--ref-space-6) !important;
+            padding-top: var(--ref-space-2) !important;
+            padding-bottom: var(--ref-space-4) !important;
           }
 
           .hero-typography-plane {
