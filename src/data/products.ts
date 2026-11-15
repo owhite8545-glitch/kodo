@@ -150,7 +150,7 @@ export const JOURNAL_POSTS: EditorialJournalArticle[] = [
     category: "ESSAY 01 / SENSES",
     author: "KODŌ Studio",
     date: "2026-05-14",
-    image: "/images/products/so/detail.jpg",
+    image: "/images/editorial/philosophy-ma.jpg",
     readTime: "8 min",
     relatedProductSlug: "so",
     content: [
@@ -172,7 +172,7 @@ export const JOURNAL_POSTS: EditorialJournalArticle[] = [
     category: "ESSAY 02 / MATERIALS",
     author: "KODŌ Studio",
     date: "2026-04-22",
-    image: "/images/products/moku/detail.jpg",
+    image: "/images/editorial/hinoki-distillation.jpg",
     readTime: "12 min",
     relatedProductSlug: "moku",
     content: [
@@ -194,7 +194,7 @@ export const JOURNAL_POSTS: EditorialJournalArticle[] = [
     category: "ESSAY 03 / SPACE",
     author: "KODŌ Studio",
     date: "2026-03-10",
-    image: "/images/products/en/detail.jpg",
+    image: "/images/editorial/borosilicate-craft.jpg",
     readTime: "10 min",
     relatedProductSlug: "en",
     content: [

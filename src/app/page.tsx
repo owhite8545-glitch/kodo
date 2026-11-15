@@ -36,6 +36,40 @@ export default function HomePage() {
             overflow: "hidden",
           }}
         >
+          {/* Architectural Concrete & Amber Depth Backdrop */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              overflow: "hidden",
+              zIndex: 0,
+            }}
+          >
+            <Image
+              src="/images/editorial/hero-amber.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              style={{
+                objectFit: "cover",
+                objectPosition: "62% center",
+                opacity: 0.18,
+                filter: "contrast(1.05) brightness(0.88)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(90deg, var(--sys-color-background) 18%, oklch(12% 0.008 260 / 0.56) 56%, var(--sys-color-background) 98%), linear-gradient(180deg, var(--sys-color-background) 0%, transparent 18%, transparent 78%, var(--sys-color-background) 100%)",
+              }}
+            />
+          </div>
+
           {/* Atmospheric breathing gradient background */}
           <div
             aria-hidden="true"
@@ -331,17 +365,22 @@ export default function HomePage() {
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
-                className="kodo-focus-ring"
+                className="bento-card kodo-focus-ring"
                 style={{
                   display: "flex",
                   flexDirection: "column",
                   textDecoration: "none",
                   color: "inherit",
-                  transition: "transform 300ms var(--ease-cinematic)",
+                  border: "1px solid var(--sys-color-border)",
+                  backgroundColor: "var(--sys-color-surface)",
+                  paddingBottom: "var(--ref-space-4)",
+                  transition:
+                    "transform 300ms var(--ease-cinematic), border-color 300ms var(--ease-cinematic)",
                 }}
               >
                 {/* Card Image */}
                 <div
+                  className="bento-card-media"
                   style={{
                     aspectRatio: "3/4",
                     backgroundColor: "var(--sys-color-surface)",
@@ -355,7 +394,10 @@ export default function HomePage() {
                     alt={`KODŌ ${product.name} Eau de Parfum`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    style={{ objectFit: "contain" }}
+                    style={{
+                      objectFit: "contain",
+                      transition: "transform 480ms var(--ease-cinematic)",
+                    }}
                   />
                   <div
                     aria-hidden="true"
@@ -370,7 +412,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Card Text */}
-                <div style={{ padding: "0 var(--ref-space-1)" }}>
+                <div style={{ padding: "0 var(--ref-space-3)" }}>
                   <p className="text-label" style={{ marginBottom: "4px" }}>
                     State {String(index + 1).padStart(2, "0")}
                   </p>
@@ -405,6 +447,202 @@ export default function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </section>
+        </SectionReveal>
+
+        {/* ─── Ma Space ─── */}
+        <div className="ma-space" />
+
+        {/* ─── ACT IV: Craft Ritual & International Sanctuaries ─── */}
+        <SectionReveal>
+        <section
+          aria-label="Kōdō craft philosophy and sanctuaries"
+          style={{
+            paddingInline: "var(--sys-space-page-margin)",
+            maxWidth: "1440px",
+            marginInline: "auto",
+          }}
+        >
+          <div className="homepage-atelier-split">
+            <div
+              style={{
+                position: "relative",
+                aspectRatio: "3/4",
+                backgroundColor: "var(--sys-color-surface)",
+                border: "1px solid var(--sys-color-border)",
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src="/images/editorial/kodo-ritual.jpg"
+                alt="Traditional Japanese Kōdō ceramic censer warming aged agarwood resin on a mica plate over white ash"
+                fill
+                sizes="(max-width: 768px) 100vw, 45vw"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-4)",
+              }}
+            >
+              <p className="text-label">Artisanal Discipline</p>
+              <h2
+                className="text-display"
+                style={{
+                  fontFamily: "var(--font-editorial-display), Georgia, serif",
+                  fontWeight: 400,
+                }}
+              >
+                Listening to Incense
+              </h2>
+              <p
+                className="text-body-lg"
+                style={{
+                  color: "var(--sys-color-text-secondary)",
+                  maxWidth: "44ch",
+                  lineHeight: "var(--ref-line-height-relaxed)",
+                }}
+              >
+                In the centuries-old ritual of Kōdō, scent is not smelled—it is
+                heard in silence. Each KODŌ extrait matures in heavy dark
+                borosilicate before release, balancing smoky hinoki bark, raw
+                fossilized amber, and architectural negative space.
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "var(--ref-space-3)",
+                  flexWrap: "wrap",
+                  marginTop: "var(--ref-space-2)",
+                }}
+              >
+                <Link
+                  href="/story"
+                  className="kodo-btn-solid kodo-focus-ring"
+                  style={{ textDecoration: "none" }}
+                >
+                  Read Our Story
+                </Link>
+                <Link
+                  href="/journal"
+                  className="kodo-btn-outline kodo-focus-ring"
+                  style={{ textDecoration: "none" }}
+                >
+                  House Journal
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              marginTop: "var(--ref-space-15)",
+              paddingTop: "var(--ref-space-12)",
+              borderTop: "1px solid var(--sys-color-border)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                flexWrap: "wrap",
+                gap: "var(--ref-space-3)",
+                marginBottom: "var(--ref-space-8)",
+              }}
+            >
+              <div>
+                <p className="text-label" style={{ marginBottom: "6px" }}>
+                  Two Sanctuaries
+                </p>
+                <h2
+                  className="text-heading"
+                  style={{
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  Tokyo &amp; Paris Ateliers
+                </h2>
+              </div>
+              <Link
+                href="/about"
+                className="text-caption kodo-focus-ring"
+                style={{
+                  color: "var(--sys-color-text-accent)",
+                  textDecoration: "none",
+                }}
+              >
+                Visit the Studios &rarr;
+              </Link>
+            </div>
+
+            <div className="homepage-studios-grid">
+              {SITE_CONFIG.studios.map((studio) => (
+                <Link
+                  key={studio.id}
+                  href="/about"
+                  className="bento-card kodo-focus-ring"
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    textDecoration: "none",
+                    color: "inherit",
+                    border: "1px solid var(--sys-color-border)",
+                    backgroundColor: "var(--sys-color-surface)",
+                    transition:
+                      "transform 300ms var(--ease-cinematic), border-color 300ms var(--ease-cinematic)",
+                  }}
+                >
+                  <div
+                    className="bento-card-media"
+                    style={{
+                      position: "relative",
+                      aspectRatio: "16/9",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Image
+                      src={studio.image}
+                      alt={studio.imageAlt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      style={{
+                        objectFit: "cover",
+                        transition: "transform 480ms var(--ease-cinematic)",
+                      }}
+                    />
+                  </div>
+                  <div style={{ padding: "var(--ref-space-5)" }}>
+                    <p className="text-label" style={{ marginBottom: "4px" }}>
+                      {studio.district} · {studio.region}
+                    </p>
+                    <h3
+                      style={{
+                        fontFamily:
+                          "var(--font-editorial-display), Georgia, serif",
+                        fontSize: "var(--ref-font-size-title)",
+                        fontWeight: 400,
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {studio.title}
+                    </h3>
+                    <p
+                      className="text-caption"
+                      style={{ color: "var(--sys-color-text-secondary)" }}
+                    >
+                      {studio.street}, {studio.cityPostal}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
         </SectionReveal>
@@ -561,6 +799,26 @@ export default function HomePage() {
           to { transform: rotate(360deg); }
         }
 
+        /* ─── Homepage Craft Split, Sanctuaries & Hover ─── */
+        .homepage-atelier-split {
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          gap: var(--ref-space-12);
+          align-items: center;
+        }
+        .homepage-studios-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: var(--ref-space-6);
+        }
+        .bento-card:hover {
+          border-color: var(--sys-color-border-active) !important;
+          transform: translateY(-4px);
+        }
+        .bento-card:hover .bento-card-media img {
+          transform: scale(1.03);
+        }
+
         /* ─── Breakpoints ─── */
         @media (max-width: 1024px) {
           .hero-editorial-grid {
@@ -576,6 +834,10 @@ export default function HomePage() {
           }
           .bento-grid {
             grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .homepage-atelier-split {
+            grid-template-columns: 1fr 1fr;
+            gap: var(--ref-space-8);
           }
         }
 
@@ -634,6 +896,11 @@ export default function HomePage() {
           }
           .homepage-asymmetric {
             grid-template-columns: 1fr !important;
+          }
+          .homepage-atelier-split,
+          .homepage-studios-grid {
+            grid-template-columns: 1fr !important;
+            gap: var(--ref-space-6) !important;
           }
         }
 

@@ -151,6 +151,7 @@
 
 html {
   scroll-behavior: smooth;
+  max-width: 100%;
   overflow-x: clip;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -162,6 +163,7 @@ body {
   font-family: var(--font-utility-sans), system-ui, -apple-system, sans-serif;
   font-size: var(--ref-font-size-base);
   line-height: var(--ref-line-height-body);
+  max-width: 100%;
   overflow-x: clip;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -176,6 +178,7 @@ h1, h2, h3, .font-editorial {
   letter-spacing: var(--ref-letter-spacing-display);
   line-height: var(--ref-line-height-tight);
   font-weight: 400;
+  overflow-wrap: break-word;
 }
 
 .text-hero {
@@ -479,9 +482,17 @@ h1, h2, h3, .font-editorial {
   opacity: 0.85;
 }
 
+.nav-desktop-links {
+  display: flex;
+}
+
 @media (max-width: 768px) {
   .nav-desktop-links {
-    display: none !important;
+    display: none;
+  }
+
+  footer a {
+    overflow-wrap: anywhere;
   }
 }
 

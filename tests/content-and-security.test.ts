@@ -122,6 +122,18 @@ describe("Catalog and Journal data + asset integrity", () => {
     for (const studio of SITE_CONFIG.studios) {
       assertAssetExists(studio.image, `studio/${studio.id}`);
     }
+
+    const editorialPlates = [
+      "/images/editorial/hero-amber.jpg",
+      "/images/editorial/kodo-ritual.jpg",
+      "/images/editorial/philosophy-ma.jpg",
+      "/images/editorial/raw-material.jpg",
+      "/images/editorial/hinoki-distillation.jpg",
+      "/images/editorial/borosilicate-craft.jpg",
+    ];
+    for (const plate of editorialPlates) {
+      assertAssetExists(plate, `editorial/${path.basename(plate)}`);
+    }
   });
 });
 

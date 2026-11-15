@@ -133,6 +133,75 @@ export default function AboutPage() {
           </section>
         </SectionReveal>
 
+        {/* Vessel & Material Craftsmanship */}
+        <SectionReveal>
+          <section
+            style={{
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1200px",
+              marginInline: "auto",
+              marginBottom: "var(--sys-space-section)",
+            }}
+          >
+            <div className="about-craft-split">
+              <div
+                style={{
+                  aspectRatio: "4/3",
+                  position: "relative",
+                  overflow: "hidden",
+                  border: "1px solid var(--sys-color-border)",
+                  background: "var(--sys-color-surface)",
+                }}
+              >
+                <Image
+                  src="/images/editorial/borosilicate-craft.jpg"
+                  alt="Hand-blown heavy-walled borosilicate crystal flacons beside raw black obsidian rock"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 560px"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+              <div>
+                <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
+                  Object Permanence
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "var(--ref-font-size-heading)",
+                    marginBottom: "var(--ref-space-4)",
+                  }}
+                >
+                  Vessel &amp; Materiality
+                </h2>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                    marginBottom: "var(--ref-space-3)",
+                  }}
+                >
+                  Every flacon begins as heavy-walled optical borosilicate tubing,
+                  annealed for structural clarity and sealed under solid charred
+                  Japanese cedar closures with blackened brass atomizers.
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                  }}
+                >
+                  Designed to remain on stone or timber surfaces long after the
+                  final spray—stripped of disposable ornament so form ages cleanly
+                  alongside the scent.
+                </p>
+              </div>
+            </div>
+          </section>
+        </SectionReveal>
+
         {/* Studio Architecture */}
         <SectionReveal>
           <section
@@ -169,7 +238,7 @@ export default function AboutPage() {
                 >
                   <div
                     style={{
-                      aspectRatio: "4/3",
+                      aspectRatio: "16/9",
                       position: "relative",
                       background: "var(--ref-color-obsidian-50)",
                     }}
@@ -292,6 +361,12 @@ export default function AboutPage() {
       <FooterDirectory />
 
       <style>{`
+        .about-craft-split {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--ref-space-12);
+          align-items: center;
+        }
         .about-principles-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -311,6 +386,7 @@ export default function AboutPage() {
           .about-team-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
+          .about-craft-split { grid-template-columns: 1fr; gap: var(--ref-space-6); }
           .about-principles-grid { grid-template-columns: 1fr; }
           .about-studios-grid { grid-template-columns: 1fr; }
         }

@@ -143,6 +143,9 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                   flexDirection: "column",
                   textDecoration: "none",
                   color: "inherit",
+                  border: "1px solid var(--sys-color-border)",
+                  backgroundColor: "var(--sys-color-surface)",
+                  paddingBottom: "var(--ref-space-5)",
                 }}
               >
                 <div
@@ -152,7 +155,7 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                     backgroundColor: "var(--sys-color-surface)",
                     position: "relative",
                     overflow: "hidden",
-                    marginBottom: "var(--ref-space-3)",
+                    marginBottom: "var(--ref-space-4)",
                     transition:
                       "transform var(--motion-duration-base) var(--ease-decelerate)",
                   }}
@@ -177,6 +180,7 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                   />
                 </div>
 
+                <div style={{ paddingInline: "var(--ref-space-4)", display: "flex", flexDirection: "column", flex: 1 }}>
                 <p className="text-label" style={{ marginBottom: "4px" }}>
                   {product.family.toUpperCase()} / STATE{" "}
                   {String(stateNumber).padStart(2, "0")}
@@ -213,10 +217,12 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                     fontSize: "var(--ref-font-size-title)",
                     fontVariantNumeric: "tabular-nums",
                     color: "var(--sys-color-text-accent)",
+                    marginTop: "auto",
                   }}
                 >
                   From {formatCatalogPrice(startingPrice)}
                 </span>
+                </div>
               </Link>
             </article>
           );

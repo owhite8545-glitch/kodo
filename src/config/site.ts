@@ -110,8 +110,8 @@ export const SITE_CONFIG = {
       timezone: "JST",
       appointmentsNote:
         "Quiet listening room for raw resin auditions and custom ceramic vessels.",
-      image: "/images/products/moku/detail.jpg",
-      imageAlt: "KODŌ Tokyo Aoyama Atelier — MOKU ceramic & cedar material study",
+      image: "/images/studios/tokyo-aoyama.jpg",
+      imageAlt: "KODŌ Tokyo Minami-Aoyama Atelier — yakisugi timber and apothecary formulation room",
     },
     {
       id: "paris",
@@ -125,8 +125,8 @@ export const SITE_CONFIG = {
       timezone: "CET",
       appointmentsNote:
         "Archival formulation library and private architectural scent consultations.",
-      image: "/images/products/kin/detail.jpg",
-      imageAlt: "KODŌ Paris Marais Salon — KIN saffron & amber material study",
+      image: "/images/studios/paris-marais.jpg",
+      imageAlt: "KODŌ Paris Le Marais Salon — dark paneled apothecary library and limestone consultation bar",
     },
   ] as readonly StudioLocation[],
   team: [

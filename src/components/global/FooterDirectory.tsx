@@ -19,7 +19,7 @@ export function FooterDirectory() {
           maxWidth: "1440px",
           marginInline: "auto",
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(210px, 100%), 1fr))",
           gap: "var(--ref-space-8)",
         }}
       >

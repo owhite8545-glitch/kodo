@@ -108,7 +108,7 @@ export default function StoryPage() {
               </div>
               <div
                 style={{
-                  aspectRatio: "4/3",
+                  aspectRatio: "4/5",
                   position: "relative",
                   overflow: "hidden",
                   background: "var(--sys-color-surface)",
@@ -116,8 +116,8 @@ export default function StoryPage() {
                 }}
               >
                 <Image
-                  src="/images/products/en/detail.jpg"
-                  alt="KODŌ smoked sandalwood and mineral ash study"
+                  src="/images/editorial/kodo-ritual.jpg"
+                  alt="Traditional Japanese Kōdō raku incense burner with aged agarwood resting on a mica plate over white ash"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: "cover" }}
@@ -155,7 +155,7 @@ export default function StoryPage() {
             <div className="story-split story-split--reverse">
               <div
                 style={{
-                  aspectRatio: "4/3",
+                  aspectRatio: "4/5",
                   position: "relative",
                   overflow: "hidden",
                   background: "var(--sys-color-surface)",
@@ -163,8 +163,8 @@ export default function StoryPage() {
                 }}
               >
                 <Image
-                  src="/images/products/so/detail.jpg"
-                  alt="KODŌ borosilicate glass prism and mineral light refraction"
+                  src="/images/editorial/philosophy-ma.jpg"
+                  alt="Circular monolithic stone threshold framing shadow and negative space (Ma)"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: "cover" }}
@@ -227,7 +227,91 @@ export default function StoryPage() {
           </section>
         </SectionReveal>
 
-        {/* Chapter 3: Philosophy Quote + CTA */}
+        {/* Chapter 3: Material Maceration Visual + Philosophy Quote */}
+        <SectionReveal>
+          <section
+            style={{
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1100px",
+              marginInline: "auto",
+              marginBottom: "var(--ref-space-15)",
+            }}
+          >
+            <div className="story-split">
+              <div>
+                <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
+                  Chapter 03
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "var(--ref-font-size-heading)",
+                    marginBottom: "var(--ref-space-4)",
+                  }}
+                >
+                  Slow Resin &amp; Patina
+                </h2>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                    marginBottom: "var(--ref-space-3)",
+                  }}
+                >
+                  True resinous depth cannot be rushed. Fossilized Baltic amber,
+                  kiln-aged hinoki bark, and wild mountain labdanum rest ninety
+                  days in dark borosilicate demijohns before a single flacon is
+                  filled.
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                  }}
+                >
+                  The resulting 22% to 26% Extrait concentrations unfold across
+                  ten hours without sharp alcohol projection—a private architecture
+                  resting close to warmth.
+                </p>
+              </div>
+              <div
+                style={{
+                  aspectRatio: "4/5",
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "var(--sys-color-surface)",
+                  border: "1px solid var(--sys-color-border)",
+                }}
+              >
+                <Image
+                  src="/images/editorial/raw-material.jpg"
+                  alt="Raw translucent golden amber resin resting atop dark charred agarwood bark"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    bottom: "16px",
+                    right: "20px",
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "2.25rem",
+                    color: "var(--ref-color-alabaster-98)",
+                    opacity: 0.72,
+                    textShadow: "0 2px 12px oklch(0% 0 0 / 0.8)",
+                  }}
+                >
+                  琥珀
+                </span>
+              </div>
+            </div>
+          </section>
+        </SectionReveal>
+
         <SectionReveal>
           <section
             style={{
@@ -239,7 +323,7 @@ export default function StoryPage() {
             }}
           >
             <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
-              Chapter 03
+              Studio Ethos
             </p>
             <blockquote
               style={{

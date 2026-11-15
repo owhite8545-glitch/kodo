@@ -192,7 +192,8 @@ export default async function JournalArticlePage({ params }: PageProps) {
           style={{
             position: "relative",
             width: "100%",
-            aspectRatio: "16 / 9",
+            aspectRatio: "4 / 3",
+            maxHeight: "560px",
             marginBottom: "var(--ref-space-10)",
             border: "1px solid var(--sys-color-border)",
             backgroundColor: "var(--ref-color-obsidian-50)",
@@ -205,7 +206,7 @@ export default async function JournalArticlePage({ params }: PageProps) {
             fill
             priority
             sizes="(max-width: 900px) 100vw, 880px"
-            style={{ objectFit: "cover" }}
+            style={{ objectFit: "cover", objectPosition: "center 60%" }}
           />
         </div>
 
@@ -343,7 +344,7 @@ export default async function JournalArticlePage({ params }: PageProps) {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))",
                 gap: "var(--ref-space-4)",
               }}
             >

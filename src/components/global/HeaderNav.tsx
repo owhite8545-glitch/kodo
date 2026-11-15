@@ -73,7 +73,6 @@ export function HeaderNav() {
         >
           <div
             style={{
-              display: "flex",
               alignItems: "center",
               gap: "var(--ref-space-4)",
               marginRight: "var(--ref-space-4)",
