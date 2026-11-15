@@ -650,32 +650,127 @@ export default function HomePage() {
         {/* ─── Ma Space ─── */}
         <div className="ma-space" />
 
-        {/* ─── Editorial Statement ─── */}
+        {/* ─── ACT V: Spatial Philosophy (Ma) & Editorial Statement ─── */}
         <SectionReveal>
         <section
-          aria-label="Brand philosophy"
+          aria-label="Brand philosophy — The Architecture of Ma"
           style={{
             paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "800px",
+            maxWidth: "1200px",
             marginInline: "auto",
-            textAlign: "center",
             paddingBottom: "var(--sys-space-section)",
           }}
         >
-          <blockquote
-            style={{
-              fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "var(--ref-font-size-heading)",
-              lineHeight: "var(--ref-line-height-tight)",
-              color: "var(--sys-color-text-secondary)",
-              fontStyle: "italic",
-            }}
-          >
-            &ldquo;{SITE_CONFIG.brand.philosophyQuote}&rdquo;
-          </blockquote>
-          <p className="text-label" style={{ marginTop: "var(--ref-space-4)" }}>
-            {SITE_CONFIG.brand.philosophyAttribution}
-          </p>
+          <div className="homepage-ma-split">
+            {/* Philosophy Copy & Statement */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-4)",
+              }}
+            >
+              <p className="text-label">Spatial Philosophy · Ma</p>
+              <blockquote
+                style={{
+                  fontFamily: "var(--font-editorial-display), Georgia, serif",
+                  fontSize: "clamp(1.75rem, 3vw, 2.75rem)",
+                  lineHeight: "var(--ref-line-height-tight)",
+                  color: "var(--sys-color-text-primary)",
+                  fontStyle: "italic",
+                  fontWeight: 400,
+                }}
+              >
+                &ldquo;{SITE_CONFIG.brand.philosophyQuote}&rdquo;
+              </blockquote>
+              <p
+                className="text-body"
+                style={{
+                  color: "var(--sys-color-text-secondary)",
+                  maxWidth: "42ch",
+                  lineHeight: "var(--ref-line-height-relaxed)",
+                }}
+              >
+                In Japanese spatial tradition, <em>Ma</em> (間) honors the pause
+                between notes—allowing light, shadow, and raw resin to hold form
+                without noise.
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "var(--ref-space-4)",
+                  marginTop: "var(--ref-space-2)",
+                  paddingTop: "var(--ref-space-4)",
+                  borderTop: "1px solid var(--sys-color-border)",
+                }}
+              >
+                <p className="text-label">
+                  {SITE_CONFIG.brand.philosophyAttribution}
+                </p>
+                <Link
+                  href="/story"
+                  className="text-caption kodo-focus-ring"
+                  style={{
+                    color: "var(--sys-color-text-accent)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Explore the Philosophy &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Framed Brutalist Concrete Portal Plate */}
+            <div
+              className="homepage-ma-frame"
+              style={{
+                position: "relative",
+                aspectRatio: "4/5",
+                width: "100%",
+                backgroundColor: "var(--sys-color-surface)",
+                border: "1px solid oklch(98% 0.005 85 / 0.22)",
+                overflow: "hidden",
+              }}
+            >
+              <Image
+                src="/images/editorial/philosophy-ma.jpg"
+                alt="Monolithic concrete portal framing empty sunlit space embodying the Japanese philosophy of Ma"
+                fill
+                sizes="(max-width: 768px) 100vw, 460px"
+                style={{ objectFit: "cover" }}
+              />
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(180deg, transparent 74%, oklch(8% 0.01 260 / 0.55) 100%)",
+                  pointerEvents: "none",
+                }}
+              />
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  bottom: "18px",
+                  right: "22px",
+                  fontFamily: "var(--font-editorial-display), 'Noto Serif JP', serif",
+                  fontSize: "clamp(1.35rem, 2vw, 1.75rem)",
+                  lineHeight: 1,
+                  color: "oklch(94% 0.006 85 / 0.82)",
+                  letterSpacing: "0.02em",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                }}
+              >
+                間
+              </span>
+            </div>
+          </div>
         </section>
         </SectionReveal>
       </main>
@@ -806,6 +901,16 @@ export default function HomePage() {
           gap: var(--ref-space-12);
           align-items: center;
         }
+        .homepage-ma-split {
+          display: grid;
+          grid-template-columns: 1.05fr 0.95fr;
+          gap: var(--ref-space-12);
+          align-items: center;
+        }
+        .homepage-ma-frame {
+          max-width: 480px;
+          margin-inline: auto;
+        }
         .homepage-studios-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -835,7 +940,8 @@ export default function HomePage() {
           .bento-grid {
             grid-template-columns: repeat(2, 1fr) !important;
           }
-          .homepage-atelier-split {
+          .homepage-atelier-split,
+          .homepage-ma-split {
             grid-template-columns: 1fr 1fr;
             gap: var(--ref-space-8);
           }
@@ -898,6 +1004,7 @@ export default function HomePage() {
             grid-template-columns: 1fr !important;
           }
           .homepage-atelier-split,
+          .homepage-ma-split,
           .homepage-studios-grid {
             grid-template-columns: 1fr !important;
             gap: var(--ref-space-6) !important;
