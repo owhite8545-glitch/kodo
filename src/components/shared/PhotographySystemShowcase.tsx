@@ -118,6 +118,7 @@ export function PhotographySystemShowcase({
             src="/images/editorial/so-campaign-wide.jpg"
             alt="KODŌ SŌ widescreen campaign plate showing fractured basalt rock beside borosilicate flacon in dark negative space"
             fill
+            loading="eager"
             sizes="(max-width: 1100px) 100vw, 1100px"
             style={{ objectFit: "cover", objectPosition: "center center" }}
           />
@@ -311,6 +312,7 @@ export function PhotographySystemShowcase({
                   src={plate.src}
                   alt={plate.alt}
                   fill
+                  loading="eager"
                   sizes="(max-width: 767px) 50vw, 250px"
                   className="kodo-specimen-img"
                   style={{

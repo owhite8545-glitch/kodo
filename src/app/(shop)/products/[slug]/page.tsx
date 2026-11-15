@@ -265,6 +265,7 @@ export default async function ProductPage({ params }: PageProps) {
                     alt={plate.alt}
                     fill
                     priority={plate.priority}
+                    loading="eager"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 60vw"
                     style={{ objectFit: "cover" }}
                   />
@@ -292,12 +293,12 @@ export default async function ProductPage({ params }: PageProps) {
             </div>
           </SectionReveal>
 
-          {/* Right Column: Interactive Client Component */}
-          <SectionReveal className="kodo-reveal--delay-1">
+          {/* Right Column: Sticky Interactive Client Component (Direct Grid Child for Sticky Positioning) */}
           <div className="pdp-info-column">
-            <PDPClient product={product} />
+            <SectionReveal className="kodo-reveal--delay-1">
+              <PDPClient product={product} />
+            </SectionReveal>
           </div>
-          </SectionReveal>
         </section>
 
         {/* Companion States Exploration */}
