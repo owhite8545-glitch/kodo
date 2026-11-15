@@ -95,7 +95,7 @@ export default function CollectionsPage() {
         .collections-card-link:hover .collections-card-cta {
           color: var(--sys-color-text-accent);
         }
-        @media (max-width: 1120px) {
+        @media (max-width: 1180px) {
           .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
         }
         @media (max-width: 767px) {

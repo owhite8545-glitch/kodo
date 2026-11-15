@@ -228,7 +228,7 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
 
                 <div
                   style={{
-                    padding: "var(--ref-space-4)",
+                    padding: "var(--ref-space-4) var(--ref-space-3)",
                     display: "flex",
                     flexDirection: "column",
                     flex: 1,
@@ -299,16 +299,17 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                         alignItems: "baseline",
                         justifyContent: "space-between",
                         gap: "var(--ref-space-2)",
-                        marginTop: "4px",
+                        marginTop: "6px",
                       }}
                     >
                       <span
                         style={{
                           fontFamily:
                             "var(--font-utility-sans), system-ui, sans-serif",
-                          fontSize: "var(--ref-font-size-title)",
+                          fontSize: "1.125rem",
                           fontVariantNumeric: "tabular-nums",
                           color: "var(--sys-color-text-accent)",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         From {formatCatalogPrice(startingPrice)}
@@ -317,10 +318,12 @@ export function CollectionsGallery({ products }: CollectionsGalleryProps) {
                         className="collections-card-cta text-label"
                         style={{
                           fontSize: "0.6875rem",
-                          letterSpacing: "var(--ref-letter-spacing-ultra)",
+                          letterSpacing: "var(--ref-letter-spacing-wide)",
                           display: "inline-flex",
                           alignItems: "center",
-                          gap: "6px",
+                          gap: "5px",
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
                         }}
                       >
                         <span>{volumesLabel}</span>
