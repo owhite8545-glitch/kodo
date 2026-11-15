@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useCartStore } from "@/store/cart-store";
 import { ButtonSolid } from "@/components/shared/ButtonSolid";
+import { formatCatalogPrice } from "@/config/commerce";
 import type { ScentProduct, ScentVariant } from "@/types/webgl";
 
 /* ═══════════════════════════════════════════════════════════
@@ -19,6 +20,13 @@ export function PDPClient({ product }: PDPClientProps) {
   const [selectedSize, setSelectedSize] = useState<ScentVariant>(product.size);
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [addedToCart, setAddedToCart] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const selectedVariant = product.sizes.find((s) => s.variant === selectedSize);
   const currentPrice = selectedVariant?.price ?? product.price;
@@ -29,7 +37,8 @@ export function PDPClient({ product }: PDPClientProps) {
       selectedSize
     );
     setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const toggleAccordion = (id: string) => {
@@ -41,7 +50,7 @@ export function PDPClient({ product }: PDPClientProps) {
       id: "composition",
       title: "Olfactory Composition",
       content: (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--ref-space-4)" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: "var(--ref-space-4)" }}>
           {(["top", "heart", "base"] as const).map((tier) => (
             <div key={tier}>
               <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
@@ -131,7 +140,7 @@ export function PDPClient({ product }: PDPClientProps) {
             color: "var(--sys-color-text-accent)",
           }}
         >
-          ${currentPrice}
+          {formatCatalogPrice(currentPrice)}
         </span>
         <span className="text-caption">{selectedSize}</span>
       </div>

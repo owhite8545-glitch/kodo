@@ -1,33 +1,43 @@
 import React from "react";
-import type { Metadata } from "next";
-import { JOURNAL_POSTS } from "@/data/products";
+import Link from "next/link";
+import Image from "next/image";
+import { getJournalPosts } from "@/data/products";
+import { SITE_CONFIG } from "@/config/site";
 import { HomeClient } from "../HomeClient";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
+import { SectionReveal } from "@/components/shared/SectionReveal";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Journal Page (Server Component)
-   Editorial essays on scent, material, and spatial design.
-   ═══════════════════════════════════════════════════════════ */
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Journal",
   description:
-    "Essays on olfactory minimalism, raw materials, and the spatial philosophy behind KODŌ fragrances.",
+    "Editorial reflections on scent minimalism, Japanese incense craft, and olfactory architecture.",
 };
 
+function formatJournalDate(dateStr: string): string {
+  const date = new Date(`${dateStr}T00:00:00Z`);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export default function JournalPage() {
+  const posts = getJournalPosts();
+
   return (
     <>
       <HomeClient />
       <main id="main-content" role="main">
-        {/* ─── Hero Statement ─── */}
+        {/* Hero */}
         <section
           style={{
             paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-15))",
             paddingBottom: "var(--ref-space-15)",
             paddingInline: "var(--sys-space-page-margin)",
             textAlign: "center",
-            maxWidth: "800px",
+            maxWidth: "850px",
             marginInline: "auto",
           }}
         >
@@ -38,19 +48,16 @@ export default function JournalPage() {
             className="text-display"
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              marginBottom: "var(--ref-space-6)",
+              marginBottom: "var(--ref-space-4)",
             }}
           >
-            The{" "}
-            <span style={{ color: "var(--sys-color-text-accent)" }}>
-              Journal
-            </span>
+            The Journal
           </h1>
           <p
             className="text-body-lg"
             style={{
               color: "var(--sys-color-text-secondary)",
-              maxWidth: "50ch",
+              maxWidth: "48ch",
               marginInline: "auto",
             }}
           >
@@ -59,174 +66,202 @@ export default function JournalPage() {
           </p>
         </section>
 
-        {/* ─── Journal Entries ─── */}
-        <section
-          aria-label="Journal entries"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "1440px",
-            marginInline: "auto",
-            paddingBottom: "var(--sys-space-section)",
-          }}
-        >
-          <div
+        {/* Journal Articles */}
+        <SectionReveal>
+          <section
+            aria-label="Editorial essays"
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--ref-space-1)",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1100px",
+              marginInline: "auto",
+              paddingBottom: "var(--sys-space-section)",
             }}
           >
-            {JOURNAL_POSTS.map((post, index) => (
-              <article
-                key={post.slug}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 2fr",
-                  gap: "var(--ref-space-6)",
-                  padding: "var(--ref-space-8) 0",
-                  borderBottom: "1px solid var(--sys-color-border)",
-                  alignItems: "start",
-                }}
-                className="journal-entry"
-              >
-                {/* Image */}
-                <div
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-8)",
+              }}
+            >
+              {posts.map((post, idx) => (
+                <article
+                  key={post.slug}
+                  className="journal-card"
                   style={{
-                    aspectRatio: "16/10",
-                    backgroundColor: "var(--sys-color-surface)",
-                    position: "relative",
+                    border: "1px solid var(--sys-color-border)",
+                    background: "var(--sys-color-surface)",
                     overflow: "hidden",
                   }}
                 >
-                  <div
-                    aria-hidden="true"
+                  <Link
+                    href={`/journal/${post.slug}`}
+                    className="journal-card-link kodo-focus-ring"
                     style={{
-                      position: "absolute",
-                      inset: 0,
-                      background:
-                        "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.5) 100%)",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      display: "grid",
+                      gridTemplateColumns: "320px 1fr",
+                      textDecoration: "none",
+                      color: "inherit",
                     }}
                   >
-                    <span
+                    <div
                       style={{
-                        fontFamily:
-                          "var(--font-editorial-display), Georgia, serif",
-                        fontSize: "clamp(3rem, 6vw, 5rem)",
-                        color: "oklch(98% 0.005 85 / 0.04)",
-                        fontWeight: 300,
-                        lineHeight: 1,
+                        position: "relative",
+                        minHeight: "240px",
+                        backgroundColor: "var(--ref-color-obsidian-50)",
+                        overflow: "hidden",
                       }}
                     >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-                </div>
+                      <Image
+                        src={post.image}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 320px"
+                        style={{ objectFit: "cover" }}
+                      />
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: "14px",
+                          left: "16px",
+                          padding: "4px 10px",
+                          backgroundColor: "oklch(12% 0.01 260 / 0.78)",
+                          border: "1px solid var(--sys-color-border)",
+                          fontFamily:
+                            "var(--font-editorial-display), Georgia, serif",
+                          fontSize: "0.875rem",
+                          color: "var(--sys-color-text-accent)",
+                        }}
+                      >
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                    </div>
 
-                {/* Content */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "var(--ref-space-3)",
-                    paddingTop: "var(--ref-space-1)",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "var(--ref-space-3)", alignItems: "center" }}>
-                    <p className="text-label">{post.category}</p>
-                    <span className="text-caption">·</span>
-                    <span className="text-caption">{post.readTime} read</span>
-                  </div>
+                    <div
+                      style={{
+                        padding: "var(--ref-space-8)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: "var(--ref-space-4)",
+                      }}
+                    >
+                      <div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "var(--ref-space-2)",
+                            marginBottom: "var(--ref-space-2)",
+                          }}
+                        >
+                          <span className="text-label">{post.category}</span>
+                          <span className="text-caption">{post.readTime} read</span>
+                        </div>
+                        <h2
+                          style={{
+                            fontFamily:
+                              "var(--font-editorial-display), Georgia, serif",
+                            fontSize: "var(--ref-font-size-heading)",
+                            marginBottom: "var(--ref-space-2)",
+                            fontWeight: 400,
+                          }}
+                        >
+                          {post.title}
+                        </h2>
+                        <p
+                          className="text-body"
+                          style={{
+                            color: "var(--sys-color-text-secondary)",
+                            lineHeight: "var(--ref-line-height-relaxed)",
+                          }}
+                        >
+                          {post.excerpt}
+                        </p>
+                      </div>
 
-                  <h2
-                    style={{
-                      fontFamily:
-                        "var(--font-editorial-display), Georgia, serif",
-                      fontSize: "var(--ref-font-size-heading)",
-                      fontWeight: 400,
-                      lineHeight: "var(--ref-line-height-tight)",
-                    }}
-                  >
-                    {post.title}
-                  </h2>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "var(--ref-space-3)",
+                          paddingTop: "var(--ref-space-3)",
+                          borderTop: "1px solid var(--sys-color-border)",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "var(--ref-space-4)",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span className="text-caption">{post.author}</span>
+                          <span className="text-caption">
+                            {formatJournalDate(post.date)}
+                          </span>
+                        </div>
+                        <span
+                          className="text-caption"
+                          style={{ color: "var(--sys-color-text-accent)" }}
+                        >
+                          Read Essay &rarr;
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </section>
+        </SectionReveal>
 
-                  <p
-                    className="text-body-lg"
-                    style={{
-                      color: "var(--sys-color-text-secondary)",
-                      maxWidth: "50ch",
-                      lineHeight: "var(--ref-line-height-relaxed)",
-                    }}
-                  >
-                    {post.excerpt}
-                  </p>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "var(--ref-space-3)",
-                      alignItems: "center",
-                      marginTop: "var(--ref-space-2)",
-                    }}
-                  >
-                    <span className="text-caption">{post.author}</span>
-                    <span className="text-caption">·</span>
-                    <span className="text-caption">
-                      {new Date(post.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── Editorial Statement ─── */}
-        <section
-          aria-label="Editorial statement"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "800px",
-            marginInline: "auto",
-            textAlign: "center",
-            paddingBottom: "var(--sys-space-section)",
-          }}
-        >
-          <blockquote
+        {/* Quote Block */}
+        <SectionReveal>
+          <section
+            aria-label="Editorial statement"
             style={{
-              fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "var(--ref-font-size-heading)",
-              lineHeight: "var(--ref-line-height-tight)",
-              color: "var(--sys-color-text-secondary)",
-              fontStyle: "italic",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "800px",
+              marginInline: "auto",
+              textAlign: "center",
+              paddingBottom: "var(--sys-space-section)",
             }}
           >
-            &ldquo;Every material carries its own memory. Our work is simply to
-            listen.&rdquo;
-          </blockquote>
-          <p className="text-label" style={{ marginTop: "var(--ref-space-4)" }}>
-            — KODŌ Journal, 2026
-          </p>
-        </section>
+            <blockquote
+              style={{
+                fontFamily: "var(--font-editorial-display), Georgia, serif",
+                fontSize: "var(--ref-font-size-heading)",
+                lineHeight: "var(--ref-line-height-tight)",
+                color: "var(--sys-color-text-secondary)",
+                fontStyle: "italic",
+              }}
+            >
+              &ldquo;Every material carries its own memory. Our work is simply
+              to listen.&rdquo;
+            </blockquote>
+            <p className="text-label" style={{ marginTop: "var(--ref-space-4)" }}>
+              — {SITE_CONFIG.brand.name} Journal, 2026
+            </p>
+          </section>
+        </SectionReveal>
       </main>
-
       <FooterDirectory />
 
       <style>{`
+        .journal-card-link {
+          transition: border-color var(--motion-duration-fast);
+        }
+        .journal-card:hover {
+          border-color: var(--sys-color-border-active);
+        }
         @media (max-width: 768px) {
-          .journal-entry {
+          .journal-card-link {
             grid-template-columns: 1fr !important;
           }
         }

@@ -1,233 +1,123 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useTransition, useRef } from "react";
+import React, { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
-import { COMMERCE_CONFIG, isDemoMode, formatPrice } from "@/config/commerce";
+import {
+  calculateOrderFinancials,
+  COMMERCE_CONFIG,
+  formatCents,
+  type CommerceMode,
+} from "@/config/commerce";
+import { SITE_CONFIG } from "@/config/site";
+import { useHydrated } from "@/hooks/use-hydrated";
 import { submitCheckout } from "./actions";
-import type { ScentVariant } from "@/types/webgl";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Checkout Client Component
-   Single-page editorial checkout with customer/shipping
-   form, order summary, validation, idempotency, and
-   demo mode notice.
-   ═══════════════════════════════════════════════════════════ */
-
-// ─── Idempotency Key Management ───────────────────────────
-
-const IDEMPOTENCY_STORAGE_KEY = "kodo-checkout-idempotency-key";
-
-function getOrCreateIdempotencyKey(): string {
-  if (typeof window === "undefined") return crypto.randomUUID();
-  let key = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
-  if (!key) {
-    key = crypto.randomUUID();
-    sessionStorage.setItem(IDEMPOTENCY_STORAGE_KEY, key);
-  }
-  return key;
+interface CheckoutClientProps {
+  mode: CommerceMode;
+  isCanceled?: boolean;
 }
 
-function rotateIdempotencyKey(): string {
-  const key = crypto.randomUUID();
-  if (typeof window !== "undefined") {
-    sessionStorage.setItem(IDEMPOTENCY_STORAGE_KEY, key);
-  }
-  return key;
-}
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  height: "var(--comp-input-height)",
+  paddingInline: "var(--ref-space-3)",
+  backgroundColor: "transparent",
+  border: "1px solid var(--sys-color-border)",
+  borderRadius: "var(--ref-radius-none)",
+  color: "var(--sys-color-text-primary)",
+  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+  fontSize: "var(--ref-font-size-base)",
+  outline: "none",
+  transition: "border-color var(--motion-duration-fast)",
+};
 
-// ─── Form Field Component ─────────────────────────────────
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: "6px",
+  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+  fontSize: "var(--ref-font-size-small)",
+  fontWeight: 500,
+  textTransform: "uppercase",
+  letterSpacing: "var(--ref-letter-spacing-wide)",
+  color: "var(--sys-color-text-secondary)",
+};
 
-function FormField({
-  id,
-  label,
-  value,
-  onChange,
-  error,
-  type = "text",
-  required = false,
-  placeholder,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  error?: string;
-  type?: string;
-  required?: boolean;
-  placeholder?: string;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label
-        htmlFor={id}
-        className="text-caption"
-        style={{
-          textTransform: "uppercase",
-          letterSpacing: "var(--ref-letter-spacing-wide)",
-        }}
-      >
-        {label}
-        {required && (
-          <span style={{ color: "var(--sys-color-text-accent)" }}> *</span>
-        )}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={
-          id === "email"
-            ? "email"
-            : id === "name"
-              ? "name"
-              : id === "phone"
-                ? "tel"
-                : id === "addressLine1"
-                  ? "address-line1"
-                  : id === "addressLine2"
-                    ? "address-line2"
-                    : id === "city"
-                      ? "address-level2"
-                      : id === "stateOrRegion"
-                        ? "address-level1"
-                        : id === "postalCode"
-                          ? "postal-code"
-                          : undefined
-        }
-        className="kodo-focus-ring"
-        style={{
-          width: "100%",
-          padding: "12px 16px",
-          background: "transparent",
-          border: error
-            ? "1px solid oklch(65% 0.2 25)"
-            : "1px solid var(--sys-color-border)",
-          color: "var(--sys-color-text-primary)",
-          fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-          fontSize: "var(--ref-font-size-base)",
-          lineHeight: 1.5,
-          transition: "border-color 200ms var(--ease-decelerate)",
-          outline: "none",
-        }}
-      />
-      {error && (
-        <span
-          style={{
-            fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-            fontSize: "var(--ref-font-size-small)",
-            color: "oklch(65% 0.2 25)",
-          }}
-        >
-          {error}
-        </span>
-      )}
-    </div>
-  );
-}
+const fieldErrorStyle: React.CSSProperties = {
+  marginTop: "4px",
+  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+  fontSize: "var(--ref-font-size-small)",
+  color: "var(--sys-color-error)",
+};
 
-const emptySubscribe = () => () => {};
-function useHydrated(): boolean {
-  return React.useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  );
-}
-
-// ─── Main Checkout Client Component ───────────────────────
-
-export function CheckoutClient() {
+export function CheckoutClient({ mode, isCanceled = false }: CheckoutClientProps) {
+  const router = useRouter();
+  const hydrated = useHydrated();
   const items = useCartStore((s) => s.items);
-  const totalPrice = useCartStore((s) => s.totalPrice);
-  const totalItems = useCartStore((s) => s.totalItems);
   const cartVersion = useCartStore((s) => s.cartVersion);
+  const submissionKeysRef = useRef<{ version: number; key: string } | null>(
+    null
+  );
 
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  const hydrated = useHydrated();
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Track previous cart version to rotate idempotency key on changes
-  const prevCartVersionRef = useRef<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [stateOrRegion, setStateOrRegion] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
 
-  // Form state
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    addressLine1: "",
-    addressLine2: "",
-    city: "",
-    stateOrRegion: "",
-    postalCode: "",
-    country: "",
-  });
-
-  // Rotate idempotency key when cart items or quantities change
-  useEffect(() => {
-    if (prevCartVersionRef.current === null) {
-      getOrCreateIdempotencyKey();
-      prevCartVersionRef.current = cartVersion;
-    } else if (prevCartVersionRef.current !== cartVersion) {
-      rotateIdempotencyKey();
-      prevCartVersionRef.current = cartVersion;
-    }
-  }, [cartVersion]);
-
-  const updateField = useCallback(
-    (field: keyof typeof form) => (value: string) => {
-      setForm((prev) => ({ ...prev, [field]: value }));
-      // Clear field-specific errors upon edit
-      setFieldErrors((prev) => {
-        const next = { ...prev };
-        for (const key of Object.keys(next)) {
-          if (key.includes(field)) delete next[key];
-        }
-        return next;
-      });
-    },
-    []
+  const financials = calculateOrderFinancials(
+    items.map((item) => ({
+      unitPriceCents: Math.round(item.product.price * 100),
+      quantity: item.quantity,
+    }))
   );
 
-  const getFieldError = (path: string): string | undefined => {
-    const errors = fieldErrors[path];
-    return errors?.[0];
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setServerError(null);
     setFieldErrors({});
 
-    const idempotencyKey = getOrCreateIdempotencyKey();
+    if (
+      !submissionKeysRef.current ||
+      submissionKeysRef.current.version !== cartVersion
+    ) {
+      submissionKeysRef.current = {
+        version: cartVersion,
+        key: crypto.randomUUID(),
+      };
+    }
 
     const payload = {
       customer: {
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
+        email: email.trim(),
+        name: name.trim(),
+        phone: phone.trim(),
       },
       shipping: {
-        addressLine1: form.addressLine1,
-        addressLine2: form.addressLine2,
-        city: form.city,
-        stateOrRegion: form.stateOrRegion,
-        postalCode: form.postalCode,
-        country: form.country,
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2.trim(),
+        city: city.trim(),
+        stateOrRegion: stateOrRegion.trim(),
+        postalCode: postalCode.trim(),
+        country,
       },
       cartItems: items.map((item) => ({
         lineKey: item.lineKey,
         productId: item.product.id,
-        variant: item.product.size as ScentVariant,
+        variant: item.product.size,
         quantity: item.quantity,
       })),
-      idempotencyKey,
+      idempotencyKey: submissionKeysRef.current.key,
     };
 
     startTransition(async () => {
@@ -235,584 +125,775 @@ export function CheckoutClient() {
         const result = await submitCheckout(payload);
         if (!result.success) {
           if (result.fieldErrors) setFieldErrors(result.fieldErrors);
-          setServerError(result.error || "An unexpected error occurred.");
+          setServerError(result.error || "Unable to complete checkout.");
+          return;
+        }
+
+        if (result.redirectUrl) {
+          if (result.redirectUrl.startsWith("http")) {
+            window.location.assign(result.redirectUrl);
+          } else {
+            router.push(result.redirectUrl);
+          }
         }
       } catch {
-        // redirect() throws NEXT_REDIRECT internally, which Next.js uses for navigation.
+        setServerError(
+          "A network error interrupted your request. Please verify your connection and retry."
+        );
       }
     });
   };
 
-  /* ── Empty Cart State ────────────────────────────────── */
-  if (hydrated && items.length === 0) {
+  if (!hydrated) {
     return (
-      <div
+      <main
+        id="main-content"
+        role="main"
         style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "var(--ref-space-12) var(--sys-space-page-margin)",
+        }}
+      >
+        <p className="text-caption">Preparing Checkout…</p>
+      </main>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <main
+        id="main-content"
+        role="main"
+        style={{
+          minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "60vh",
+          padding: "var(--ref-space-12) var(--sys-space-page-margin)",
           textAlign: "center",
           gap: "var(--ref-space-4)",
-          paddingInline: "var(--sys-space-page-margin)",
         }}
       >
-        <p
+        <Link
+          href="/"
+          className="kodo-focus-ring"
           style={{
             fontFamily: "var(--font-editorial-display), Georgia, serif",
-            fontSize: "var(--ref-font-size-display)",
-            lineHeight: "var(--ref-line-height-tight)",
+            fontSize: "var(--ref-font-size-title)",
+            letterSpacing: "var(--ref-letter-spacing-label)",
+            color: "var(--sys-color-text-primary)",
+            textDecoration: "none",
+            textTransform: "uppercase",
+            marginBottom: "var(--ref-space-4)",
+          }}
+        >
+          {SITE_CONFIG.brand.wordmark}
+        </Link>
+        <h1
+          style={{
+            fontFamily: "var(--font-editorial-display), Georgia, serif",
+            fontSize: "var(--ref-font-size-heading)",
             color: "var(--sys-color-text-primary)",
           }}
         >
-          The ritual awaits
-        </p>
+          Your ritual is currently empty
+        </h1>
         <p
-          className="text-body-lg"
+          className="text-body"
           style={{
             color: "var(--sys-color-text-secondary)",
-            maxWidth: "40ch",
+            maxWidth: "38ch",
           }}
         >
-          Your collection is empty. Explore our scent taxonomy to begin
-          composing your personal ritual.
+          Explore our curated architectural distillations before proceeding to
+          checkout.
         </p>
         <Link
           href="/collections"
           className="kodo-btn-solid kodo-focus-ring"
-          style={{ marginTop: "var(--ref-space-4)", textDecoration: "none" }}
+          style={{ marginTop: "var(--ref-space-2)" }}
         >
-          Explore Collections
+          Explore Collection
         </Link>
-      </div>
+      </main>
     );
   }
 
-  // Pre-hydration placeholder to avoid layout shift / SSR flash
-  if (!hydrated) {
-    return (
-      <div
-        style={{
-          minHeight: "60vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <span className="text-caption" style={{ opacity: 0.5 }}>
-          Preparing your ritual…
-        </span>
-      </div>
-    );
-  }
+  const totalCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  const { symbol } = COMMERCE_CONFIG.currency;
-
-  /* ── Checkout with Items ─────────────────────────────── */
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="checkout-layout"
+    <main
+      id="main-content"
+      role="main"
       style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 420px",
-        gap: "var(--ref-space-12)",
-        alignItems: "start",
+        minHeight: "100vh",
+        paddingBottom: "var(--ref-space-16)",
         paddingInline: "var(--sys-space-page-margin)",
-        maxWidth: "1440px",
-        marginInline: "auto",
-        paddingBottom: "var(--sys-space-section)",
       }}
     >
-      {/* ── Form Fields Column ─── */}
-      <div
+      <header
         style={{
+          maxWidth: "1200px",
+          marginInline: "auto",
           display: "flex",
-          flexDirection: "column",
-          gap: "var(--ref-space-8)",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: "var(--comp-nav-height)",
+          borderBottom: "1px solid var(--sys-color-border)",
+          marginBottom: "var(--ref-space-10)",
         }}
       >
-        {/* Demo Mode Notice */}
-        {isDemoMode() && (
+        <Link
+          href="/"
+          className="kodo-focus-ring"
+          aria-label="Return to KODŌ home"
+          style={{
+            fontFamily: "var(--font-editorial-display), Georgia, serif",
+            fontSize: "var(--ref-font-size-title)",
+            letterSpacing: "var(--ref-letter-spacing-label)",
+            color: "var(--sys-color-text-primary)",
+            textDecoration: "none",
+            textTransform: "uppercase",
+          }}
+        >
+          {SITE_CONFIG.brand.wordmark}
+        </Link>
+        <span className="text-caption">Secure Checkout</span>
+      </header>
+
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="checkout-grid"
+        style={{
+          maxWidth: "1200px",
+          marginInline: "auto",
+          display: "grid",
+          gridTemplateColumns: "1fr 420px",
+          gap: "var(--ref-space-12)",
+          alignItems: "start",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--ref-space-8)",
+          }}
+        >
           <div
+            role="status"
             style={{
               padding: "var(--ref-space-3) var(--ref-space-4)",
               border: "1px solid var(--sys-color-border)",
-              background: "oklch(20% 0.005 260 / 0.4)",
+              backgroundColor: "var(--ref-color-obsidian-50)",
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--ref-space-3)",
             }}
           >
-            <p
-              className="text-caption"
+            <span
+              aria-hidden="true"
               style={{
-                color: "var(--sys-color-text-secondary)",
-                textAlign: "center",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: "var(--sys-color-text-accent)",
+                flexShrink: 0,
               }}
-            >
-              Atelier Concept Demonstration — Non-commercial simulation. No real
-              payment method charged.
+            />
+            <p className="text-caption" style={{ lineHeight: 1.5 }}>
+              {mode === "live"
+                ? COMMERCE_CONFIG.liveNotice
+                : COMMERCE_CONFIG.demoNotice}
             </p>
           </div>
-        )}
 
-        {/* Server Error Alert */}
-        {serverError && (
-          <div
-            role="alert"
-            style={{
-              padding: "var(--ref-space-3) var(--ref-space-4)",
-              border: "1px solid oklch(65% 0.2 25)",
-              background: "oklch(25% 0.04 25 / 0.3)",
-            }}
-          >
-            <p
+          {isCanceled && (
+            <div
+              role="status"
               style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-caption)",
-                color: "oklch(75% 0.15 25)",
+                padding: "var(--ref-space-3) var(--ref-space-4)",
+                border: "1px solid var(--sys-color-text-accent)",
+                backgroundColor: "oklch(20% 0.02 85 / 0.25)",
               }}
             >
-              {serverError}
-            </p>
-          </div>
-        )}
+              <p
+                className="text-body"
+                style={{ color: "var(--sys-color-text-primary)" }}
+              >
+                Your Stripe session was cancelled before payment. Your ritual
+                selections remain saved below.
+              </p>
+            </div>
+          )}
 
-        {/* Customer Information */}
-        <fieldset
-          style={{
-            border: "none",
-            padding: 0,
-            margin: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--ref-space-4)",
-          }}
-        >
-          <legend
-            className="text-label"
+          {serverError && (
+            <div
+              role="alert"
+              style={{
+                padding: "var(--ref-space-3) var(--ref-space-4)",
+                border: "1px solid var(--sys-color-error)",
+                backgroundColor: "oklch(16% 0.04 25 / 0.28)",
+              }}
+            >
+              <p
+                className="text-body"
+                style={{ color: "var(--sys-color-error)" }}
+              >
+                {serverError}
+              </p>
+            </div>
+          )}
+
+          <fieldset
             style={{
-              marginBottom: "var(--ref-space-2)",
-              paddingBottom: "var(--ref-space-2)",
-              borderBottom: "1px solid var(--sys-color-border)",
-              width: "100%",
-            }}
-          >
-            Customer Information
-          </legend>
-
-          <FormField
-            id="email"
-            label="Email Address"
-            type="email"
-            value={form.email}
-            onChange={updateField("email")}
-            error={getFieldError("customer.email")}
-            required
-            placeholder="your@email.com"
-          />
-          <FormField
-            id="name"
-            label="Full Name"
-            value={form.name}
-            onChange={updateField("name")}
-            error={getFieldError("customer.name")}
-            required
-            placeholder="Your full name"
-          />
-          <FormField
-            id="phone"
-            label="Phone Number"
-            type="tel"
-            value={form.phone}
-            onChange={updateField("phone")}
-            error={getFieldError("customer.phone")}
-            placeholder="Optional"
-          />
-        </fieldset>
-
-        {/* Shipping Address */}
-        <fieldset
-          style={{
-            border: "none",
-            padding: 0,
-            margin: 0,
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--ref-space-4)",
-          }}
-        >
-          <legend
-            className="text-label"
-            style={{
-              marginBottom: "var(--ref-space-2)",
-              paddingBottom: "var(--ref-space-2)",
-              borderBottom: "1px solid var(--sys-color-border)",
-              width: "100%",
-            }}
-          >
-            Shipping Address
-          </legend>
-
-          {/* Region selector */}
-          <div
-            style={{
+              border: "none",
               display: "flex",
               flexDirection: "column",
-              gap: "6px",
-            }}
-          >
-            <label
-              htmlFor="country"
-              className="text-caption"
-              style={{
-                textTransform: "uppercase",
-                letterSpacing: "var(--ref-letter-spacing-wide)",
-              }}
-            >
-              Region <span style={{ color: "var(--sys-color-text-accent)" }}>*</span>
-            </label>
-            <select
-              id="country"
-              name="country"
-              value={form.country}
-              onChange={(e) => updateField("country")(e.target.value)}
-              required
-              className="kodo-focus-ring"
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                background: "transparent",
-                border: getFieldError("shipping.country")
-                  ? "1px solid oklch(65% 0.2 25)"
-                  : "1px solid var(--sys-color-border)",
-                color: form.country
-                  ? "var(--sys-color-text-primary)"
-                  : "var(--sys-color-text-secondary)",
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-base)",
-                lineHeight: 1.5,
-                cursor: "pointer",
-                outline: "none",
-                appearance: "none",
-              }}
-            >
-              <option value="" disabled>
-                Select region…
-              </option>
-              {COMMERCE_CONFIG.supportedRegions.map((region) => (
-                <option key={region.code} value={region.code}>
-                  {region.name}
-                </option>
-              ))}
-            </select>
-            {getFieldError("shipping.country") && (
-              <span
-                style={{
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-small)",
-                  color: "oklch(65% 0.2 25)",
-                }}
-              >
-                {getFieldError("shipping.country")}
-              </span>
-            )}
-          </div>
-
-          <FormField
-            id="addressLine1"
-            label="Address"
-            value={form.addressLine1}
-            onChange={updateField("addressLine1")}
-            error={getFieldError("shipping.addressLine1")}
-            required
-            placeholder="Street address"
-          />
-          <FormField
-            id="addressLine2"
-            label="Suite / Apartment"
-            value={form.addressLine2}
-            onChange={updateField("addressLine2")}
-            error={getFieldError("shipping.addressLine2")}
-            placeholder="Optional"
-          />
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
               gap: "var(--ref-space-4)",
             }}
           >
-            <FormField
-              id="city"
-              label="City"
-              value={form.city}
-              onChange={updateField("city")}
-              error={getFieldError("shipping.city")}
-              required
-            />
-            <FormField
-              id="stateOrRegion"
-              label="State / Province"
-              value={form.stateOrRegion}
-              onChange={updateField("stateOrRegion")}
-              error={getFieldError("shipping.stateOrRegion")}
-            />
-          </div>
-
-          <div style={{ maxWidth: "200px" }}>
-            <FormField
-              id="postalCode"
-              label="Postal / Zip Code"
-              value={form.postalCode}
-              onChange={updateField("postalCode")}
-              error={getFieldError("shipping.postalCode")}
-              required
-            />
-          </div>
-        </fieldset>
-      </div>
-
-      {/* ── Order Summary Sidebar ─── */}
-      <div
-        style={{
-          position: "sticky",
-          top: "var(--ref-space-6)",
-          border: "1px solid var(--sys-color-border)",
-          padding: "var(--ref-space-6)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--ref-space-4)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingBottom: "var(--ref-space-3)",
-            borderBottom: "1px solid var(--sys-color-border)",
-          }}
-        >
-          <span className="text-label">
-            Your Ritual ({totalItems()}{" "}
-            {totalItems() === 1 ? "item" : "items"})
-          </span>
-          <Link
-            href="/collections"
-            className="text-caption"
-            style={{
-              color: "var(--sys-color-text-secondary)",
-              textDecoration: "none",
-              transition: "color 240ms var(--ease-decelerate)",
-            }}
-          >
-            Edit
-          </Link>
-        </div>
-
-        {/* Line Items List */}
-        <ul
-          style={{
-            listStyle: "none",
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--ref-space-3)",
-            maxHeight: "320px",
-            overflowY: "auto",
-          }}
-        >
-          {items.map((item) => (
-            <li
-              key={item.lineKey}
+            <legend
               style={{
-                display: "grid",
-                gridTemplateColumns: "60px 1fr auto",
-                gap: "var(--ref-space-3)",
-                paddingBottom: "var(--ref-space-3)",
-                borderBottom: "1px solid var(--sys-color-border)",
-                alignItems: "center",
+                fontFamily: "var(--font-editorial-display), Georgia, serif",
+                fontSize: "var(--ref-font-size-title)",
+                color: "var(--sys-color-text-primary)",
+                marginBottom: "var(--ref-space-2)",
               }}
             >
-              {/* Thumbnail */}
-              <div
+              Customer Information
+            </legend>
+
+            <div>
+              <label htmlFor="checkout-email" style={labelStyle}>
+                Email Address *
+              </label>
+              <input
+                id="checkout-email"
+                name="email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="kodo-input kodo-focus-ring"
+                aria-invalid={Boolean(fieldErrors["customer.email"])}
                 style={{
-                  aspectRatio: "3/4",
-                  backgroundColor: "var(--sys-color-surface)",
-                  position: "relative",
-                  overflow: "hidden",
+                  ...inputStyle,
+                  borderColor: fieldErrors["customer.email"]
+                    ? "var(--sys-color-error)"
+                    : undefined,
                 }}
-              >
-                <Image
-                  src={item.product.images.pureProduct}
-                  alt={`KODŌ ${item.product.name}`}
-                  fill
-                  sizes="60px"
-                  style={{ objectFit: "contain" }}
+              />
+              {fieldErrors["customer.email"] && (
+                <p style={fieldErrorStyle}>{fieldErrors["customer.email"]}</p>
+              )}
+            </div>
+
+            <div className="checkout-two-col">
+              <div>
+                <label htmlFor="checkout-name" style={labelStyle}>
+                  Full Name *
+                </label>
+                <input
+                  id="checkout-name"
+                  name="name"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your full name"
+                  className="kodo-input kodo-focus-ring"
+                  aria-invalid={Boolean(fieldErrors["customer.name"])}
+                  style={{
+                    ...inputStyle,
+                    borderColor: fieldErrors["customer.name"]
+                      ? "var(--sys-color-error)"
+                      : undefined,
+                  }}
+                />
+                {fieldErrors["customer.name"] && (
+                  <p style={fieldErrorStyle}>{fieldErrors["customer.name"]}</p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="checkout-phone" style={labelStyle}>
+                  Phone Number
+                </label>
+                <input
+                  id="checkout-phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Optional (for courier SMS)"
+                  className="kodo-input kodo-focus-ring"
+                  style={inputStyle}
                 />
               </div>
+            </div>
+          </fieldset>
 
-              {/* Details */}
+          <fieldset
+            style={{
+              border: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-4)",
+            }}
+          >
+            <legend
+              style={{
+                fontFamily: "var(--font-editorial-display), Georgia, serif",
+                fontSize: "var(--ref-font-size-title)",
+                color: "var(--sys-color-text-primary)",
+                marginBottom: "var(--ref-space-2)",
+              }}
+            >
+              Shipping Destination
+            </legend>
+
+            <div style={{ position: "relative" }}>
+              <label htmlFor="checkout-country" style={labelStyle}>
+                Country / Region *
+              </label>
+              <select
+                id="checkout-country"
+                name="country"
+                required
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="kodo-input kodo-select kodo-focus-ring"
+                aria-invalid={Boolean(fieldErrors["shipping.country"])}
+                style={{
+                  ...inputStyle,
+                  appearance: "none",
+                  paddingRight: "var(--ref-space-8)",
+                  cursor: "pointer",
+                  borderColor: fieldErrors["shipping.country"]
+                    ? "var(--sys-color-error)"
+                    : undefined,
+                }}
+              >
+                <option value="" disabled>
+                  Select destination…
+                </option>
+                {COMMERCE_CONFIG.supportedRegions.map((region) => (
+                  <option key={region.code} value={region.code}>
+                    {region.name}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors["shipping.country"] && (
+                <p style={fieldErrorStyle}>{fieldErrors["shipping.country"]}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="checkout-addr1" style={labelStyle}>
+                Street Address *
+              </label>
+              <input
+                id="checkout-addr1"
+                name="addressLine1"
+                type="text"
+                required
+                autoComplete="address-line1"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                placeholder="Street address"
+                className="kodo-input kodo-focus-ring"
+                aria-invalid={Boolean(fieldErrors["shipping.addressLine1"])}
+                style={{
+                  ...inputStyle,
+                  borderColor: fieldErrors["shipping.addressLine1"]
+                    ? "var(--sys-color-error)"
+                    : undefined,
+                }}
+              />
+              {fieldErrors["shipping.addressLine1"] && (
+                <p style={fieldErrorStyle}>
+                  {fieldErrors["shipping.addressLine1"]}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="checkout-addr2" style={labelStyle}>
+                Suite / Apartment
+              </label>
+              <input
+                id="checkout-addr2"
+                name="addressLine2"
+                type="text"
+                autoComplete="address-line2"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                placeholder="Optional"
+                className="kodo-input kodo-focus-ring"
+                style={inputStyle}
+              />
+            </div>
+
+            <div className="checkout-two-col">
               <div>
-                <p
+                <label htmlFor="checkout-city" style={labelStyle}>
+                  City *
+                </label>
+                <input
+                  id="checkout-city"
+                  name="city"
+                  type="text"
+                  required
+                  autoComplete="address-level2"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="kodo-input kodo-focus-ring"
+                  aria-invalid={Boolean(fieldErrors["shipping.city"])}
                   style={{
-                    fontFamily:
-                      "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "var(--ref-font-size-caption)",
-                    fontWeight: 400,
+                    ...inputStyle,
+                    borderColor: fieldErrors["shipping.city"]
+                      ? "var(--sys-color-error)"
+                      : undefined,
                   }}
-                >
-                  {item.product.name}
-                </p>
-                <p
-                  className="text-caption"
-                  style={{
-                    opacity: 0.7,
-                    fontSize: "var(--ref-font-size-small)",
-                  }}
-                >
-                  {item.product.size} × {item.quantity}
-                </p>
+                />
+                {fieldErrors["shipping.city"] && (
+                  <p style={fieldErrorStyle}>{fieldErrors["shipping.city"]}</p>
+                )}
               </div>
 
-              {/* Line total */}
-              <p
+              <div>
+                <label htmlFor="checkout-state" style={labelStyle}>
+                  State / Province
+                </label>
+                <input
+                  id="checkout-state"
+                  name="stateOrRegion"
+                  type="text"
+                  autoComplete="address-level1"
+                  value={stateOrRegion}
+                  onChange={(e) => setStateOrRegion(e.target.value)}
+                  className="kodo-input kodo-focus-ring"
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+
+            <div className="checkout-postal-col">
+              <label htmlFor="checkout-postal" style={labelStyle}>
+                Postal / Zip Code *
+              </label>
+              <input
+                id="checkout-postal"
+                name="postalCode"
+                type="text"
+                required
+                autoComplete="postal-code"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value)}
+                className="kodo-input kodo-focus-ring"
+                aria-invalid={Boolean(fieldErrors["shipping.postalCode"])}
                 style={{
-                  fontFamily:
-                    "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-caption)",
-                  fontVariantNumeric: "tabular-nums",
+                  ...inputStyle,
+                  borderColor: fieldErrors["shipping.postalCode"]
+                    ? "var(--sys-color-error)"
+                    : undefined,
+                }}
+              />
+              {fieldErrors["shipping.postalCode"] && (
+                <p style={fieldErrorStyle}>
+                  {fieldErrors["shipping.postalCode"]}
+                </p>
+              )}
+            </div>
+          </fieldset>
+        </div>
+
+        <aside
+          aria-label="Order summary"
+          style={{
+            padding: "var(--ref-space-6)",
+            border: "1px solid var(--sys-color-border)",
+            backgroundColor: "var(--ref-color-obsidian-50)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--ref-space-4)",
+            position: "sticky",
+            top: "calc(var(--comp-nav-height) + var(--ref-space-4))",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              paddingBottom: "var(--ref-space-3)",
+              borderBottom: "1px solid var(--sys-color-border)",
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: "var(--font-editorial-display), Georgia, serif",
+                fontSize: "var(--ref-font-size-title)",
+                color: "var(--sys-color-text-primary)",
+              }}
+            >
+              Your Ritual ({totalCount} {totalCount === 1 ? "item" : "items"})
+            </h2>
+            <Link
+              href="/collections"
+              className="text-caption kodo-focus-ring"
+              style={{
+                color: "var(--sys-color-text-accent)",
+                textDecoration: "none",
+              }}
+            >
+              Modify
+            </Link>
+          </div>
+
+          <ul
+            style={{
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-3)",
+            }}
+          >
+            {items.map((item) => (
+              <li
+                key={item.lineKey}
+                style={{
+                  display: "flex",
+                  gap: "var(--ref-space-3)",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: "52px",
+                    height: "66px",
+                    position: "relative",
+                    flexShrink: 0,
+                    overflow: "hidden",
+                    backgroundColor: "var(--ref-color-obsidian-20)",
+                    border: "1px solid var(--sys-color-border)",
+                  }}
+                >
+                  <Image
+                    src={item.product.image}
+                    alt={`KODŌ ${item.product.name}`}
+                    fill
+                    sizes="52px"
+                    style={{ objectFit: "cover" }}
+                  />
+                </div>
+
+                <div style={{ flex: 1 }}>
+                  <p
+                    style={{
+                      fontFamily:
+                        "var(--font-editorial-display), Georgia, serif",
+                      fontSize: "var(--ref-font-size-base)",
+                      color: "var(--sys-color-text-primary)",
+                    }}
+                  >
+                    {item.product.name}
+                  </p>
+                  <p className="text-caption" style={{ fontSize: "0.75rem" }}>
+                    {item.product.size} × {item.quantity}
+                  </p>
+                </div>
+
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-primary)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {formatCents(Math.round(item.product.price * 100) * item.quantity)}
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          <div
+            style={{
+              paddingTop: "var(--ref-space-3)",
+              borderTop: "1px solid var(--sys-color-border)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-2)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="text-caption">Subtotal</span>
+              <span
+                className="text-body"
+                style={{ color: "var(--sys-color-text-primary)" }}
+              >
+                {formatCents(financials.subtotalCents)}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="text-caption">
+                {financials.qualifiesFreeShipping
+                  ? COMMERCE_CONFIG.shipping.complimentaryLabel
+                  : COMMERCE_CONFIG.shipping.methodLabel}
+              </span>
+              <span
+                className="text-body"
+                style={{
+                  color: financials.qualifiesFreeShipping
+                    ? "var(--sys-color-text-accent)"
+                    : "var(--sys-color-text-primary)",
+                }}
+              >
+                {financials.qualifiesFreeShipping
+                  ? "Complimentary"
+                  : formatCents(financials.shippingCents)}
+              </span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                paddingTop: "var(--ref-space-2)",
+                borderTop: "1px solid var(--sys-color-border)",
+                marginTop: "var(--ref-space-1)",
+              }}
+            >
+              <span className="text-label">Total</span>
+              <span
+                style={{
+                  fontFamily: "var(--font-editorial-display), Georgia, serif",
+                  fontSize: "var(--ref-font-size-title)",
                   color: "var(--sys-color-text-accent)",
                 }}
               >
-                {formatPrice(
-                  Math.round(item.product.price * 100) * item.quantity
-                )}
-              </p>
-            </li>
-          ))}
-        </ul>
-
-        {/* Totals */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "var(--ref-space-2)",
-            paddingTop: "var(--ref-space-2)",
-            borderTop: "1px solid var(--sys-color-border)",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span className="text-caption">Subtotal</span>
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-caption)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {formatPrice(Math.round(totalPrice() * 100))}
-            </span>
+                {formatCents(financials.totalCents)}
+              </span>
+            </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span className="text-caption">
-              {COMMERCE_CONFIG.shipping.policyLabel}
-            </span>
-            <span className="text-caption">
-              {COMMERCE_CONFIG.shipping.defaultRateCents === 0
-                ? `${symbol}0.00`
-                : formatPrice(COMMERCE_CONFIG.shipping.defaultRateCents)}
-            </span>
-          </div>
-        </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            paddingTop: "var(--ref-space-3)",
-            borderTop: "1px solid var(--sys-color-border)",
-          }}
-        >
-          <span
+          <button
+            type="submit"
+            disabled={isPending}
+            className="kodo-btn-solid kodo-focus-ring"
             style={{
-              fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-              fontSize: "var(--ref-font-size-base)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "var(--ref-letter-spacing-sans)",
+              width: "100%",
+              marginTop: "var(--ref-space-2)",
+              opacity: isPending ? 0.65 : 1,
+              cursor: isPending ? "wait" : "pointer",
             }}
           >
-            Total
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-              fontSize: "var(--ref-font-size-title)",
-              fontVariantNumeric: "tabular-nums",
-              color: "var(--sys-color-text-primary)",
-            }}
-          >
-            {formatPrice(Math.round(totalPrice() * 100))}
-          </span>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="kodo-btn-solid kodo-focus-ring"
-          style={{
-            width: "100%",
-            opacity: isPending ? 0.6 : 1,
-            cursor: isPending ? "not-allowed" : "pointer",
-            position: "relative",
-          }}
-        >
-          {isPending ? (
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "var(--ref-space-2)",
-              }}
-            >
+            {isPending ? (
               <span
                 style={{
-                  width: 16,
-                  height: 16,
-                  border: "2px solid var(--sys-color-text-inverted)",
-                  borderTopColor: "transparent",
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  animation: "spin 800ms linear infinite",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
                 }}
-              />
-              Processing…
-            </span>
-          ) : isDemoMode() ? (
-            "Complete Ritual"
-          ) : (
-            "Proceed to Payment"
-          )}
-        </button>
-      </div>
+              >
+                <span
+                  aria-hidden="true"
+                  className="kodo-spin"
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    border: "2px solid var(--sys-color-text-inverted)",
+                    borderTopColor: "transparent",
+                    borderRadius: "50%",
+                    display: "inline-block",
+                  }}
+                />
+                {mode === "live"
+                  ? "Redirecting to Stripe…"
+                  : "Confirming Atelier Order…"}
+              </span>
+            ) : mode === "live" ? (
+              "Continue to Payment"
+            ) : (
+              "Complete Demo Order"
+            )}
+          </button>
 
-      <style jsx>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
+          <p
+            className="text-caption"
+            style={{
+              fontSize: "0.75rem",
+              textAlign: "center",
+              lineHeight: 1.5,
+            }}
+          >
+            {COMMERCE_CONFIG.shipping.estimatedTransit}
+          </p>
+        </aside>
+      </form>
+
+      <footer
+        style={{
+          maxWidth: "1200px",
+          marginInline: "auto",
+          marginTop: "var(--ref-space-12)",
+          paddingTop: "var(--ref-space-4)",
+          borderTop: "1px solid var(--sys-color-border)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "var(--ref-space-3)",
+        }}
+      >
+        <p className="text-caption">{SITE_CONFIG.brand.copyright}</p>
+        <div style={{ display: "flex", gap: "var(--ref-space-4)" }}>
+          {SITE_CONFIG.navigation.legal.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-caption kodo-focus-ring"
+              style={{ textDecoration: "none" }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </footer>
+
+      <style>{`
+        .checkout-two-col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--ref-space-4);
         }
-        @media (max-width: 768px) {
-          .checkout-layout {
+        .checkout-postal-col {
+          max-width: 240px;
+        }
+        @media (max-width: 900px) {
+          .checkout-grid {
             grid-template-columns: 1fr !important;
-            gap: var(--ref-space-6) !important;
+          }
+          .checkout-two-col {
+            grid-template-columns: 1fr;
+          }
+          .checkout-postal-col {
+            max-width: 100%;
           }
         }
       `}</style>
-    </form>
+    </main>
   );
 }

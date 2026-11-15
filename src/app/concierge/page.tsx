@@ -1,18 +1,13 @@
 import React from "react";
-import type { Metadata } from "next";
 import { HomeClient } from "../HomeClient";
-import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { ConciergeForm } from "./ConciergeForm";
+import { FooterDirectory } from "@/components/global/FooterDirectory";
+import { SITE_CONFIG } from "@/config/site";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Concierge Page (Server Component)
-   Private inquiry form with editorial presentation.
-   ═══════════════════════════════════════════════════════════ */
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Concierge",
   description:
-    "Contact the KODŌ concierge for private consultations, wholesale inquiries, and press requests. Tokyo & Paris studios.",
+    "Private scent consultations, bespoke fragrance commissions, and patron support at KODŌ studios in Tokyo and Paris.",
 };
 
 export default function ConciergePage() {
@@ -20,14 +15,14 @@ export default function ConciergePage() {
     <>
       <HomeClient />
       <main id="main-content" role="main">
-        {/* ─── Hero Statement ─── */}
+        {/* Hero */}
         <section
           style={{
             paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-15))",
             paddingBottom: "var(--ref-space-15)",
             paddingInline: "var(--sys-space-page-margin)",
             textAlign: "center",
-            maxWidth: "800px",
+            maxWidth: "850px",
             marginInline: "auto",
           }}
         >
@@ -38,13 +33,10 @@ export default function ConciergePage() {
             className="text-display"
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              marginBottom: "var(--ref-space-6)",
+              marginBottom: "var(--ref-space-4)",
             }}
           >
-            The{" "}
-            <span style={{ color: "var(--sys-color-text-accent)" }}>
-              Concierge
-            </span>
+            The Concierge
           </h1>
           <p
             className="text-body-lg"
@@ -54,156 +46,164 @@ export default function ConciergePage() {
               marginInline: "auto",
             }}
           >
-            For private consultations, bespoke commissions, wholesale
-            partnerships, and press inquiries. Every interaction is personal.
+            For private consultations, bespoke commissions, hospitality
+            partnerships, and press inquiries. Every dialogue is attended
+            directly by our studio team.
           </p>
         </section>
 
-        {/* ─── Contact Form & Info ─── */}
+        {/* Form & Contact Directory */}
         <section
-          aria-label="Contact form and information"
+          aria-label="Contact form and studio directory"
           style={{
             paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "1440px",
+            maxWidth: "1100px",
             marginInline: "auto",
             paddingBottom: "var(--sys-space-section)",
           }}
         >
-          <div
-            className="concierge-layout"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "var(--ref-space-12)",
-              alignItems: "start",
-            }}
-          >
-            {/* Form */}
-            <ConciergeForm />
+          <div className="concierge-grid">
+            <div>
+              <ConciergeForm />
+            </div>
 
-            {/* Info */}
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: "var(--ref-space-8)",
+                paddingTop: "var(--ref-space-2)",
               }}
             >
               {/* Direct Contact */}
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--ref-space-3)",
+                  padding: "var(--ref-space-6)",
+                  border: "1px solid var(--sys-color-border)",
+                  background: "var(--sys-color-surface)",
                 }}
               >
-                <p className="text-label">Direct Contact</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "var(--ref-space-2)" }}>
+                <p
+                  className="text-label"
+                  style={{ marginBottom: "var(--ref-space-3)" }}
+                >
+                  Direct Contact
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-primary)",
+                    marginBottom: "var(--ref-space-2)",
+                  }}
+                >
+                  <a
+                    href={`mailto:${SITE_CONFIG.contact.conciergeEmail}`}
+                    className="kodo-focus-ring"
+                    style={{ color: "inherit", textDecoration: "none" }}
+                  >
+                    {SITE_CONFIG.contact.conciergeEmail}
+                  </a>
+                </p>
+                {SITE_CONFIG.studios.map((studio) => (
                   <p
+                    key={studio.id}
                     className="text-body"
                     style={{ color: "var(--sys-color-text-secondary)" }}
                   >
-                    [your-email@example.com]
+                    {studio.phone}{" "}
+                    <span className="text-caption">({studio.region})</span>
                   </p>
-                  <p
-                    className="text-body"
-                    style={{ color: "var(--sys-color-text-secondary)" }}
-                  >
-                    [+00 0 0000 0000] (Location 1)
-                  </p>
-                  <p
-                    className="text-body"
-                    style={{ color: "var(--sys-color-text-secondary)" }}
-                  >
-                    [+00 0 0000 0000] (Location 2)
-                  </p>
-                </div>
+                ))}
               </div>
 
-              {/* Hours */}
+              {/* Studio Consultation Hours */}
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--ref-space-3)",
+                  padding: "var(--ref-space-6)",
+                  border: "1px solid var(--sys-color-border)",
+                  background: "var(--sys-color-surface)",
                 }}
               >
-                <p className="text-label">Consultation Hours</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "var(--ref-space-2)" }}>
-                  <p
-                    className="text-body"
-                    style={{ color: "var(--sys-color-text-secondary)" }}
-                  >
-                    [Day] — [Day]
-                  </p>
-                  <p
-                    className="text-body"
-                    style={{ color: "var(--sys-color-text-secondary)" }}
-                  >
-                    [00:00] — [00:00] (Local Time)
-                  </p>
-                  <p
-                    className="text-caption"
-                    style={{ marginTop: "var(--ref-space-1)" }}
-                  >
-                    [Customize this note about appointment availability.]
-                  </p>
-                </div>
+                <p
+                  className="text-label"
+                  style={{ marginBottom: "var(--ref-space-3)" }}
+                >
+                  Consultation Hours
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-primary)",
+                    marginBottom: "4px",
+                  }}
+                >
+                  {SITE_CONFIG.contact.consultationHours.days}
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    marginBottom: "var(--ref-space-3)",
+                  }}
+                >
+                  {SITE_CONFIG.contact.consultationHours.hours} (Local Studio
+                  Time)
+                </p>
+                <p className="text-caption">
+                  {SITE_CONFIG.contact.consultationHours.note}
+                </p>
               </div>
 
-              {/* Studios */}
+              {/* Studio Addresses */}
               <div
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--ref-space-3)",
+                  padding: "var(--ref-space-6)",
+                  border: "1px solid var(--sys-color-border)",
+                  background: "var(--sys-color-surface)",
                 }}
               >
-                <p className="text-label">Studios</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "var(--ref-space-4)" }}>
-                  <div>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                        fontSize: "var(--ref-font-size-caption)",
-                        fontWeight: 700,
-                        color: "var(--sys-color-text-accent)",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Tokyo / Aoyama
-                    </p>
-                    <p className="text-caption">5-11-23 Minami-Aoyama, Minato-ku</p>
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                        fontSize: "var(--ref-font-size-caption)",
-                        fontWeight: 700,
-                        color: "var(--sys-color-text-accent)",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Paris / Le Marais
-                    </p>
-                    <p className="text-caption">18 Rue de la Verrerie, 75004</p>
-                  </div>
+                <p
+                  className="text-label"
+                  style={{ marginBottom: "var(--ref-space-3)" }}
+                >
+                  Studios
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "var(--ref-space-3)",
+                  }}
+                >
+                  {SITE_CONFIG.studios.map((studio) => (
+                    <div key={studio.id}>
+                      <p
+                        className="text-body"
+                        style={{ color: "var(--sys-color-text-primary)" }}
+                      >
+                        {studio.title}
+                      </p>
+                      <p className="text-caption">{studio.street}</p>
+                      <p className="text-caption">{studio.cityPostal}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </section>
       </main>
-
       <FooterDirectory />
 
       <style>{`
+        .concierge-grid {
+          display: grid;
+          grid-template-columns: 1.5fr 1fr;
+          gap: var(--ref-space-12);
+          align-items: start;
+        }
         @media (max-width: 768px) {
-          .concierge-layout {
-            grid-template-columns: 1fr !important;
-            gap: var(--ref-space-8) !important;
-          }
+          .concierge-grid { grid-template-columns: 1fr; gap: var(--ref-space-8); }
         }
       `}</style>
     </>

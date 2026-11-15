@@ -1,4 +1,8 @@
-import type { ScentProduct, JournalPost } from "@/types/webgl";
+import type { ScentProduct, JournalArticle } from "@/types/webgl";
+
+export interface EditorialJournalArticle extends JournalArticle {
+  readonly relatedProductSlug?: string;
+}
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — Static Product & Editorial Data
@@ -137,7 +141,7 @@ export const PRODUCTS: ScentProduct[] = [
   },
 ];
 
-export const JOURNAL_POSTS: JournalPost[] = [
+export const JOURNAL_POSTS: EditorialJournalArticle[] = [
   {
     slug: "olfactory-minimalism",
     title: "Olfactory Minimalism in Modernity",
@@ -146,8 +150,19 @@ export const JOURNAL_POSTS: JournalPost[] = [
     category: "ESSAY 01 / SENSES",
     author: "KODŌ Studio",
     date: "2026-05-14",
-    image: "/journal/minimalism.jpg",
+    image: "/images/products/so/detail.jpg",
     readTime: "8 min",
+    relatedProductSlug: "so",
+    content: [
+      "Contemporary culture saturates every sense simultaneously. When both vision and sound are crowded by perpetual signage, our capacity to register delicate aromatic transitions collapses into background noise.",
+      "In the Japanese listening room, a single raw vessel is placed in restrained low light precisely so the observer's attention shifts inward. Removing peripheral ornament does not impoverish the experience; it sharpens contrast around the fleeting chemistry rising from warm skin.",
+      "Across the KODŌ collection, restraint begins at the molecular level. Rather than stacking forty competing synthetics to chase instant shelf impact, each extrait centers around three structural accords built from mineral salts, cold-pressed cypress, and aged resins.",
+      "Because less volatiles clamor for dominance in the first thirty seconds, the middle and base registers emerge slowly across six to ten hours—turning personal wear into an unhurried temporal study rather than a single static statement.",
+    ].join("\n\n"),
+    footnotes: [
+      "Recorded in our Tokyo Aoyama listening room study on sensory threshold calibration, Spring 2026.",
+      "SŌ mineral vapor accords utilize cold-vacuum extraction to preserve transient marine aldehydes.",
+    ],
   },
   {
     slug: "memory-of-wood",
@@ -157,8 +172,19 @@ export const JOURNAL_POSTS: JournalPost[] = [
     category: "ESSAY 02 / MATERIALS",
     author: "KODŌ Studio",
     date: "2026-04-22",
-    image: "/journal/wood-fire.jpg",
+    image: "/images/products/moku/detail.jpg",
     readTime: "12 min",
+    relatedProductSlug: "moku",
+    content: [
+      "Long before alcohol perfumery became an architectural medium, Mon-kō—the practice of 'listening to incense'—treated heated aromatic woods as vessels of memory, season, and provenance.",
+      "When raw Yoshino hinoki or charred cedar bark encounters gentle indirect heat over ash and mica plates, moisture evacuates before resin liquefies. That delayed release creates a quiet boundary between clean timber and dark smoke.",
+      "In formulating MOKU and EN, our perfumers studied how aged heartwood retains micro-traces of soil, rain, and kiln smoke decades after harvest. By pairing dry cedarwood fractions with black amber and labdanum, we transpose slow ash-heated resonance into cold Extrait form.",
+      "Every raw timber batch rests in dark borosilicate demijohns for ninety days prior to filtration, allowing harsh edges to settle into a velvet, contemplative skin trail.",
+    ].join("\n\n"),
+    footnotes: [
+      "Material reference: Aged Yoshino Hinoki & smoked cedar fractions aged 90 days in borosilicate glass.",
+      "Direct ash-plate distillation studies conducted between Kyoto artisan kilns and Paris extraction labs.",
+    ],
   },
   {
     slug: "architecture-of-scent",
@@ -168,8 +194,19 @@ export const JOURNAL_POSTS: JournalPost[] = [
     category: "ESSAY 03 / SPACE",
     author: "KODŌ Studio",
     date: "2026-03-10",
-    image: "/journal/architecture.jpg",
+    image: "/images/products/en/detail.jpg",
     readTime: "10 min",
+    relatedProductSlug: "en",
+    content: [
+      "In structural architecture, a wall only gains presence through the emptiness it frames. This principle—Ma, the deliberate pause between surfaces—serves as the primary compositional grammar for all four KODŌ states.",
+      "An unedited perfume acts like a room packed wall-to-wall with furniture: dense, suffocating, and devoid of spatial rhythm. To construct depth, a perfumer must design intentional hollows where skin chemistry and ambient air complete the accord.",
+      "Both our architectural philosophy and our hand-blown borosilicate flacons follow this geometric dialogue. Clear structural planes capture ambient shadow while dark matte mineral collars ground the vessel in weight and permanence.",
+      "As EN, SŌ, MOKU, and KIN evolve across temperature shifts from morning air to midnight interiors, those negative spaces allow light, breath, and individual memory to inhabit the composition.",
+    ].join("\n\n"),
+    footnotes: [
+      "Flacon geometry: Heavy-walled borosilicate glass paired with anodized dark basalt-toned closures.",
+      "Ma spatial cadence references architectural essays curated for KODŌ's Paris Marais exhibition.",
+    ],
   },
 ];
 
@@ -177,10 +214,23 @@ export function getProductBySlug(slug: string): ScentProduct | undefined {
   return PRODUCTS.find((p) => p.slug === slug);
 }
 
+export function getRelatedProducts(
+  excludeSlug: string,
+  limit = 3
+): ScentProduct[] {
+  return PRODUCTS.filter((p) => p.slug !== excludeSlug).slice(0, limit);
+}
+
 export function getAllProducts(): ScentProduct[] {
   return PRODUCTS;
 }
 
-export function getJournalPosts(): JournalPost[] {
+export function getJournalPosts(): EditorialJournalArticle[] {
   return JOURNAL_POSTS;
+}
+
+export function getJournalArticleBySlug(
+  slug: string
+): EditorialJournalArticle | undefined {
+  return JOURNAL_POSTS.find((post) => post.slug === slug);
 }

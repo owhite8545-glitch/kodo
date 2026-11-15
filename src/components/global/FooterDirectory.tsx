@@ -1,31 +1,26 @@
 import React from "react";
 import Link from "next/link";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — FooterDirectory
-   Global footer with brand identity, navigation links,
-   studio addresses, and copyright.
-   ═══════════════════════════════════════════════════════════ */
-
-import { NAV_LINKS as FOOTER_LINKS } from "@/data/navigation";
+import { LEGAL_LINKS, NAV_LINKS } from "@/data/navigation";
+import { SITE_CONFIG } from "@/config/site";
 
 export function FooterDirectory() {
   return (
     <footer
+      role="contentinfo"
       style={{
         borderTop: "1px solid var(--sys-color-border)",
         paddingBlock: "var(--ref-space-12)",
         paddingInline: "var(--sys-space-page-margin)",
-        marginTop: "auto",
+        backgroundColor: "var(--sys-color-bg)",
       }}
     >
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "var(--ref-space-8)",
           maxWidth: "1440px",
           marginInline: "auto",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+          gap: "var(--ref-space-8)",
         }}
       >
         {/* Brand Column */}
@@ -33,41 +28,48 @@ export function FooterDirectory() {
           <p
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+              fontSize: "var(--ref-font-size-title)",
               letterSpacing: "var(--ref-letter-spacing-label)",
               color: "var(--sys-color-text-primary)",
-              marginBottom: "var(--ref-space-3)",
+              marginBottom: "var(--ref-space-2)",
             }}
           >
-            K O D Ō
+            {SITE_CONFIG.brand.wordmark}
           </p>
           <p
-            className="text-caption"
-            style={{ maxWidth: "28ch", lineHeight: "var(--ref-line-height-relaxed)" }}
+            className="text-body"
+            style={{
+              color: "var(--sys-color-text-secondary)",
+              maxWidth: "28ch",
+            }}
           >
-            The geometry of memory. A luxury fragrance house where traditional
-            craft meets structural geometry.
+            {SITE_CONFIG.brand.tagline}. A luxury fragrance house where
+            traditional Japanese craft meets structural geometry.
           </p>
         </div>
 
-        {/* Navigation Column */}
+        {/* Navigation Links */}
         <div>
           <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
             Navigate
           </p>
           <nav aria-label="Footer navigation">
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "var(--ref-space-2)" }}>
-              {FOOTER_LINKS.map((link) => (
+            <ul
+              style={{
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-2)",
+              }}
+            >
+              {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="kodo-focus-ring footer-link"
+                    className="text-body kodo-focus-ring"
                     style={{
-                      fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                      fontSize: "var(--ref-font-size-caption)",
                       color: "var(--sys-color-text-secondary)",
                       textDecoration: "none",
-                      transition: "color 240ms var(--ease-decelerate)",
                     }}
                   >
                     {link.label}
@@ -83,60 +85,89 @@ export function FooterDirectory() {
           <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
             Studios
           </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--ref-space-4)" }}>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-caption)",
-                  fontWeight: 700,
-                  color: "var(--sys-color-text-accent)",
-                  marginBottom: "4px",
-                }}
-              >
-                Tokyo / Aoyama
-              </p>
-              <p className="text-caption">5-11-23 Minami-Aoyama, Minato-ku</p>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-caption)",
-                  fontWeight: 700,
-                  color: "var(--sys-color-text-accent)",
-                  marginBottom: "4px",
-                }}
-              >
-                Paris / Marais
-              </p>
-              <p className="text-caption">18 Rue de la Verrerie, 75004</p>
-            </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-3)",
+            }}
+          >
+            {SITE_CONFIG.studios.map((studio) => (
+              <div key={studio.id}>
+                <p
+                  className="text-body"
+                  style={{ color: "var(--sys-color-text-primary)" }}
+                >
+                  {studio.title}
+                </p>
+                <p
+                  className="text-caption"
+                  style={{ color: "var(--sys-color-text-secondary)" }}
+                >
+                  {studio.street}
+                </p>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Patron Care & Legal Column */}
+        <div>
+          <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
+            Patron Care
+          </p>
+          <ul
+            style={{
+              listStyle: "none",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-2)",
+            }}
+          >
+            {LEGAL_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-body kodo-focus-ring"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    textDecoration: "none",
+                  }}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
       {/* Copyright */}
       <div
         style={{
-          borderTop: "1px solid var(--sys-color-border)",
-          marginTop: "var(--ref-space-8)",
-          paddingTop: "var(--ref-space-4)",
           maxWidth: "1440px",
           marginInline: "auto",
+          marginTop: "var(--ref-space-10)",
+          paddingTop: "var(--ref-space-4)",
+          borderTop: "1px solid var(--sys-color-border)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "var(--ref-space-2)",
         }}
       >
-        <p className="text-caption" style={{ textAlign: "center" }}>
-          © {new Date().getFullYear()} KODŌ Fragrances. All rights reserved.
+        <p className="text-caption">{SITE_CONFIG.brand.copyright}</p>
+        <p className="text-caption">
+          <a
+            href={`mailto:${SITE_CONFIG.contact.conciergeEmail}`}
+            className="kodo-focus-ring"
+            style={{ color: "inherit", textDecoration: "none" }}
+          >
+            {SITE_CONFIG.contact.conciergeEmail}
+          </a>
         </p>
       </div>
-
-      <style>{`
-        .footer-link:hover {
-          color: var(--sys-color-text-primary) !important;
-        }
-      `}</style>
     </footer>
   );
 }
-

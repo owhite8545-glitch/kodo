@@ -1,21 +1,19 @@
 import React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { PRODUCTS } from "@/data/products";
+import { getAllProducts } from "@/data/products";
 import { HomeClient } from "../../HomeClient";
+import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { SectionReveal } from "@/components/shared/SectionReveal";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Collections Page (Server Component)
-   Symmetrical product gallery with Ma spacing.
-   ═══════════════════════════════════════════════════════════ */
+import { CollectionsGallery } from "./CollectionsGallery";
 
 export const metadata = {
   title: "Collections",
-  description: "Browse the four states of resin — the complete KODŌ scent taxonomy.",
+  description:
+    "Browse the four states of resin — the complete KODŌ scent taxonomy.",
 };
 
 export default function CollectionsPage() {
+  const products = getAllProducts();
+
   return (
     <>
       <HomeClient />
@@ -24,7 +22,7 @@ export default function CollectionsPage() {
         <section
           style={{
             paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-15))",
-            paddingBottom: "var(--ref-space-15)",
+            paddingBottom: "var(--ref-space-12)",
             paddingInline: "var(--sys-space-page-margin)",
             textAlign: "center",
             maxWidth: "800px",
@@ -45,122 +43,34 @@ export default function CollectionsPage() {
           </h1>
           <p
             className="text-body-lg"
-            style={{ color: "var(--sys-color-text-secondary)", maxWidth: "50ch", marginInline: "auto" }}
+            style={{
+              color: "var(--sys-color-text-secondary)",
+              maxWidth: "50ch",
+              marginInline: "auto",
+            }}
           >
             Each composition maps a distinct emotional frequency — from volatile
             mineral vapor to the settled weight of aged oud.
           </p>
         </section>
 
-        {/* Product Grid */}
+        {/* Product Gallery & Filtering */}
         <SectionReveal>
-        <section
-          aria-label="Product collection"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "1440px",
-            marginInline: "auto",
-            paddingBottom: "var(--sys-space-section)",
-          }}
-        >
-          <div
-            className="collections-grid"
+          <section
+            aria-label="Product collection"
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: "var(--ref-space-4)",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1440px",
+              marginInline: "auto",
+              paddingBottom: "var(--sys-space-section)",
             }}
           >
-            {PRODUCTS.map((product, index) => (
-              <article key={product.id}>
-                <Link
-                  href={`/products/${product.slug}`}
-                  className="kodo-focus-ring collections-card-link"
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    textDecoration: "none",
-                    color: "inherit",
-                  }}
-                >
-                  {/* Image container */}
-                  <div
-                    className="collections-card-image"
-                    style={{
-                      aspectRatio: "3/4",
-                      backgroundColor: "var(--sys-color-surface)",
-                      position: "relative",
-                      overflow: "hidden",
-                      marginBottom: "var(--ref-space-3)",
-                      transition: "transform var(--motion-duration-base) var(--ease-decelerate)",
-                    }}
-                  >
-                    <Image
-                      src={product.images.pureProduct}
-                      alt={`KODŌ ${product.name} Eau de Parfum`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      style={{ objectFit: "contain" }}
-                    />
-                    <div
-                      className="collections-card-overlay"
-                      aria-hidden="true"
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.5) 100%)",
-                        pointerEvents: "none",
-                      }}
-                    />
-                  </div>
-
-                  {/* Card meta */}
-                  <p className="text-label" style={{ marginBottom: "4px" }}>
-                    {product.family.toUpperCase()} / STATE {String(index + 1).padStart(2, "0")}
-                  </p>
-                  <h2
-                    style={{
-                      fontFamily: "var(--font-editorial-display), Georgia, serif",
-                      fontSize: "var(--ref-font-size-heading)",
-                      fontWeight: 400,
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {product.name}
-                  </h2>
-                  <p className="text-caption" style={{ marginBottom: "var(--ref-space-2)" }}>
-                    {product.subtitle}
-                  </p>
-                  <p
-                    className="text-body"
-                    style={{
-                      color: "var(--sys-color-text-secondary)",
-                      marginBottom: "var(--ref-space-3)",
-                      maxWidth: "32ch",
-                    }}
-                  >
-                    {product.description.slice(0, 120)}…
-                  </p>
-                  <div style={{ display: "flex", gap: "var(--ref-space-2)", alignItems: "baseline" }}>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                        fontSize: "var(--ref-font-size-title)",
-                        fontVariantNumeric: "tabular-nums",
-                        color: "var(--sys-color-text-accent)",
-                      }}
-                    >
-                      From ${product.sizes[0].price}
-                    </span>
-                  </div>
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section>
+            <CollectionsGallery products={products} />
+          </section>
         </SectionReveal>
       </main>
+
+      <FooterDirectory />
 
       <style>{`
         .collections-card-overlay {
@@ -173,10 +83,10 @@ export default function CollectionsPage() {
           opacity: 0.6;
         }
         @media (max-width: 1024px) {
-          .collections-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .collections-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
         }
         @media (max-width: 768px) {
-          .collections-grid { grid-template-columns: 1fr !important; max-width: 400px; margin-inline: auto; }
+          .collections-grid { grid-template-columns: minmax(0, 1fr) !important; max-width: 400px; margin-inline: auto; }
         }
       `}</style>
     </>

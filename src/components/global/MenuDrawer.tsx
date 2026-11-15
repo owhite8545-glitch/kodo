@@ -1,185 +1,128 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useUIStore } from "@/store/ui-store";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — MenuDrawer
-   Fullscreen overlay navigation. Slides down from top.
-   Focus trapped inside. Esc closes menu.
-   ═══════════════════════════════════════════════════════════ */
-
 import { MENU_LINKS } from "@/data/navigation";
+import { SITE_CONFIG } from "@/config/site";
 
 export function MenuDrawer() {
   const isOpen = useUIStore((s) => s.isMenuOpen);
-  const [isMounted, setIsMounted] = React.useState(isOpen);
-  const [isClosing, setIsClosing] = React.useState(false);
   const closeMenu = useUIStore((s) => s.closeMenu);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Trap focus and handle Esc
   useEffect(() => {
     if (!isOpen) return;
-
-    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         closeMenu();
-        return;
-      }
-
-      // Focus trap
-      if (e.key === "Tab" && containerRef.current) {
-        const focusable = containerRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
       }
     };
-
-    document.addEventListener("keydown", handleKeyDown);
-    closeButtonRef.current?.focus();
+    window.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
     };
   }, [isOpen, closeMenu]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      setIsClosing(false);
-    } else if (isMounted) {
-      setIsClosing(true);
-    }
-  }, [isOpen, isMounted]);
-
-  if (!isMounted) return null;
-
   return (
     <div
-      ref={containerRef}
-      onAnimationEnd={(e) => {
-        if (isClosing && e.target === containerRef.current) {
-          setIsMounted(false);
-          setIsClosing(false);
-        }
-      }}
-      role="dialog"
-      aria-modal="true"
+      className="kodo-menu-overlay"
+      data-open={isOpen}
+      role={isOpen ? "dialog" : undefined}
+      aria-modal={isOpen ? "true" : undefined}
       aria-label="Navigation menu"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "oklch(12% 0.01 260 / 0.95)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        animation: isClosing
-          ? "menuSlideOut 300ms var(--ease-cinematic) forwards"
-          : "menuSlideIn 450ms var(--ease-cinematic) forwards",
-      }}
+      aria-hidden={!isOpen}
+      inert={!isOpen}
     >
-      {/* Top Bar matching HeaderNav */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "var(--comp-nav-height)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          paddingInline: "var(--sys-space-page-margin)",
+          paddingBottom: "var(--ref-space-4)",
         }}
       >
-        {/* Brand */}
-        <div
+        <span
           style={{
             fontFamily: "var(--font-editorial-display), Georgia, serif",
-            fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
+            fontSize: "var(--ref-font-size-title)",
             letterSpacing: "var(--ref-letter-spacing-label)",
             color: "var(--sys-color-text-primary)",
+            textTransform: "uppercase",
           }}
         >
-          K O D Ō
-        </div>
+          {SITE_CONFIG.brand.wordmark}
+        </span>
 
-        {/* Close Button */}
         <button
-          ref={closeButtonRef}
+          type="button"
           onClick={closeMenu}
           className="kodo-btn-utility kodo-focus-ring"
           aria-label="Close navigation menu"
           style={{
-            fontSize: "var(--ref-font-size-small)",
-            letterSpacing: "var(--ref-letter-spacing-ultra)",
-            padding: "var(--ref-space-1)",
-            minWidth: "var(--ref-touch-target)",
-            minHeight: "var(--ref-touch-target)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minWidth: "44px",
+            minHeight: "44px",
           }}
         >
           Close
         </button>
       </div>
 
-      {/* Navigation Links */}
       <nav
         aria-label="Main navigation"
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          gap: "var(--ref-space-6)",
+          gap: "var(--ref-space-3)",
+          maxWidth: "600px",
+          marginInline: "auto",
+          width: "100%",
+          textAlign: "center",
         }}
       >
-        {MENU_LINKS.map((link, index) => (
+        {MENU_LINKS.map((item, idx) => (
           <Link
-            key={link.href}
-            href={link.href}
+            key={item.href}
+            href={item.href}
             onClick={closeMenu}
-            className="kodo-focus-ring menu-link"
+            className="kodo-focus-ring kodo-menu-item"
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "clamp(2rem, 4vw, 3.5rem)",
+              fontSize: "clamp(1.75rem, 4vw, 3rem)",
               fontWeight: 400,
               color: "var(--sys-color-text-primary)",
               textDecoration: "none",
               letterSpacing: "var(--ref-letter-spacing-tight)",
-              opacity: 0,
-              animation: `menuItemFade 400ms var(--ease-decelerate) ${150 + index * 80}ms forwards`,
-              transition: "opacity 240ms var(--ease-decelerate)",
+              lineHeight: 1.3,
+              transitionDelay: `${idx * 45}ms`,
             }}
           >
-            {link.label}
+            {item.label}
           </Link>
         ))}
       </nav>
 
-      <style jsx>{`
-        .menu-link:hover {
-          opacity: 0.85 !important;
-        }
-      `}</style>
+      <div
+        style={{
+          textAlign: "center",
+          paddingTop: "var(--ref-space-4)",
+        }}
+      >
+        <Link
+          href="/collections"
+          onClick={closeMenu}
+          className="kodo-btn-solid kodo-focus-ring"
+        >
+          Explore Collection
+        </Link>
+      </div>
     </div>
   );
 }

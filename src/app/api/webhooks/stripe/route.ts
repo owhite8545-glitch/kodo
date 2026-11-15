@@ -1,16 +1,13 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { OrderRepository } from "@/lib/order-repository";
 
 /* ═══════════════════════════════════════════════════════════
-   KODŌ — Stripe Webhook Handler (Live Mode)
-   Validates webhook signatures and transitions live orders
-   to "paid" status.
+   Stripe Webhook Endpoint
+   POST /api/webhooks/stripe
 
-   This route is only active when COMMERCE_MODE=live.
-   The webhook signature verification is the sole authority
-   for marking live orders as paid.
-
-   Implementation will be activated when the merchant
-   configures STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET.
+   Verifies the Stripe cryptographic signature on raw request body
+   and reconciles checkout session lifecycle states idempotently.
    ═══════════════════════════════════════════════════════════ */
 
 export async function POST(request: NextRequest) {
@@ -18,67 +15,92 @@ export async function POST(request: NextRequest) {
 
   if (!isLive) {
     return NextResponse.json(
-      { error: "Webhook handler is only active in live commerce mode." },
-      { status: 403 }
+      { received: false, message: "Commerce is operating in demo mode." },
+      { status: 400 }
     );
   }
 
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!webhookSecret) {
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  const stripeSecret = process.env.STRIPE_SECRET_KEY?.trim();
+
+  if (!webhookSecret || !stripeSecret) {
     console.error(
-      "[KODŌ Webhook] STRIPE_WEBHOOK_SECRET is not configured."
+      "[Stripe Webhook] Missing STRIPE_WEBHOOK_SECRET or STRIPE_SECRET_KEY."
     );
     return NextResponse.json(
-      { error: "Webhook secret not configured." },
+      { error: "Webhook configuration incomplete." },
       { status: 500 }
     );
   }
 
-  try {
-    const body = await request.text();
-    const signature = request.headers.get("stripe-signature");
-
-    if (!signature) {
-      return NextResponse.json(
-        { error: "Missing stripe-signature header." },
-        { status: 400 }
-      );
-    }
-
-    // Dynamic import to avoid loading Stripe SDK in Demo Mode
-    const Stripe = (await import("stripe")).default;
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: "2026-07-29.dahlia",
-    });
-
-    const event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      webhookSecret
-    );
-
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-
-      if (session.payment_status === "paid") {
-        const orderId = session.metadata?.orderId;
-
-        if (orderId) {
-          // TODO: Update order status in PostgreSQL via Drizzle ORM
-          // await db.update(orders).set({ status: "paid", paidAt: new Date().toISOString() }).where(eq(orders.id, orderId));
-          console.log(
-            `[KODŌ Webhook] Order ${orderId} marked as paid.`
-          );
-        }
-      }
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error("[KODŌ Webhook] Error processing webhook:", err);
+  const signature = request.headers.get("stripe-signature");
+  if (!signature) {
     return NextResponse.json(
-      { error: "Webhook processing failed." },
+      { error: "Missing stripe-signature header." },
       { status: 400 }
     );
   }
+
+  let event: Stripe.Event;
+
+  try {
+    const rawBody = await request.text();
+    const stripe = new Stripe(stripeSecret, {
+      apiVersion: "2026-07-29.dahlia",
+    });
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Invalid signature payload";
+    console.error("[Stripe Webhook] Verification failed:", message);
+    return NextResponse.json(
+      { error: "Webhook verification failed." },
+      { status: 400 }
+    );
+  }
+
+  let handled = false;
+
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const orderId =
+        session.metadata?.orderId || session.client_reference_id || "";
+      if (orderId) {
+        const paymentIntentId =
+          typeof session.payment_intent === "string"
+            ? session.payment_intent
+            : session.payment_intent?.id;
+        await OrderRepository.updateStatus(orderId, "paid", {
+          stripeSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          paidAt: new Date().toISOString(),
+        });
+        handled = true;
+      }
+      break;
+    }
+
+    case "checkout.session.expired": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const orderId =
+        session.metadata?.orderId || session.client_reference_id || "";
+      if (orderId) {
+        await OrderRepository.updateStatus(orderId, "cancelled", {
+          stripeSessionId: session.id,
+        });
+        handled = true;
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+
+  return NextResponse.json({
+    received: true,
+    eventType: event.type,
+    handled,
+  });
 }

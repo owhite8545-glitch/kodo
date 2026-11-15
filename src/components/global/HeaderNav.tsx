@@ -2,27 +2,21 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useUIStore } from "@/store/ui-store";
 import { useCartStore } from "@/store/cart-store";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — HeaderNav
-   Fixed glassmorphic navigation bar. 80px height.
-   Brand name on Column 1, Menu trigger on Column 12.
-   ═══════════════════════════════════════════════════════════ */
-
+import { useUIStore } from "@/store/ui-store";
 import { NAV_LINKS } from "@/data/navigation";
+import { SITE_CONFIG } from "@/config/site";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 export function HeaderNav() {
-  const pathname = usePathname();
-  const toggleMenu = useUIStore((s) => s.toggleMenu);
-  const isMenuOpen = useUIStore((s) => s.isMenuOpen);
-  const toggleCart = useCartStore((s) => s.toggleCart);
-  const totalItems = useCartStore((s) => s.totalItems);
+  const isHydrated = useHydrated();
+  const items = useCartStore((s) => s.items);
+  const openCart = useCartStore((s) => s.openCart);
+  const { isMenuOpen, toggleMenu } = useUIStore();
 
-  // Hide nav on checkout
-  if (pathname === "/checkout") return null;
+  const itemCount = isHydrated
+    ? items.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
 
   return (
     <header
@@ -52,7 +46,6 @@ export function HeaderNav() {
           width: "100%",
         }}
       >
-        {/* Brand Mark — Left Anchor */}
         <Link
           href="/"
           className="kodo-focus-ring"
@@ -68,10 +61,9 @@ export function HeaderNav() {
             flexShrink: 0,
           }}
         >
-          K O D Ō
+          {SITE_CONFIG.brand.wordmark}
         </Link>
 
-        {/* Right Navigation Group */}
         <div
           style={{
             display: "flex",
@@ -79,7 +71,6 @@ export function HeaderNav() {
             marginLeft: "auto",
           }}
         >
-          {/* Desktop Navigation Links */}
           <div
             style={{
               display: "flex",
@@ -89,72 +80,77 @@ export function HeaderNav() {
             }}
             className="nav-desktop-links"
           >
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.map((item) => (
               <Link
-                key={link.href}
-                href={link.href}
-                className="kodo-focus-ring nav-link"
-                aria-current={pathname === link.href ? "page" : undefined}
-                data-active={pathname === link.href}
+                key={item.href}
+                href={item.href}
+                className="kodo-focus-ring"
                 style={{
                   fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
                   fontSize: "var(--ref-font-size-small)",
                   fontWeight: 500,
                   textTransform: "uppercase",
-                  letterSpacing: "var(--ref-letter-spacing-ultra)",
+                  letterSpacing: "var(--ref-letter-spacing-wide)",
+                  color: "var(--sys-color-text-secondary)",
                   textDecoration: "none",
-                  padding: "var(--ref-space-1) 0",
-                  position: "relative",
+                  transition: "color var(--motion-duration-fast)",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {link.label}
+                {item.label}
               </Link>
             ))}
           </div>
 
-          {/* Cart Button */}
           <button
-            onClick={toggleCart}
+            type="button"
+            onClick={openCart}
             className="kodo-btn-utility kodo-focus-ring"
-            aria-label={`Shopping cart, ${totalItems()} items`}
+            aria-label={
+              itemCount > 0
+                ? `Shopping cart, ${itemCount} items`
+                : "Shopping cart"
+            }
             style={{
-              position: "relative",
-              fontSize: "var(--ref-font-size-small)",
-              letterSpacing: "var(--ref-letter-spacing-ultra)",
-              padding: "var(--ref-space-1) var(--ref-space-2)",
-              marginRight: "var(--ref-space-3)",
-              minWidth: "var(--ref-touch-target)",
-              minHeight: "var(--ref-touch-target)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "44px",
+              minHeight: "44px",
+              paddingInline: "8px",
             }}
           >
-            Cart
-            {totalItems() > 0 && (
+            <span>Cart</span>
+            {itemCount > 0 && (
               <span
                 style={{
                   marginLeft: "4px",
                   color: "var(--sys-color-text-accent)",
                 }}
               >
-                ({totalItems()})
+                ({itemCount})
               </span>
             )}
           </button>
 
-          {/* Menu Trigger */}
           <button
+            type="button"
             onClick={toggleMenu}
             className="kodo-btn-utility kodo-focus-ring"
+            aria-label={
+              isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+            }
             aria-expanded={isMenuOpen}
-            aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             style={{
-              fontSize: "var(--ref-font-size-small)",
-              letterSpacing: "var(--ref-letter-spacing-ultra)",
-              padding: "var(--ref-space-1)",
-              minWidth: "var(--ref-touch-target)",
-              minHeight: "var(--ref-touch-target)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "44px",
+              minHeight: "44px",
+              paddingInline: "8px",
             }}
           >
-            {isMenuOpen ? "Close" : "Menu"}
+            <span>{isMenuOpen ? "Close" : "Menu"}</span>
           </button>
         </div>
       </nav>

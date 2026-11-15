@@ -109,6 +109,7 @@
   --sys-color-text-primary: var(--ref-color-alabaster-98);
   --sys-color-text-secondary: var(--ref-color-alabaster-75);
   --sys-color-text-accent: var(--ref-color-gold-mid);
+  --sys-color-text-inverted: var(--ref-color-obsidian-10);
   --sys-color-border: var(--ref-color-border-subtle);
   --sys-color-border-active: var(--ref-color-border-active);
   --sys-color-error: var(--ref-color-crimson-error);
@@ -150,6 +151,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -160,7 +162,7 @@ body {
   font-family: var(--font-utility-sans), system-ui, -apple-system, sans-serif;
   font-size: var(--ref-font-size-base);
   line-height: var(--ref-line-height-body);
-  overflow-x: hidden;
+  overflow-x: clip;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -230,7 +232,7 @@ h1, h2, h3, .font-editorial {
    ───────────────────────────────────────────────────────── */
 .editorial-grid {
   display: grid;
-  grid-template-columns: repeat(var(--sys-grid-columns), 1fr);
+  grid-template-columns: repeat(var(--sys-grid-columns), minmax(0, 1fr));
   column-gap: var(--sys-space-gutter);
   padding-inline: var(--sys-space-page-margin);
   width: 100%;
@@ -568,8 +570,143 @@ h1, h2, h3, .font-editorial {
 }
 
 /* ─────────────────────────────────────────────────────────
-   14. Form Input States
+   14. Form Input States & Shared Motion Primitives
    ───────────────────────────────────────────────────────── */
 .kodo-input:focus {
   border-color: var(--sys-color-border-active);
+}
+
+.kodo-select {
+  background-color: var(--ref-color-obsidian-50);
+  color: var(--sys-color-text-primary);
+  color-scheme: dark;
+}
+
+.kodo-select option {
+  background-color: var(--ref-color-obsidian-50);
+  color: var(--sys-color-text-primary);
+}
+
+@keyframes kodoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.kodo-spin {
+  animation: kodoSpin 0.8s linear infinite;
+}
+
+/* Reusable animated drawer overlay & panel primitives (zero setState-in-effect) */
+.kodo-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: oklch(0% 0 0 / 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 280ms var(--ease-decelerate), visibility 0s linear 0s;
+}
+
+.kodo-drawer-backdrop[data-open="false"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms var(--ease-decelerate), visibility 0s linear 280ms;
+}
+
+.kodo-drawer-backdrop[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.kodo-cart-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 201;
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--sys-color-bg);
+  border-left: 1px solid var(--sys-color-border);
+  display: flex;
+  flex-direction: column;
+  padding: var(--ref-space-6) var(--sys-space-page-margin);
+  transition:
+    transform 320ms var(--ease-cinematic),
+    visibility 0s linear 0s;
+  will-change: transform;
+}
+
+.kodo-cart-panel[data-open="false"] {
+  transform: translate3d(100%, 0, 0);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform 280ms var(--ease-decelerate),
+    visibility 0s linear 280ms;
+}
+
+.kodo-cart-panel[data-open="true"] {
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.kodo-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background-color: var(--sys-color-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--ref-space-6) var(--sys-space-page-margin);
+  overflow-y: auto;
+  transition:
+    opacity 320ms var(--ease-cinematic),
+    transform 320ms var(--ease-cinematic),
+    visibility 0s linear 0s;
+}
+
+.kodo-menu-overlay[data-open="false"] {
+  opacity: 0;
+  transform: translate3d(0, -16px, 0);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 240ms var(--ease-decelerate),
+    transform 240ms var(--ease-decelerate),
+    visibility 0s linear 240ms;
+}
+
+.kodo-menu-overlay[data-open="true"] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.kodo-menu-item {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 420ms var(--ease-cinematic),
+    transform 420ms var(--ease-cinematic);
+}
+
+.kodo-menu-overlay[data-open="true"] .kodo-menu-item {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kodo-drawer-backdrop,
+  .kodo-cart-panel,
+  .kodo-menu-overlay,
+  .kodo-menu-item {
+    transition: none !important;
+  }
 }

@@ -26,7 +26,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["three", "gsap", "@react-three/fiber", "@react-three/drei"],
 
   images: {
     formats: ["image/avif", "image/webp"],

@@ -1,51 +1,47 @@
+import React from "react";
 import type { Metadata, Viewport } from "next";
 import { fontDisplay, fontSans } from "@/styles/fonts";
+import { resolveBaseUrl, SITE_CONFIG } from "@/config/site";
 import "./globals.css";
 
-/* ── Strict metadataBase Resolution ─────────────────────── */
-const baseUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ??
-  (process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : undefined);
+const baseUrl = resolveBaseUrl();
 
-if (!baseUrl) {
-  throw new Error(
-    "Critical Configuration Missing: NEXT_PUBLIC_BASE_URL must be defined in production for canonical metadata resolution."
-  );
-}
+export const viewport: Viewport = {
+  themeColor: "#0a0a0c",
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "KODŌ — The Geometry of Memory",
-    template: "%s | KODŌ Fragrances",
+    default: `${SITE_CONFIG.brand.name} — ${SITE_CONFIG.brand.tagline}`,
+    template: `%s | ${SITE_CONFIG.brand.fullName}`,
   },
-  description:
-    "KODŌ is a luxury fragrance house blending traditional Japanese design philosophy with hyper-modern structural geometry. Explore our olfactory architecture.",
-  keywords: [
-    "luxury fragrance",
-    "KODŌ",
-    "perfume",
-    "olfactory architecture",
-    "premium scent",
-    "quiet luxury",
-  ],
-  authors: [{ name: "KODŌ Studio" }],
+  description: SITE_CONFIG.brand.description,
+  keywords: [...SITE_CONFIG.brand.keywords],
   openGraph: {
+    title: `${SITE_CONFIG.brand.name} — ${SITE_CONFIG.brand.tagline}`,
+    description: SITE_CONFIG.brand.description,
     type: "website",
     locale: "en_US",
+    siteName: SITE_CONFIG.brand.name,
     url: baseUrl,
-    siteName: "KODŌ Fragrances",
-    title: "KODŌ — The Geometry of Memory",
-    description:
-      "A luxury fragrance house where traditional craft meets structural geometry.",
+    images: [
+      {
+        url: "/images/products/so/social-og.png",
+        width: 1024,
+        height: 538,
+        alt: `${SITE_CONFIG.brand.fullName} — Architectural Fragrances`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KODŌ — The Geometry of Memory",
-    description:
-      "A luxury fragrance house where traditional craft meets structural geometry.",
+    title: `${SITE_CONFIG.brand.name} — ${SITE_CONFIG.brand.tagline}`,
+    description: SITE_CONFIG.brand.description,
+    images: ["/images/products/so/social-og.png"],
   },
   robots: {
     index: true,
@@ -53,49 +49,38 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#1a1a1e",
-  width: "device-width",
-  initialScale: 1,
-};
-
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_CONFIG.brand.fullName,
+    url: baseUrl,
+    email: SITE_CONFIG.contact.conciergeEmail,
+    description: SITE_CONFIG.brand.description,
+    logo: `${baseUrl}/images/products/so/pure-product.jpg`,
+  };
+
   return (
     <html
       lang="en"
       className={`${fontDisplay.variable} ${fontSans.variable}`}
+      style={{ colorScheme: "dark" }}
     >
       <body>
-        {/* WCAG 2.4.1: Skip Navigation Link */}
-        <a href="#main-content" className="skip-nav">
+        <a href="#main-content" className="skip-to-main">
           Skip to main content
         </a>
 
         {children}
 
-        {/* Structured Data: JSON-LD Schema for AI Crawlers */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Brand",
-              name: "KODŌ Fragrances",
-              description:
-                "High-end luxury perfume house blending traditional Ma space design with precision structural web architecture.",
-              url: "https://kodo-fragrances.com",
-              category: "Luxury Beauty / Fragrance",
-              offers: {
-                "@type": "AggregateOffer",
-                priceCurrency: "USD",
-                lowPrice: "180",
-                highPrice: "320",
-              },
-            }),
+            __html: JSON.stringify(jsonLd),
           }}
         />
       </body>

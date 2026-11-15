@@ -1,234 +1,349 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { PRODUCTS } from "@/data/products";
-import { COMMERCE_CONFIG } from "@/config/commerce";
+import crypto from "node:crypto";
+import Stripe from "stripe";
 import { checkoutFormSchema } from "@/lib/checkout-schema";
+import { getAllProducts } from "@/data/products";
 import { OrderRepository } from "@/lib/order-repository";
-import type { OrderRecord, OrderLineItem } from "@/types/webgl";
+import {
+  calculateOrderFinancials,
+  COMMERCE_CONFIG,
+  resolveCommerceMode,
+} from "@/config/commerce";
+import { resolveBaseUrl } from "@/config/site";
+import { signDemoReceipt } from "@/lib/demo-receipt";
+import type { OrderLineItem, OrderRecord } from "@/types/webgl";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Checkout Server Action
-   Handles form validation, server-side price resolution,
-   strict server-side idempotency enforcement, and
-   mode-branched order creation.
-   ═══════════════════════════════════════════════════════════ */
-
-// ─── Types ────────────────────────────────────────────────
-
-interface CheckoutResult {
+export interface CheckoutActionResult {
   success: boolean;
   error?: string;
-  fieldErrors?: Record<string, string[]>;
   redirectUrl?: string;
+  fieldErrors?: Record<string, string>;
 }
 
-// ─── Helpers ──────────────────────────────────────────────
+const DEMO_TOKEN_COOKIE = "kodo_demo_token";
+const DEMO_RECEIPT_COOKIE = "kodo_demo_receipt";
 
-function generateOrderId(): string {
-  const now = new Date();
-  const dateStr = now
-    .toISOString()
-    .slice(0, 10)
-    .replace(/-/g, "");
-  const suffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-  return `KODO-DEMO-${dateStr}-${suffix}`;
+function generateOrderId(prefix = "KDO-ORD"): string {
+  const random = crypto.randomBytes(6).toString("hex").toUpperCase();
+  return `${prefix}-${random}`;
 }
-
-function generateToken(): string {
-  return crypto.randomUUID();
-}
-
-// ─── Server Action ────────────────────────────────────────
 
 export async function submitCheckout(
-  rawData: unknown
-): Promise<CheckoutResult> {
-  // 1. Validate input
-  const parsed = checkoutFormSchema.safeParse(rawData);
+  formData: unknown
+): Promise<CheckoutActionResult> {
+  const parsed = checkoutFormSchema.safeParse(formData);
+
   if (!parsed.success) {
-    const fieldErrors: Record<string, string[]> = {};
+    const fieldErrors: Record<string, string> = {};
     for (const issue of parsed.error.issues) {
       const path = issue.path.join(".");
-      if (!fieldErrors[path]) fieldErrors[path] = [];
-      fieldErrors[path].push(issue.message);
+      if (path && !fieldErrors[path]) {
+        fieldErrors[path] = issue.message;
+      }
     }
     return {
       success: false,
-      error: "Please correct the highlighted fields.",
+      error: "Please review the highlighted fields below.",
       fieldErrors,
     };
   }
 
-  const data = parsed.data;
+  const { customer, shipping, cartItems, idempotencyKey } = parsed.data;
+  const products = getAllProducts();
+  const productMap = new Map(products.map((p) => [p.id, p]));
 
-  // 2. Server-side price resolution — zero client price authority
-  const lineItems: OrderLineItem[] = [];
-  let subtotalCents = 0;
+  const verifiedLineItems: OrderLineItem[] = [];
 
-  for (const cartItem of data.cartItems) {
-    const product = PRODUCTS.find((p) => p.id === cartItem.productId);
-    if (!product) {
+  for (const item of cartItems) {
+    const product = productMap.get(item.productId);
+    if (!product || !product.inStock) {
       return {
         success: false,
-        error: `Product "${cartItem.productId}" not found.`,
+        error: `Product "${item.productId}" is currently unavailable.`,
       };
     }
 
-    const sizeEntry = product.sizes.find(
-      (s) => s.variant === cartItem.variant
+    const variantMatch = product.sizes.find(
+      (s) => s.variant === item.variant && s.inStock
     );
-    if (!sizeEntry) {
+    if (!variantMatch) {
       return {
         success: false,
-        error: `Variant "${cartItem.variant}" not available for ${product.name}.`,
+        error: `${product.name} (${item.variant}) is currently out of stock.`,
       };
     }
 
-    if (!sizeEntry.inStock) {
-      return {
-        success: false,
-        error: `${product.name} (${cartItem.variant}) is currently out of stock.`,
-      };
-    }
-
-    const unitPriceCents = Math.round(sizeEntry.price * 100);
-    const lineTotalCents = unitPriceCents * cartItem.quantity;
-    subtotalCents += lineTotalCents;
-
-    lineItems.push({
+    const unitPriceCents = Math.round(variantMatch.price * 100);
+    verifiedLineItems.push({
       productId: product.id,
       productName: product.name,
-      variant: cartItem.variant,
-      quantity: cartItem.quantity,
+      variant: item.variant,
+      quantity: item.quantity,
       unitPriceCents,
-      lineTotalCents,
+      lineTotalCents: unitPriceCents * item.quantity,
     });
   }
 
-  // 3. Financial calculation
-  const shippingCents = COMMERCE_CONFIG.shipping.defaultRateCents;
-  const taxCents = 0; // Tax calculation deferred to Live Mode configuration
-  const totalCents = subtotalCents + shippingCents + taxCents;
+  const calculated = calculateOrderFinancials(verifiedLineItems);
+  const financials = {
+    currency: calculated.currency,
+    subtotalCents: calculated.subtotalCents,
+    shippingCents: calculated.shippingCents,
+    taxCents: calculated.taxCents,
+    totalCents: calculated.totalCents,
+  };
 
-  // 4. Mode-branched order creation
-  if (COMMERCE_CONFIG.mode === "demo") {
-    return await handleDemoCheckout(data, lineItems, {
-      subtotalCents,
-      shippingCents,
-      taxCents,
-      totalCents,
+  const mode = resolveCommerceMode();
+
+  if (mode === "live") {
+    return handleLiveCheckout({
+      customer,
+      shipping,
+      lineItems: verifiedLineItems,
+      financials,
+      idempotencyKey,
     });
   }
 
-  // Live mode
-  return handleLiveCheckout();
+  return handleDemoCheckout({
+    customer,
+    shipping,
+    lineItems: verifiedLineItems,
+    financials,
+    idempotencyKey,
+  });
 }
 
-// ─── Demo Mode Handler ────────────────────────────────────
+async function handleDemoCheckout(params: {
+  customer: { name: string; email: string; phone?: string };
+  shipping: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    stateOrRegion?: string;
+    postalCode: string;
+    country: string;
+  };
+  lineItems: OrderLineItem[];
+  financials: OrderRecord["financials"];
+  idempotencyKey: string;
+}): Promise<CheckoutActionResult> {
+  const { customer, shipping, lineItems, financials, idempotencyKey } = params;
+  const cookieStore = await cookies();
 
-async function handleDemoCheckout(
-  data: {
-    customer: { name: string; email: string; phone?: string };
-    shipping: {
-      addressLine1: string;
-      addressLine2?: string;
-      city: string;
-      stateOrRegion?: string;
-      postalCode: string;
-      country: string;
-    };
-    idempotencyKey: string;
-  },
-  lineItems: OrderLineItem[],
-  financials: {
-    subtotalCents: number;
-    shippingCents: number;
-    taxCents: number;
-    totalCents: number;
-  }
-): Promise<CheckoutResult> {
-  // 1. Server-Side Idempotency Check:
-  // If an order already exists for this idempotency key, reuse the existing order
-  // and redirect without creating duplicates.
-  const existing = await OrderRepository.getDemoOrderByIdempotencyKey(
-    data.idempotencyKey
-  );
-
+  const existing = await OrderRepository.findByIdempotencyKey(idempotencyKey);
   if (existing) {
-    const cookieStore = await cookies();
-    cookieStore.set("kodo_demo_token", existing.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 86400, // 24 hours
-    });
-    redirect(
-      `/checkout/success?order_id=${encodeURIComponent(existing.order.id)}`
-    );
+    await issueDemoReceiptCookies(cookieStore, existing, idempotencyKey);
+    return {
+      success: true,
+      redirectUrl: `/checkout/success?order_id=${encodeURIComponent(existing.id)}`,
+    };
   }
 
-  // 2. Fresh Order Creation
-  const orderId = generateOrderId();
-  const token = generateToken();
+  const orderId = generateOrderId("KDO-DEMO");
   const now = new Date().toISOString();
 
   const order: OrderRecord = {
     id: orderId,
-    idempotencyKey: data.idempotencyKey,
+    idempotencyKey,
     mode: "demo",
     stripeSessionId: null,
     stripePaymentIntentId: null,
     customer: {
-      name: data.customer.name,
-      email: data.customer.email,
-      phone: data.customer.phone || null,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone ?? "",
     },
     shipping: {
-      addressLine1: data.shipping.addressLine1,
-      addressLine2: data.shipping.addressLine2 || null,
-      city: data.shipping.city,
-      stateOrRegion: data.shipping.stateOrRegion || null,
-      postalCode: data.shipping.postalCode,
-      country: data.shipping.country,
+      addressLine1: shipping.addressLine1,
+      addressLine2: shipping.addressLine2 ?? "",
+      city: shipping.city,
+      stateOrRegion: shipping.stateOrRegion ?? "",
+      postalCode: shipping.postalCode,
+      country: shipping.country,
     },
     lineItems,
-    financials: {
-      currency: COMMERCE_CONFIG.currency.code,
-      ...financials,
-    },
-    status: "paid", // Demo orders are immediately marked "paid"
+    financials,
+    status: "paid",
     createdAt: now,
     paidAt: now,
   };
 
-  // Persist the complete OrderRecord server-side (stored in Upstash Redis or In-Memory)
-  await OrderRepository.saveDemoOrder(token, order);
+  await OrderRepository.create(order);
+  await issueDemoReceiptCookies(cookieStore, order, idempotencyKey);
 
-  // Set minimal opaque cookie (ZERO PII, token only)
-  const cookieStore = await cookies();
-  cookieStore.set("kodo_demo_token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 86400, // 24 hours — matches Redis TTL
-  });
-
-  // Redirect to success page
-  redirect(`/checkout/success?order_id=${encodeURIComponent(orderId)}`);
+  return {
+    success: true,
+    redirectUrl: `/checkout/success?order_id=${encodeURIComponent(orderId)}`,
+  };
 }
 
-// ─── Live Mode Handler (Stubbed) ──────────────────────────
+async function issueDemoReceiptCookies(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+  order: OrderRecord,
+  idempotencyKey: string
+): Promise<void> {
+  const isProd = process.env.NODE_ENV === "production";
+  const tokenPayload = crypto
+    .createHash("sha256")
+    .update(`${order.id}:${idempotencyKey}`)
+    .digest("hex");
 
-function handleLiveCheckout(): CheckoutResult {
-  // Live Mode requires STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, POSTGRES_URL.
-  // This handler will be activated when COMMERCE_MODE=live.
-  return {
-    success: false,
-    error:
-      "Live commerce is not yet configured. Please contact the atelier administrator.",
+  cookieStore.set(DEMO_TOKEN_COOKIE, tokenPayload, {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 3600,
+    secure: isProd,
+  });
+
+  cookieStore.set(DEMO_RECEIPT_COOKIE, signDemoReceipt(order), {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 3600,
+    secure: isProd,
+  });
+}
+
+async function handleLiveCheckout(params: {
+  customer: { name: string; email: string; phone?: string };
+  shipping: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    stateOrRegion?: string;
+    postalCode: string;
+    country: string;
   };
+  lineItems: OrderLineItem[];
+  financials: OrderRecord["financials"];
+  idempotencyKey: string;
+}): Promise<CheckoutActionResult> {
+  const secretKey = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!secretKey) {
+    return {
+      success: false,
+      error:
+        "Stripe secret key is missing. Configure STRIPE_SECRET_KEY or switch COMMERCE_MODE to demo.",
+    };
+  }
+
+  const baseUrl = resolveBaseUrl();
+  const orderId = generateOrderId("KDO-LIVE");
+  const now = new Date().toISOString();
+
+  const order: OrderRecord = {
+    id: orderId,
+    idempotencyKey: params.idempotencyKey,
+    mode: "live",
+    stripeSessionId: null,
+    stripePaymentIntentId: null,
+    customer: {
+      name: params.customer.name,
+      email: params.customer.email,
+      phone: params.customer.phone ?? "",
+    },
+    shipping: {
+      addressLine1: params.shipping.addressLine1,
+      addressLine2: params.shipping.addressLine2 ?? "",
+      city: params.shipping.city,
+      stateOrRegion: params.shipping.stateOrRegion ?? "",
+      postalCode: params.shipping.postalCode,
+      country: params.shipping.country,
+    },
+    lineItems: params.lineItems,
+    financials: params.financials,
+    status: "pending",
+    createdAt: now,
+    paidAt: null,
+  };
+
+  await OrderRepository.create(order);
+
+  try {
+    const stripe = new Stripe(secretKey, {
+      apiVersion: "2026-07-29.dahlia",
+    });
+
+    const stripeLineItems: Stripe.Checkout.SessionCreateParams.LineItem[] =
+      params.lineItems.map((item) => ({
+        price_data: {
+          currency: COMMERCE_CONFIG.currency.code.toLowerCase(),
+          product_data: {
+            name: `KODŌ ${item.productName} (${item.variant})`,
+            description: "Extrait de Parfum — Architectural Borosilicate Flacon",
+          },
+          unit_amount: item.unitPriceCents,
+        },
+        quantity: item.quantity,
+      }));
+
+    if (params.financials.shippingCents > 0) {
+      stripeLineItems.push({
+        price_data: {
+          currency: COMMERCE_CONFIG.currency.code.toLowerCase(),
+          product_data: {
+            name: COMMERCE_CONFIG.shipping.methodLabel,
+            description: COMMERCE_CONFIG.shipping.estimatedTransit,
+          },
+          unit_amount: params.financials.shippingCents,
+        },
+        quantity: 1,
+      });
+    }
+
+    const session = await stripe.checkout.sessions.create(
+      {
+        mode: "payment",
+        customer_email: params.customer.email,
+        client_reference_id: orderId,
+        line_items: stripeLineItems,
+        metadata: {
+          orderId,
+          idempotencyKey: params.idempotencyKey,
+          customerName: params.customer.name,
+          shippingCountry: params.shipping.country,
+          shippingCity: params.shipping.city,
+          shippingPostalCode: params.shipping.postalCode,
+          shippingAddress: params.shipping.addressLine1,
+        },
+        success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${baseUrl}/checkout?canceled=1`,
+      },
+      {
+        idempotencyKey: params.idempotencyKey,
+      }
+    );
+
+    await OrderRepository.updateStatus(orderId, "pending", {
+      stripeSessionId: session.id,
+    });
+
+    if (!session.url) {
+      return {
+        success: false,
+        error: "Unable to initialize Stripe Checkout URL.",
+      };
+    }
+
+    return {
+      success: true,
+      redirectUrl: session.url,
+    };
+  } catch (err) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : "Unable to initialize Stripe Checkout session.";
+    console.error("[Checkout] Live Stripe initialization failed:", message);
+    await OrderRepository.updateStatus(orderId, "cancelled");
+    return {
+      success: false,
+      error:
+        "Payment initialization could not complete. Please verify your details and try again.",
+    };
+  }
 }

@@ -2,176 +2,334 @@ import React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import crypto from "node:crypto";
+import Stripe from "stripe";
 import { OrderRepository } from "@/lib/order-repository";
-import { COMMERCE_CONFIG } from "@/config/commerce";
+import { formatCents } from "@/config/commerce";
+import { SITE_CONFIG } from "@/config/site";
+import { verifyDemoReceipt } from "@/lib/demo-receipt";
+import type { OrderRecord } from "@/types/webgl";
 import { SuccessClient } from "./SuccessClient";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Order Confirmation Page (Server Component)
-   Retrieves the demo order from OrderRepository using
-   the opaque token from the cookie, validates against
-   the orderId from searchParams, and renders the receipt.
-   ═══════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
   title: "Order Confirmed",
-  description: "Your KODŌ order has been confirmed.",
+  description: "Your KODŌ order receipt and atelier fulfillment summary.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
-interface SuccessPageProps {
-  searchParams: Promise<{ order_id?: string }>;
+export const dynamic = "force-dynamic";
+
+function renderUnavailableReceipt(title: string, subtitle: string) {
+  return (
+    <main
+      id="main-content"
+      role="main"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "var(--ref-space-12) var(--sys-space-page-margin)",
+        textAlign: "center",
+        gap: "var(--ref-space-4)",
+      }}
+    >
+      <p className="text-label">KODŌ Patron Receipt</p>
+      <h1
+        style={{
+          fontFamily: "var(--font-editorial-display), Georgia, serif",
+          fontSize: "var(--ref-font-size-heading)",
+          color: "var(--sys-color-text-primary)",
+        }}
+      >
+        {title}
+      </h1>
+      <p
+        className="text-body"
+        style={{
+          color: "var(--sys-color-text-secondary)",
+          maxWidth: "42ch",
+        }}
+      >
+        {subtitle}
+      </p>
+      <div style={{ display: "flex", gap: "var(--ref-space-3)", marginTop: "var(--ref-space-2)" }}>
+        <Link href="/collections" className="kodo-btn-solid kodo-focus-ring">
+          Return to Collection
+        </Link>
+        <Link href="/concierge" className="kodo-btn-outline kodo-focus-ring">
+          Contact Concierge
+        </Link>
+      </div>
+    </main>
+  );
 }
 
-export default async function SuccessPage({ searchParams }: SuccessPageProps) {
-  const { order_id: orderId } = await searchParams;
+async function resolveDemoOrder(orderId: string): Promise<OrderRecord | null> {
   const cookieStore = await cookies();
-  const tokenCookie = cookieStore.get("kodo_demo_token");
+  const receiptCookie = cookieStore.get("kodo_demo_receipt")?.value;
+  const verifiedCookieOrder = verifyDemoReceipt(receiptCookie, orderId);
 
-  // Validate inputs
-  if (!orderId || !tokenCookie?.value) {
-    return (
-      <main id="main-content" role="main">
-        <ReceiptLayout>
-          <ErrorState message="No order found. Please complete your checkout first." />
-        </ReceiptLayout>
-      </main>
-    );
+  const repoOrder = await OrderRepository.findById(orderId);
+  const demoToken = cookieStore.get("kodo_demo_token")?.value;
+
+  if (repoOrder) {
+    const expectedToken = crypto
+      .createHash("sha256")
+      .update(`${repoOrder.id}:${repoOrder.idempotencyKey}`)
+      .digest("hex");
+
+    if (demoToken === expectedToken) {
+      return repoOrder;
+    }
   }
 
-  // Retrieve order from server-side storage
-  const order = await OrderRepository.getDemoOrder(
-    orderId,
-    tokenCookie.value
-  );
+  return verifiedCookieOrder;
+}
+
+async function resolveLiveStripeOrder(
+  sessionId: string
+): Promise<OrderRecord | null> {
+  const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+  if (!stripeKey) return null;
+
+  try {
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2026-07-29.dahlia",
+    });
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ["line_items"],
+    });
+
+    if (session.payment_status !== "paid") {
+      return null;
+    }
+
+    const orderId =
+      session.metadata?.orderId ||
+      session.client_reference_id ||
+      `KDO-STR-${session.id.slice(-8).toUpperCase()}`;
+
+    const repoOrder = await OrderRepository.findById(orderId);
+    if (repoOrder) {
+      return {
+        ...repoOrder,
+        status: "paid",
+        stripeSessionId: session.id,
+        paidAt: repoOrder.paidAt ?? new Date().toISOString(),
+      };
+    }
+
+    const lineItems = (session.line_items?.data ?? []).map((item, idx) => ({
+      productId: `stripe-${idx + 1}`,
+      productName: item.description || "KODŌ Architectural Fragrance",
+      variant: "50ml" as const,
+      quantity: item.quantity ?? 1,
+      unitPriceCents:
+        item.price?.unit_amount ??
+        Math.round((item.amount_total ?? 0) / Math.max(1, item.quantity ?? 1)),
+      lineTotalCents: item.amount_total ?? 0,
+    }));
+
+    const paymentIntentId =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id ?? null;
+
+    return {
+      id: orderId,
+      idempotencyKey: session.metadata?.idempotencyKey || session.id,
+      mode: "live",
+      stripeSessionId: session.id,
+      stripePaymentIntentId: paymentIntentId,
+      customer: {
+        name:
+          session.customer_details?.name ||
+          session.metadata?.customerName ||
+          "KODŌ Patron",
+        email: session.customer_details?.email || session.customer_email || "",
+        phone: session.customer_details?.phone || "",
+      },
+      shipping: {
+        addressLine1:
+          session.metadata?.shippingAddress ||
+          session.customer_details?.address?.line1 ||
+          "",
+        addressLine2: session.customer_details?.address?.line2 || "",
+        city:
+          session.metadata?.shippingCity ||
+          session.customer_details?.address?.city ||
+          "",
+        stateOrRegion: session.customer_details?.address?.state || "",
+        postalCode:
+          session.metadata?.shippingPostalCode ||
+          session.customer_details?.address?.postal_code ||
+          "",
+        country:
+          session.metadata?.shippingCountry ||
+          session.customer_details?.address?.country ||
+          "",
+      },
+      lineItems,
+      financials: {
+        currency: (session.currency || "USD").toUpperCase(),
+        subtotalCents: session.amount_subtotal ?? 0,
+        shippingCents: 0,
+        taxCents: session.total_details?.amount_tax ?? 0,
+        totalCents: session.amount_total ?? 0,
+      },
+      status: "paid",
+      createdAt: new Date(session.created * 1000).toISOString(),
+      paidAt: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error("[Success] Stripe session lookup error:", err);
+    return null;
+  }
+}
+
+export default async function CheckoutSuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ order_id?: string; session_id?: string }>;
+}) {
+  const params = await searchParams;
+
+  let order: OrderRecord | null = null;
+
+  if (params.order_id) {
+    order = await resolveDemoOrder(params.order_id);
+  } else if (params.session_id) {
+    order = await resolveLiveStripeOrder(params.session_id);
+  } else {
+    return renderUnavailableReceipt(
+      "Receipt Not Found",
+      "No valid order reference was provided. Please check your confirmation link or contact our concierge."
+    );
+  }
 
   if (!order) {
-    return (
-      <main id="main-content" role="main">
-        <ReceiptLayout>
-          <ErrorState message="Order not found or has expired. Demo orders are available for 24 hours." />
-        </ReceiptLayout>
-      </main>
+    return renderUnavailableReceipt(
+      "Receipt Unavailable",
+      "This order confirmation has expired or belongs to another browser session."
     );
   }
 
-  const { symbol, decimals } = COMMERCE_CONFIG.currency;
-  const fmt = (cents: number) => `${symbol}${(cents / 100).toFixed(decimals)}`;
-
   return (
-    <main id="main-content" role="main">
-      {/* Client component: clears cart and idempotency key on mount */}
+    <>
       <SuccessClient />
 
-      <ReceiptLayout>
-        {/* Confirmation Header */}
+      <main
+        id="main-content"
+        role="main"
+        style={{
+          minHeight: "100vh",
+          paddingBlock: "var(--ref-space-12)",
+          paddingInline: "var(--sys-space-page-margin)",
+          maxWidth: "740px",
+          marginInline: "auto",
+        }}
+      >
         <div
+          style={{
+            marginBottom: "var(--ref-space-10)",
+            textAlign: "center",
+          }}
+        >
+          <Link
+            href="/"
+            className="kodo-focus-ring"
+            style={{
+              fontFamily: "var(--font-editorial-display), Georgia, serif",
+              fontSize: "var(--ref-font-size-title)",
+              letterSpacing: "var(--ref-letter-spacing-label)",
+              color: "var(--sys-color-text-primary)",
+              textDecoration: "none",
+              textTransform: "uppercase",
+            }}
+          >
+            {SITE_CONFIG.brand.wordmark}
+          </Link>
+        </div>
+
+        <section
+          aria-labelledby="receipt-heading"
           style={{
             textAlign: "center",
             marginBottom: "var(--ref-space-8)",
           }}
         >
-          {/* Checkmark */}
-          <div
+          <span
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              border: "2px solid var(--sys-color-text-accent)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginInline: "auto",
-              marginBottom: "var(--ref-space-4)",
+              display: "inline-block",
+              padding: "4px 12px",
+              border: "1px solid var(--sys-color-border)",
+              fontSize: "var(--ref-font-size-small)",
+              letterSpacing: "var(--ref-letter-spacing-wide)",
+              textTransform: "uppercase",
+              color: "var(--sys-color-text-accent)",
+              marginBottom: "var(--ref-space-3)",
             }}
           >
-            <svg
-              width={28}
-              height={28}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: "var(--sys-color-text-accent)" }}
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
+            {order.mode === "demo"
+              ? "Atelier Demo Confirmed"
+              : "Payment Confirmed"}
+          </span>
 
           <h1
+            id="receipt-heading"
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "var(--ref-font-size-display)",
-              lineHeight: "var(--ref-line-height-tight)",
+              fontSize: "var(--ref-font-size-heading)",
               fontWeight: 400,
+              letterSpacing: "var(--ref-letter-spacing-display)",
+              color: "var(--sys-color-text-primary)",
               marginBottom: "var(--ref-space-2)",
             }}
           >
             Ritual Confirmed
           </h1>
+
           <p
-            className="text-body-lg"
+            className="text-body"
             style={{ color: "var(--sys-color-text-secondary)" }}
           >
-            Thank you, {order.customer.name}.
+            Order Reference:{" "}
+            <strong style={{ color: "var(--sys-color-text-primary)" }}>
+              {order.id}
+            </strong>
           </p>
+        </section>
 
-          {order.mode === "demo" && (
-            <p
-              className="text-caption"
-              style={{
-                color: "var(--sys-color-text-secondary)",
-                marginTop: "var(--ref-space-2)",
-                opacity: 0.7,
-              }}
-            >
-              Atelier Concept Demonstration — Non-commercial simulation
-            </p>
-          )}
-        </div>
-
-        {/* Order Reference */}
-        <div
+        <section
+          aria-label="Order summary"
           style={{
-            padding: "var(--ref-space-4)",
+            padding: "var(--ref-space-6)",
             border: "1px solid var(--sys-color-border)",
-            marginBottom: "var(--ref-space-6)",
+            backgroundColor: "var(--ref-color-obsidian-50)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--ref-space-4)",
+            marginBottom: "var(--ref-space-8)",
           }}
         >
-          <div
+          <h2
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span className="text-label">Order Reference</span>
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-caption)",
-                fontVariantNumeric: "tabular-nums",
-                letterSpacing: "var(--ref-letter-spacing-wide)",
-              }}
-            >
-              {order.id}
-            </span>
-          </div>
-        </div>
-
-        {/* Line Items */}
-        <div style={{ marginBottom: "var(--ref-space-6)" }}>
-          <p
-            className="text-label"
-            style={{
-              marginBottom: "var(--ref-space-3)",
-              paddingBottom: "var(--ref-space-2)",
+              fontFamily: "var(--font-editorial-display), Georgia, serif",
+              fontSize: "var(--ref-font-size-title)",
+              color: "var(--sys-color-text-primary)",
+              paddingBottom: "var(--ref-space-3)",
               borderBottom: "1px solid var(--sys-color-border)",
             }}
           >
-            Items
-          </p>
+            Selected Vessels
+          </h2>
+
           <ul
             style={{
               listStyle: "none",
@@ -180,15 +338,13 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               gap: "var(--ref-space-3)",
             }}
           >
-            {order.lineItems.map((item, i) => (
+            {order.lineItems.map((item, idx) => (
               <li
-                key={`${item.productId}-${item.variant}-${i}`}
+                key={`${item.productId}-${item.variant}-${idx}`}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  paddingBottom: "var(--ref-space-2)",
-                  borderBottom: "1px solid var(--sys-color-border)",
                 }}
               >
                 <div>
@@ -197,256 +353,138 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                       fontFamily:
                         "var(--font-editorial-display), Georgia, serif",
                       fontSize: "var(--ref-font-size-base)",
-                      fontWeight: 400,
+                      color: "var(--sys-color-text-primary)",
                     }}
                   >
                     {item.productName}
                   </p>
-                  <p
-                    className="text-caption"
-                    style={{ opacity: 0.7 }}
-                  >
+                  <p className="text-caption" style={{ fontSize: "0.75rem" }}>
                     {item.variant} × {item.quantity}
                   </p>
                 </div>
-                <span
-                  style={{
-                    fontFamily:
-                      "var(--font-utility-sans), system-ui, sans-serif",
-                    fontSize: "var(--ref-font-size-caption)",
-                    fontVariantNumeric: "tabular-nums",
-                  }}
+                <p
+                  className="text-body"
+                  style={{ color: "var(--sys-color-text-primary)" }}
                 >
-                  {fmt(item.lineTotalCents)}
-                </span>
+                  {formatCents(item.lineTotalCents)}
+                </p>
               </li>
             ))}
           </ul>
-        </div>
 
-        {/* Financials */}
-        <div
+          <div
+            style={{
+              paddingTop: "var(--ref-space-3)",
+              borderTop: "1px solid var(--sys-color-border)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--ref-space-2)",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="text-caption">Subtotal</span>
+              <span
+                className="text-body"
+                style={{ color: "var(--sys-color-text-primary)" }}
+              >
+                {formatCents(order.financials.subtotalCents)}
+              </span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span className="text-caption">Shipping</span>
+              <span
+                className="text-body"
+                style={{ color: "var(--sys-color-text-primary)" }}
+              >
+                {order.financials.shippingCents === 0
+                  ? "Complimentary"
+                  : formatCents(order.financials.shippingCents)}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "var(--ref-space-2)",
+                borderTop: "1px solid var(--sys-color-border)",
+              }}
+            >
+              <span className="text-label">Total</span>
+              <span
+                style={{
+                  fontFamily: "var(--font-editorial-display), Georgia, serif",
+                  fontSize: "var(--ref-font-size-title)",
+                  color: "var(--sys-color-text-accent)",
+                }}
+              >
+                {formatCents(order.financials.totalCents)}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section
+          aria-label="Shipping destination"
           style={{
+            padding: "var(--ref-space-6)",
+            border: "1px solid var(--sys-color-border)",
+            backgroundColor: "var(--ref-color-obsidian-50)",
             display: "flex",
             flexDirection: "column",
             gap: "var(--ref-space-2)",
-            marginBottom: "var(--ref-space-6)",
+            marginBottom: "var(--ref-space-8)",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span className="text-caption">Subtotal</span>
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-caption)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {fmt(order.financials.subtotalCents)}
-            </span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span className="text-caption">
-              {COMMERCE_CONFIG.shipping.policyLabel}
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-caption)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {fmt(order.financials.shippingCents)}
-            </span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              paddingTop: "var(--ref-space-3)",
-              borderTop: "1px solid var(--sys-color-border)",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-base)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "var(--ref-letter-spacing-sans)",
-              }}
-            >
-              Total
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                fontSize: "var(--ref-font-size-title)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {fmt(order.financials.totalCents)}
-            </span>
-          </div>
-        </div>
-
-        {/* Shipping Address */}
-        <div style={{ marginBottom: "var(--ref-space-8)" }}>
+          <p className="text-label">Shipping Destination</p>
           <p
-            className="text-label"
-            style={{
-              marginBottom: "var(--ref-space-3)",
-              paddingBottom: "var(--ref-space-2)",
-              borderBottom: "1px solid var(--sys-color-border)",
-            }}
+            className="text-body"
+            style={{ color: "var(--sys-color-text-primary)" }}
           >
-            Delivery Address
+            {order.customer.name}
           </p>
-          <div
-            className="text-caption"
-            style={{
-              lineHeight: 1.8,
-              color: "var(--sys-color-text-secondary)",
-            }}
-          >
-            <p>{order.customer.name}</p>
-            <p>{order.shipping.addressLine1}</p>
-            {order.shipping.addressLine2 && (
-              <p>{order.shipping.addressLine2}</p>
-            )}
-            <p>
-              {order.shipping.city}
-              {order.shipping.stateOrRegion
-                ? `, ${order.shipping.stateOrRegion}`
+          {order.shipping.addressLine1 && (
+            <p className="text-caption">
+              {order.shipping.addressLine1}
+              {order.shipping.addressLine2
+                ? `, ${order.shipping.addressLine2}`
                 : ""}
             </p>
-            <p>{order.shipping.postalCode}</p>
-            <p>{order.shipping.country}</p>
-          </div>
-        </div>
+          )}
+          <p className="text-caption">
+            {[
+              order.shipping.city,
+              order.shipping.stateOrRegion,
+              order.shipping.postalCode,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+          </p>
+          {order.shipping.country && (
+            <p className="text-caption">{order.shipping.country}</p>
+          )}
+          {order.customer.email && (
+            <p className="text-caption">
+              Confirmation dispatched to {order.customer.email}
+            </p>
+          )}
+        </section>
 
-        {/* Continue Shopping */}
-        <div style={{ textAlign: "center" }}>
-          <Link
-            href="/collections"
-            className="kodo-btn-solid kodo-focus-ring"
-            style={{
-              textDecoration: "none",
-              display: "inline-flex",
-              justifyContent: "center",
-            }}
-          >
-            Continue Exploring
-          </Link>
-        </div>
-      </ReceiptLayout>
-    </main>
-  );
-}
-
-// ─── Layout Wrapper ───────────────────────────────────────
-
-function ReceiptLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      {/* Header */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "var(--comp-nav-height)",
-          paddingInline: "var(--sys-space-page-margin)",
-          borderBottom: "1px solid var(--sys-color-border)",
-        }}
-      >
-        <Link
-          href="/"
-          className="kodo-focus-ring"
-          aria-label="Return to KODŌ home"
+        <div
           style={{
-            fontFamily: "var(--font-editorial-display), Georgia, serif",
-            fontSize: "clamp(1rem, 1.5vw, 1.25rem)",
-            fontWeight: 400,
-            letterSpacing: "var(--ref-letter-spacing-label)",
-            color: "var(--sys-color-text-primary)",
-            textDecoration: "none",
-            textTransform: "uppercase",
+            display: "flex",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: "var(--ref-space-4)",
           }}
         >
-          K O D Ō
-        </Link>
-      </header>
-
-      {/* Content */}
-      <section
-        style={{
-          maxWidth: "640px",
-          marginInline: "auto",
-          paddingInline: "var(--sys-space-page-margin)",
-          paddingTop: "var(--ref-space-10)",
-          paddingBottom: "var(--sys-space-section)",
-        }}
-      >
-        {children}
-      </section>
-
-      {/* Footer */}
-      <footer
-        style={{
-          borderTop: "1px solid var(--sys-color-border)",
-          padding: "var(--ref-space-4) var(--sys-space-page-margin)",
-        }}
-      >
-        <p className="text-caption" style={{ textAlign: "center" }}>
-          © {new Date().getFullYear()} KODŌ Fragrances. All rights reserved.
-        </p>
-      </footer>
+          <Link href="/collections" className="kodo-btn-solid kodo-focus-ring">
+            Explore Collection
+          </Link>
+          <Link href="/concierge" className="kodo-btn-outline kodo-focus-ring">
+            Contact Concierge
+          </Link>
+        </div>
+      </main>
     </>
-  );
-}
-
-// ─── Error State ──────────────────────────────────────────
-
-function ErrorState({ message }: { message: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "40vh",
-        textAlign: "center",
-        gap: "var(--ref-space-4)",
-      }}
-    >
-      <p
-        style={{
-          fontFamily: "var(--font-editorial-display), Georgia, serif",
-          fontSize: "var(--ref-font-size-title)",
-          lineHeight: "var(--ref-line-height-tight)",
-          color: "var(--sys-color-text-primary)",
-        }}
-      >
-        Order Not Found
-      </p>
-      <p
-        className="text-body-lg"
-        style={{
-          color: "var(--sys-color-text-secondary)",
-          maxWidth: "40ch",
-        }}
-      >
-        {message}
-      </p>
-      <Link
-        href="/collections"
-        className="kodo-btn-solid kodo-focus-ring"
-        style={{ marginTop: "var(--ref-space-4)" }}
-      >
-        Explore Collections
-      </Link>
-    </div>
   );
 }

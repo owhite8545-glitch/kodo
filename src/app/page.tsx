@@ -2,7 +2,9 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { PRODUCTS } from "@/data/products";
+import { SITE_CONFIG } from "@/config/site";
 import { HomeClient } from "./HomeClient";
+import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { SectionReveal } from "@/components/shared/SectionReveal";
 import { HeroFlacon } from "@/components/shared/HeroFlacon";
 
@@ -61,20 +63,17 @@ export default function HomePage() {
             <div className="hero-editorial-grid">
               {/* Primary Typography Anchor Plane */}
               <div className="hero-typography-plane">
-                {/* 1. Brand Eyebrow (150ms–400ms) */}
+                {/* 1. Brand Eyebrow */}
                 <p
                   className="text-label hero-eyebrow"
                   style={{
                     marginBottom: "var(--ref-space-3)",
-                    opacity: 0,
-                    animation:
-                      "heroEyebrowReveal 600ms var(--ease-cinematic) 150ms forwards",
                   }}
                 >
-                  KODŌ — Olfactory Architecture
+                  {SITE_CONFIG.brand.heroEyebrow}
                 </p>
 
-                {/* 2. Masked Staged Headline (300ms–900ms) */}
+                {/* 2. Architectural Headline */}
                 <h1
                   className="text-hero hero-main-heading"
                   style={{
@@ -85,60 +84,30 @@ export default function HomePage() {
                     marginBottom: "var(--ref-space-4)",
                   }}
                 >
-                  <span
-                    style={{
-                      display: "block",
-                      overflow: "hidden",
-                      paddingBottom: "3px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "block",
-                        opacity: 0,
-                        animation:
-                          "heroLineReveal 850ms var(--ease-cinematic) 300ms forwards",
-                      }}
-                    >
-                      Where Scent Becomes
-                    </span>
+                  <span style={{ display: "block" }}>
+                    {SITE_CONFIG.brand.heroTitleLine1}
                   </span>
                   <span
                     style={{
                       display: "block",
-                      overflow: "hidden",
-                      paddingBottom: "3px",
+                      color: "var(--sys-color-text-accent)",
                     }}
                   >
-                    <span
-                      style={{
-                        display: "block",
-                        color: "var(--sys-color-text-accent)",
-                        opacity: 0,
-                        animation:
-                          "heroLineReveal 850ms var(--ease-cinematic) 450ms forwards",
-                      }}
-                    >
-                      Architecture
-                    </span>
+                    {SITE_CONFIG.brand.heroTitleLine2}
                   </span>
                 </h1>
 
-                {/* 3. Concrete Supporting Line (700ms–1100ms) */}
+                {/* 3. Concrete Supporting Line */}
                 <p
                   className="text-body-lg hero-supporting-copy"
                   style={{
                     color: "var(--sys-color-text-secondary)",
-                    opacity: 0,
-                    animation:
-                      "heroFadeSlideUp 700ms var(--ease-cinematic) 700ms forwards",
                   }}
                 >
-                  Four architectural distillations in hand-blown borosilicate
-                  flacons. Composed in the tradition of Japanese craft.
+                  {SITE_CONFIG.brand.heroSubtitle}
                 </p>
 
-                {/* 4. Primary & Secondary CTAs (850ms–1250ms) */}
+                {/* 4. Primary & Secondary CTAs */}
                 <div
                   className="hero-cta-group"
                   style={{
@@ -146,9 +115,6 @@ export default function HomePage() {
                     gap: "var(--ref-space-4)",
                     alignItems: "center",
                     flexWrap: "wrap",
-                    opacity: 0,
-                    animation:
-                      "heroFadeSlideUp 700ms var(--ease-cinematic) 850ms forwards",
                   }}
                 >
                   <Link
@@ -185,7 +151,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 5. Scroll Beacon (1000ms–1400ms) */}
+          {/* 5. Scroll Beacon */}
           <div
             aria-hidden="true"
             className="hero-scroll-beacon"
@@ -198,9 +164,6 @@ export default function HomePage() {
               flexDirection: "column",
               alignItems: "center",
               gap: "var(--ref-space-1)",
-              opacity: 0,
-              animation:
-                "heroFadeSlideUp 600ms var(--ease-cinematic) 1000ms forwards",
             }}
           >
             <span
@@ -470,15 +433,16 @@ export default function HomePage() {
               fontStyle: "italic",
             }}
           >
-            &ldquo;In the spaces between notes, the architecture of memory is
-            revealed.&rdquo;
+            &ldquo;{SITE_CONFIG.brand.philosophyQuote}&rdquo;
           </blockquote>
           <p className="text-label" style={{ marginTop: "var(--ref-space-4)" }}>
-            — KODŌ Studio, 2026
+            {SITE_CONFIG.brand.philosophyAttribution}
           </p>
         </section>
         </SectionReveal>
       </main>
+
+      <FooterDirectory />
 
       <style>{`
         /* ─── Hero Asymmetric Editorial Layout ─── */
@@ -520,9 +484,6 @@ export default function HomePage() {
 
         .hero-flacon-wrapper {
           width: clamp(280px, 26vw, 380px) !important;
-          opacity: 0;
-          animation: heroBottleUnveil 1100ms var(--ease-cinematic) 450ms forwards;
-          will-change: transform, opacity;
         }
 
         @keyframes heroLineReveal {
@@ -624,64 +585,42 @@ export default function HomePage() {
             flex-direction: column !important;
             align-items: center !important;
             text-align: center !important;
-            gap: 0 !important;
+            gap: var(--ref-space-6) !important;
             min-height: auto !important;
-            padding-top: var(--ref-space-2) !important;
+            padding-top: var(--ref-space-4) !important;
             padding-bottom: var(--ref-space-6) !important;
           }
 
           .hero-typography-plane {
-            display: contents !important;
-          }
-
-          .hero-eyebrow {
-            order: 1 !important;
-            margin-bottom: 6px !important;
-            font-size: var(--ref-font-size-small) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
           }
 
           .hero-main-heading {
-            order: 2 !important;
-            font-size: clamp(2rem, 6.2vw, 2.5rem) !important;
-            line-height: 1.15 !important;
-            margin-bottom: 8px !important;
-          }
-
-          .hero-flacon-plane {
-            order: 3 !important;
-            margin-block: 6px 10px !important;
+            font-size: clamp(2.125rem, 7.5vw, 2.75rem) !important;
+            line-height: 1.12 !important;
+            margin-bottom: 12px !important;
           }
 
           .hero-flacon-wrapper {
-            width: clamp(140px, 36vw, 190px) !important;
+            width: clamp(180px, 46vw, 240px) !important;
             margin-inline: auto !important;
           }
 
           .hero-supporting-copy {
-            order: 4 !important;
-            font-size: 0.8125rem !important;
-            line-height: 1.45 !important;
-            max-width: 32ch !important;
+            font-size: 0.9375rem !important;
+            line-height: 1.55 !important;
+            max-width: 34ch !important;
             margin-inline: auto !important;
-            margin-bottom: 12px !important;
+            margin-bottom: var(--ref-space-4) !important;
           }
 
           .hero-cta-group {
-            order: 5 !important;
             width: 100% !important;
-            display: flex !important;
-            flex-direction: row !important;
             justify-content: center !important;
-            gap: 8px !important;
-            margin-top: 0 !important;
-          }
-
-          .hero-cta-group > a {
-            flex: 1 1 auto !important;
-            max-width: 165px !important;
-            height: 44px !important;
-            padding-inline: 12px !important;
-            font-size: 0.6875rem !important;
+            gap: 10px !important;
           }
 
           .hero-scroll-beacon {

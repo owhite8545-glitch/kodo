@@ -1,392 +1,284 @@
 import React from "react";
 import Link from "next/link";
-import type { Metadata } from "next";
+import Image from "next/image";
 import { HomeClient } from "../HomeClient";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { SectionReveal } from "@/components/shared/SectionReveal";
+import { SITE_CONFIG } from "@/config/site";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — The Story Page (Server Component)
-   Brand narrative with editorial spacing and poetic copy.
-   ═══════════════════════════════════════════════════════════ */
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "The Story",
   description:
-    "The origin of KODŌ — where Japanese incense ceremony meets structural geometry. Discover how memory becomes architecture.",
+    "The philosophy and heritage of KODŌ — from ancient Japanese Kōdō incense rituals to architectural perfumery.",
 };
 
 export default function StoryPage() {
+  const leadMaker = SITE_CONFIG.team[0];
+
   return (
     <>
       <HomeClient />
       <main id="main-content" role="main">
-        {/* ─── Hero Statement ─── */}
+        {/* Hero Headline */}
         <section
           style={{
             paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-15))",
             paddingBottom: "var(--ref-space-15)",
             paddingInline: "var(--sys-space-page-margin)",
             textAlign: "center",
-            maxWidth: "800px",
+            maxWidth: "850px",
             marginInline: "auto",
           }}
         >
           <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
-            Origin
+            The Heritage
           </p>
           <h1
             className="text-display"
             style={{
               fontFamily: "var(--font-editorial-display), Georgia, serif",
-              marginBottom: "var(--ref-space-6)",
+              marginBottom: "var(--ref-space-4)",
             }}
           >
-            The Geometry{" "}
-            <span style={{ color: "var(--sys-color-text-accent)" }}>
-              of Memory
-            </span>
+            {SITE_CONFIG.brand.tagline}
           </h1>
           <p
             className="text-body-lg"
             style={{
               color: "var(--sys-color-text-secondary)",
-              maxWidth: "50ch",
+              maxWidth: "52ch",
               marginInline: "auto",
             }}
           >
-            KODŌ was born from a single question: what if scent could be
-            architecture? What if the negative space between notes held as much
-            meaning as the notes themselves?
+            Kōdō (香道) — The Way of Fragrance — is one of Japan&apos;s three
+            classical arts of refinement, alongside the tea ceremony and flower
+            arrangement.
           </p>
         </section>
 
-        {/* ─── Ma Space ─── */}
-        <div className="ma-space" />
-
-        {/* ─── Chapter I: The Ancient Way ─── */}
+        {/* Chapter 1 */}
         <SectionReveal>
-        <section
-          aria-label="The Ancient Way of Incense"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "1440px",
-            marginInline: "auto",
-          }}
-        >
-          <div
-            className="story-two-col"
+          <section
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "var(--ref-space-8)",
-              alignItems: "center",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1100px",
+              marginInline: "auto",
+              marginBottom: "var(--sys-space-section)",
             }}
           >
-            {/* Visual */}
-            <div
-              style={{
-                aspectRatio: "4/5",
-                backgroundColor: "var(--sys-color-surface)",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "radial-gradient(ellipse 70% 50% at 50% 50%, oklch(20% 0.02 85 / 0.15), transparent 70%)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <span
+            <div className="story-split">
+              <div>
+                <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
+                  Chapter 01
+                </p>
+                <h2
                   style={{
-                    fontFamily:
-                      "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "clamp(4rem, 10vw, 8rem)",
-                    color: "oklch(98% 0.005 85 / 0.04)",
-                    fontWeight: 300,
-                    lineHeight: 1,
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "var(--ref-font-size-heading)",
+                    marginBottom: "var(--ref-space-4)",
                   }}
                 >
-                  香
+                  The Ancient Way of Incense
+                </h2>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                    marginBottom: "var(--ref-space-3)",
+                  }}
+                >
+                  In the Muromachi period of the 15th century, nobles gathered in
+                  low-lit listening rooms not to &ldquo;smell&rdquo; incense, but
+                  to &ldquo;listen&rdquo; to it — mon-kō (聞香). A tiny shaving
+                  of agarwood was heated gently over a mica plate resting on white
+                  ash.
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                  }}
+                >
+                  This ritual transformed scent from a fleeting ornament into an
+                  exercise of profound concentration — a sensory dialogue
+                  between material, fire, and silence.
+                </p>
+              </div>
+              <div
+                style={{
+                  aspectRatio: "4/3",
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "var(--sys-color-surface)",
+                  border: "1px solid var(--sys-color-border)",
+                }}
+              >
+                <Image
+                  src="/images/products/en/detail.jpg"
+                  alt="KODŌ smoked sandalwood and mineral ash study"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                />
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    bottom: "16px",
+                    right: "20px",
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "2.25rem",
+                    color: "var(--ref-color-alabaster-98)",
+                    opacity: 0.72,
+                    textShadow: "0 2px 12px oklch(0% 0 0 / 0.8)",
+                  }}
+                >
+                  香道
                 </span>
               </div>
             </div>
-
-            {/* Copy */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--ref-space-4)",
-              }}
-            >
-              <p className="text-label">Chapter 01</p>
-              <h2
-                className="text-heading"
-                style={{
-                  fontFamily: "var(--font-editorial-display), Georgia, serif",
-                }}
-              >
-                The Ancient Way of Incense
-              </h2>
-              <p
-                className="text-body-lg"
-                style={{
-                  color: "var(--sys-color-text-secondary)",
-                  maxWidth: "40ch",
-                  lineHeight: "var(--ref-line-height-relaxed)",
-                }}
-              >
-                In Muromachi-era Japan, the practice of Kōdō — &ldquo;the way
-                of incense&rdquo; — elevated scent to the level of poetry and
-                calligraphy. Masters would &ldquo;listen&rdquo; to fragrance
-                rather than smell it, treating each composition as a spatial
-                meditation.
-              </p>
-              <p
-                className="text-body"
-                style={{
-                  color: "var(--sys-color-text-secondary)",
-                  maxWidth: "40ch",
-                }}
-              >
-                This listening — this deliberate attention to what unfolds in
-                the negative space between notes — became the founding
-                principle of our house.
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
         </SectionReveal>
 
-        {/* ─── Ma Space ─── */}
-        <div className="ma-space" />
-
-        {/* ─── Chapter II: Structural Geometry ─── */}
+        {/* Chapter 2 */}
         <SectionReveal>
-        <section
-          aria-label="Structural Geometry"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "1440px",
-            marginInline: "auto",
-          }}
-        >
-          <div
-            className="story-two-col story-two-col-reverse"
+          <section
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "var(--ref-space-8)",
-              alignItems: "center",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "1100px",
+              marginInline: "auto",
+              marginBottom: "var(--sys-space-section)",
             }}
           >
-            {/* Copy */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--ref-space-4)",
-              }}
-            >
-              <p className="text-label">Chapter 02</p>
-              <h2
-                className="text-heading"
-                style={{
-                  fontFamily: "var(--font-editorial-display), Georgia, serif",
-                }}
-              >
-                Structural Geometry
-              </h2>
-              <p
-                className="text-body-lg"
-                style={{
-                  color: "var(--sys-color-text-secondary)",
-                  maxWidth: "40ch",
-                  lineHeight: "var(--ref-line-height-relaxed)",
-                }}
-              >
-                Each KODŌ composition begins not with a brief, but with a
-                spatial diagram. Our perfumers map olfactory molecules across
-                three-dimensional grids — plotting volatility against weight,
-                luminosity against depth.
-              </p>
-              <p
-                className="text-body"
-                style={{
-                  color: "var(--sys-color-text-secondary)",
-                  maxWidth: "40ch",
-                }}
-              >
-                The result is scent that unfolds like architecture: each layer
-                reveals the next, each transition calibrated to the millimetre.
-              </p>
-            </div>
-
-            {/* Visual */}
-            <div
-              style={{
-                aspectRatio: "4/5",
-                backgroundColor: "var(--sys-color-surface)",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(180deg, transparent 50%, oklch(12% 0.01 260 / 0.6) 100%)",
-                }}
-              />
+            <div className="story-split story-split--reverse">
               <div
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  aspectRatio: "4/3",
+                  position: "relative",
+                  overflow: "hidden",
+                  background: "var(--sys-color-surface)",
+                  border: "1px solid var(--sys-color-border)",
                 }}
               >
+                <Image
+                  src="/images/products/so/detail.jpg"
+                  alt="KODŌ borosilicate glass prism and mineral light refraction"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: "cover" }}
+                />
                 <span
+                  aria-hidden="true"
                   style={{
-                    fontFamily:
-                      "var(--font-editorial-display), Georgia, serif",
-                    fontSize: "clamp(4rem, 10vw, 8rem)",
-                    color: "oklch(98% 0.005 85 / 0.04)",
-                    fontWeight: 300,
-                    lineHeight: 1,
+                    position: "absolute",
+                    bottom: "16px",
+                    right: "20px",
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "2.25rem",
+                    color: "var(--ref-color-alabaster-98)",
+                    opacity: 0.72,
+                    textShadow: "0 2px 12px oklch(0% 0 0 / 0.8)",
                   }}
                 >
-                  構
+                  間
                 </span>
               </div>
+              <div>
+                <p className="text-label" style={{ marginBottom: "var(--ref-space-2)" }}>
+                  Chapter 02
+                </p>
+                <h2
+                  style={{
+                    fontFamily: "var(--font-editorial-display), Georgia, serif",
+                    fontSize: "var(--ref-font-size-heading)",
+                    marginBottom: "var(--ref-space-4)",
+                  }}
+                >
+                  Olfactory Architecture
+                </h2>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                    marginBottom: "var(--ref-space-3)",
+                  }}
+                >
+                  Modern perfumery often pursues volume over restraint. KODŌ
+                  applies the spatial discipline of contemporary Japanese
+                  architecture: negative space (Ma) is treated as an active
+                  ingredient alongside wood, resin, and mineral distillates.
+                </p>
+                <p
+                  className="text-body"
+                  style={{
+                    color: "var(--sys-color-text-secondary)",
+                    lineHeight: "var(--ref-line-height-relaxed)",
+                  }}
+                >
+                  Every flacon is hand-blown in heavy-walled borosilicate glass,
+                  eliminating external label noise so light, shadow, and time
+                  remain visible through the liquid itself.
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
         </SectionReveal>
 
-        {/* ─── Ma Space ─── */}
-        <div className="ma-space" />
-
-        {/* ─── Chapter III: Four States ─── */}
+        {/* Chapter 3: Philosophy Quote + CTA */}
         <SectionReveal>
-        <section
-          aria-label="The Four States"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "800px",
-            marginInline: "auto",
-            textAlign: "center",
-          }}
-        >
-          <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
-            Chapter 03
-          </p>
-          <h2
-            className="text-heading"
+          <section
             style={{
-              fontFamily: "var(--font-editorial-display), Georgia, serif",
-              marginBottom: "var(--ref-space-6)",
-            }}
-          >
-            Four States of Resin
-          </h2>
-          <p
-            className="text-body-lg"
-            style={{
-              color: "var(--sys-color-text-secondary)",
-              maxWidth: "50ch",
+              paddingInline: "var(--sys-space-page-margin)",
+              maxWidth: "800px",
               marginInline: "auto",
-              marginBottom: "var(--ref-space-6)",
-              lineHeight: "var(--ref-line-height-relaxed)",
+              textAlign: "center",
+              paddingBottom: "var(--sys-space-section)",
             }}
           >
-            Our debut collection maps four fundamental states of matter through
-            the lens of raw resin: the mineral volatility of sea salt, the
-            botanical warmth of cedar, the resinous gravity of smoke, and the
-            precious weight of saffron gold.
-          </p>
-          <p
-            className="text-body"
-            style={{
-              color: "var(--sys-color-text-secondary)",
-              maxWidth: "50ch",
-              marginInline: "auto",
-              marginBottom: "var(--ref-space-8)",
-            }}
-          >
-            Each state is a meditation on transformation — the moment a
-            material crosses the threshold from one form to the next.
-          </p>
-          <Link
-            href="/collections"
-            className="kodo-btn-solid kodo-focus-ring"
-          >
-            Explore The Collection
-          </Link>
-        </section>
-        </SectionReveal>
-
-        {/* ─── Ma Space ─── */}
-        <div className="ma-space" />
-
-        {/* ─── Editorial Quote ─── */}
-        <SectionReveal>
-        <section
-          aria-label="Brand philosophy"
-          style={{
-            paddingInline: "var(--sys-space-page-margin)",
-            maxWidth: "800px",
-            marginInline: "auto",
-            textAlign: "center",
-            paddingBottom: "var(--sys-space-section)",
-          }}
-        >
-          <blockquote
-            style={{
-              fontFamily: "var(--font-editorial-display), Georgia, serif",
-              fontSize: "var(--ref-font-size-heading)",
-              lineHeight: "var(--ref-line-height-tight)",
-              color: "var(--sys-color-text-secondary)",
-              fontStyle: "italic",
-            }}
-          >
-            &ldquo;We do not compose perfume. We compose the silence between
-            notes.&rdquo;
-          </blockquote>
-          <p className="text-label" style={{ marginTop: "var(--ref-space-4)" }}>
-            — [Founder Name], [Role Title]
-          </p>
-        </section>
+            <p className="text-label" style={{ marginBottom: "var(--ref-space-3)" }}>
+              Chapter 03
+            </p>
+            <blockquote
+              style={{
+                fontFamily: "var(--font-editorial-display), Georgia, serif",
+                fontSize: "var(--ref-font-size-heading)",
+                lineHeight: "var(--ref-line-height-tight)",
+                color: "var(--sys-color-text-primary)",
+                fontStyle: "italic",
+                marginBottom: "var(--ref-space-4)",
+              }}
+            >
+              &ldquo;Perfume is not decoration for the skin; it is an invisible
+              room we invite the world into.&rdquo;
+            </blockquote>
+            <p className="text-caption" style={{ marginBottom: "var(--ref-space-8)" }}>
+              — {leadMaker.name}, {leadMaker.role}
+            </p>
+            <Link
+              href="/collections"
+              className="kodo-btn-solid kodo-focus-ring"
+              style={{ textDecoration: "none" }}
+            >
+              Discover the Collection
+            </Link>
+          </section>
         </SectionReveal>
       </main>
-
       <FooterDirectory />
 
       <style>{`
+        .story-split {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--ref-space-12);
+          align-items: center;
+        }
         @media (max-width: 768px) {
-          .story-two-col {
-            grid-template-columns: 1fr !important;
-          }
-          .story-two-col-reverse {
-            direction: ltr;
-          }
+          .story-split { grid-template-columns: 1fr; gap: var(--ref-space-6); }
+          .story-split--reverse > :first-child { order: 2; }
         }
       `}</style>
     </>

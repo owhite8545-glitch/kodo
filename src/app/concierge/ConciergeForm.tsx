@@ -1,93 +1,131 @@
 "use client";
 
-import React, { useState } from "react";
-import type { ConciergeFormData, FormState } from "@/types/webgl";
+import React, { useState, useTransition } from "react";
+import { SITE_CONFIG } from "@/config/site";
+import { INQUIRY_LABELS, type InquiryType } from "@/lib/concierge-schema";
+import { submitConciergeInquiry } from "./actions";
 
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — Concierge Form Client Component
-   Handles form state and validation for the concierge page.
-   ═══════════════════════════════════════════════════════════ */
+const fieldStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "var(--ref-space-3) var(--ref-space-4)",
+  backgroundColor: "var(--sys-color-surface)",
+  border: "1px solid var(--sys-color-border)",
+  color: "var(--sys-color-text-primary)",
+  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+  fontSize: "var(--ref-font-size-base)",
+  outline: "none",
+};
 
-const INQUIRY_TYPES: { value: ConciergeFormData["inquiryType"]; label: string }[] = [
-  { value: "general", label: "General Inquiry" },
-  { value: "consultation", label: "Private Consultation" },
-  { value: "wholesale", label: "Wholesale & Partnerships" },
-  { value: "press", label: "Press & Media" },
-];
+const errorTextStyle: React.CSSProperties = {
+  marginTop: "6px",
+  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
+  fontSize: "var(--ref-font-size-small)",
+  color: "var(--sys-color-error)",
+};
 
 export function ConciergeForm() {
-  const [formData, setFormData] = useState<ConciergeFormData>({
+  const [isPending, startTransition] = useTransition();
+  const [submittedRef, setSubmittedRef] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const [formData, setFormData] = useState({
+    inquiryType: "consultation" as InquiryType,
     name: "",
     email: "",
     subject: "",
     message: "",
-    inquiryType: "general",
-  });
-
-  const [formState, setFormState] = useState<FormState>({
-    status: "idle",
-    message: "",
+    website: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormState({ status: "success", message: "Thank you. Our team will be in touch shortly." });
+    setServerError(null);
+    setFieldErrors({});
+
+    startTransition(async () => {
+      try {
+        const result = await submitConciergeInquiry(formData);
+        if (!result.success) {
+          if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+          setServerError(result.error || "Unable to send inquiry.");
+          return;
+        }
+
+        setSubmittedRef(result.referenceId ?? "CONFIRMED");
+        setSuccessMessage(
+          result.message ??
+            "Thank you. Our team will be in touch shortly."
+        );
+      } catch {
+        setServerError(
+          "A connection interruption prevented submission. Please try again."
+        );
+      }
+    });
   };
 
-  const inputStyles: React.CSSProperties = {
-    width: "100%",
-    height: "var(--comp-input-height)",
-    padding: "0 var(--ref-space-2)",
-    backgroundColor: "transparent",
-    border: "1px solid var(--sys-color-border)",
-    color: "var(--sys-color-text-primary)",
-    fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-    fontSize: "var(--ref-font-size-base)",
-    outline: "none",
-    transition: "border-color var(--motion-duration-fast) var(--ease-decelerate)",
+  const handleReset = () => {
+    setSubmittedRef(null);
+    setSuccessMessage(null);
+    setServerError(null);
+    setFieldErrors({});
+    setFormData({
+      inquiryType: "consultation",
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      website: "",
+    });
   };
 
-  const labelStyles: React.CSSProperties = {
-    fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-    fontSize: "var(--ref-font-size-small)",
-    fontWeight: 500,
-    textTransform: "uppercase",
-    letterSpacing: "var(--ref-letter-spacing-caps)",
-    color: "var(--sys-color-text-accent)",
-    marginBottom: "var(--ref-space-1)",
-    display: "block",
-  };
-
-  if (formState.status === "success") {
+  if (submittedRef) {
     return (
       <div
+        role="status"
         style={{
+          padding: "var(--ref-space-10)",
+          border: "1px solid var(--sys-color-border)",
+          background: "var(--sys-color-surface)",
           textAlign: "center",
-          padding: "var(--ref-space-12) 0",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "var(--ref-space-4)",
+          gap: "var(--ref-space-3)",
         }}
       >
-        <p
+        <p className="text-label">Message Received</p>
+        <h2
           style={{
             fontFamily: "var(--font-editorial-display), Georgia, serif",
-            fontSize: "var(--ref-font-size-heading)",
-            lineHeight: "var(--ref-line-height-tight)",
+            fontSize: "var(--ref-font-size-title)",
+            fontWeight: 400,
           }}
         >
-          Message Received
+          Thank you, {formData.name || "Patron"}.
+        </h2>
+        <p className="text-caption" style={{ color: "var(--sys-color-text-accent)" }}>
+          Reference: {submittedRef}
         </p>
         <p
-          className="text-body-lg"
+          className="text-body"
           style={{
             color: "var(--sys-color-text-secondary)",
-            maxWidth: "40ch",
+            maxWidth: "42ch",
           }}
         >
-          {formState.message}
+          {successMessage}
         </p>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="kodo-btn-outline kodo-focus-ring"
+          style={{ marginTop: "var(--ref-space-3)" }}
+        >
+          Send Another Inquiry
+        </button>
       </div>
     );
   }
@@ -95,127 +133,226 @@ export function ConciergeForm() {
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "var(--ref-space-4)",
-        maxWidth: "600px",
+        gap: "var(--ref-space-6)",
       }}
     >
+      {serverError && (
+        <div
+          role="alert"
+          style={{
+            padding: "var(--ref-space-3) var(--ref-space-4)",
+            border: "1px solid var(--sys-color-error)",
+            backgroundColor: "oklch(16% 0.04 25 / 0.28)",
+          }}
+        >
+          <p className="text-body" style={{ color: "var(--sys-color-error)" }}>
+            {serverError}
+          </p>
+        </div>
+      )}
+
+      {/* Hidden Honeypot */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      >
+        <label htmlFor="concierge-website">Website</label>
+        <input
+          id="concierge-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={formData.website}
+          onChange={(e) =>
+            setFormData({ ...formData, website: e.target.value })
+          }
+        />
+      </div>
+
       {/* Inquiry Type */}
       <div>
-        <label htmlFor="concierge-inquiry" style={labelStyles}>
+        <label
+          htmlFor="inquiryType"
+          className="text-label"
+          style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
+        >
           Inquiry Type
         </label>
         <select
-          id="concierge-inquiry"
+          id="inquiryType"
+          name="inquiryType"
           value={formData.inquiryType}
           onChange={(e) =>
-            setFormData({ ...formData, inquiryType: e.target.value as ConciergeFormData["inquiryType"] })
+            setFormData({
+              ...formData,
+              inquiryType: e.target.value as InquiryType,
+            })
           }
-          className="kodo-focus-ring kodo-input"
+          className="kodo-select kodo-focus-ring"
           style={{
-            ...inputStyles,
-            appearance: "none",
-            cursor: "pointer",
+            ...fieldStyle,
+            backgroundColor: "var(--ref-color-obsidian-50)",
           }}
         >
-          {INQUIRY_TYPES.map((type) => (
-            <option key={type.value} value={type.value} style={{ backgroundColor: "var(--sys-color-bg)" }}>
-              {type.label}
+          {(Object.keys(INQUIRY_LABELS) as InquiryType[]).map((key) => (
+            <option key={key} value={key}>
+              {INQUIRY_LABELS[key]}
             </option>
           ))}
         </select>
+        {fieldErrors.inquiryType && (
+          <p style={errorTextStyle}>{fieldErrors.inquiryType}</p>
+        )}
       </div>
 
       {/* Name */}
       <div>
-        <label htmlFor="concierge-name" style={labelStyles}>
+        <label
+          htmlFor="name"
+          className="text-label"
+          style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
+        >
           Full Name
         </label>
         <input
-          id="concierge-name"
+          id="name"
+          name="name"
           type="text"
           required
+          autoComplete="name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="kodo-focus-ring kodo-input"
-          placeholder="Your name"
-          style={inputStyles}
+          placeholder="Your full name"
+          className="kodo-input kodo-focus-ring"
+          aria-invalid={Boolean(fieldErrors.name)}
+          style={{
+            ...fieldStyle,
+            borderColor: fieldErrors.name ? "var(--sys-color-error)" : undefined,
+          }}
         />
+        {fieldErrors.name && <p style={errorTextStyle}>{fieldErrors.name}</p>}
       </div>
 
       {/* Email */}
       <div>
-        <label htmlFor="concierge-email" style={labelStyles}>
+        <label
+          htmlFor="email"
+          className="text-label"
+          style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
+        >
           Email Address
         </label>
         <input
-          id="concierge-email"
+          id="email"
+          name="email"
           type="email"
           required
+          autoComplete="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="kodo-focus-ring kodo-input"
           placeholder="your@email.com"
-          style={inputStyles}
+          className="kodo-input kodo-focus-ring"
+          aria-invalid={Boolean(fieldErrors.email)}
+          style={{
+            ...fieldStyle,
+            borderColor: fieldErrors.email ? "var(--sys-color-error)" : undefined,
+          }}
         />
+        {fieldErrors.email && <p style={errorTextStyle}>{fieldErrors.email}</p>}
       </div>
 
       {/* Subject */}
       <div>
-        <label htmlFor="concierge-subject" style={labelStyles}>
+        <label
+          htmlFor="subject"
+          className="text-label"
+          style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
+        >
           Subject
         </label>
         <input
-          id="concierge-subject"
+          id="subject"
+          name="subject"
           type="text"
           required
           value={formData.subject}
-          onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-          className="kodo-focus-ring kodo-input"
-          placeholder="How may we assist you?"
-          style={inputStyles}
+          onChange={(e) =>
+            setFormData({ ...formData, subject: e.target.value })
+          }
+          placeholder="How may our studio assist you?"
+          className="kodo-input kodo-focus-ring"
+          aria-invalid={Boolean(fieldErrors.subject)}
+          style={{
+            ...fieldStyle,
+            borderColor: fieldErrors.subject
+              ? "var(--sys-color-error)"
+              : undefined,
+          }}
         />
+        {fieldErrors.subject && (
+          <p style={errorTextStyle}>{fieldErrors.subject}</p>
+        )}
       </div>
 
       {/* Message */}
       <div>
-        <label htmlFor="concierge-message" style={labelStyles}>
+        <label
+          htmlFor="message"
+          className="text-label"
+          style={{ display: "block", marginBottom: "var(--ref-space-2)" }}
+        >
           Message
         </label>
         <textarea
-          id="concierge-message"
+          id="message"
+          name="message"
           required
-          rows={6}
+          rows={5}
           value={formData.message}
-          onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-          className="kodo-focus-ring kodo-input"
-          placeholder="Please describe your inquiry in detail..."
+          onChange={(e) =>
+            setFormData({ ...formData, message: e.target.value })
+          }
+          placeholder="Share preferred scent profiles, consultation dates, or architectural project details…"
+          className="kodo-input kodo-focus-ring"
+          aria-invalid={Boolean(fieldErrors.message)}
           style={{
-            ...inputStyles,
-            height: "auto",
-            padding: "var(--ref-space-2)",
+            ...fieldStyle,
             resize: "vertical",
-            minHeight: "120px",
+            borderColor: fieldErrors.message
+              ? "var(--sys-color-error)"
+              : undefined,
           }}
         />
+        {fieldErrors.message && (
+          <p style={errorTextStyle}>{fieldErrors.message}</p>
+        )}
       </div>
 
-      {/* Submit */}
       <button
         type="submit"
+        disabled={isPending}
         className="kodo-btn-solid kodo-focus-ring"
         style={{
-          width: "100%",
-          marginTop: "var(--ref-space-2)",
+          opacity: isPending ? 0.65 : 1,
+          cursor: isPending ? "wait" : "pointer",
         }}
       >
-        Send Inquiry
+        {isPending ? "Sending Inquiry…" : "Send Inquiry"}
       </button>
 
-      <p className="text-caption" style={{ marginTop: "var(--ref-space-1)" }}>
-        [Customize response time and availability details.]
+      <p className="text-caption" style={{ textAlign: "center" }}>
+        {SITE_CONFIG.contact.responseWindow}
       </p>
     </form>
   );

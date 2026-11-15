@@ -2,7 +2,13 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { getProductBySlug, getAllProducts } from "@/data/products";
+import {
+  getAllProducts,
+  getProductBySlug,
+  getRelatedProducts,
+} from "@/data/products";
+import { formatCatalogPrice } from "@/config/commerce";
+import { resolveBaseUrl, SITE_CONFIG } from "@/config/site";
 import { PDPClient } from "./PDPClient";
 import { HeaderNav } from "@/components/global/HeaderNav";
 import { MenuDrawer } from "@/components/global/MenuDrawer";
@@ -76,16 +82,19 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  /* JSON-LD Product Schema — spec lines 6793–6816 */
+  const baseUrl = resolveBaseUrl();
+  const relatedProducts = getRelatedProducts(product.slug, 3);
+
+  /* JSON-LD Product Schema */
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: `${product.name} — ${product.subtitle}`,
-    image: `https://kodo-fragrances.com${product.images.pureProduct}`,
+    image: `${baseUrl}${product.images.pureProduct}`,
     description: product.description,
     brand: {
       "@type": "Brand",
-      name: "KODŌ",
+      name: SITE_CONFIG.brand.name,
     },
     offers: {
       "@type": "AggregateOffer",
@@ -265,6 +274,112 @@ export default async function ProductPage({ params }: PageProps) {
           </div>
           </SectionReveal>
         </section>
+
+        {/* Companion States Exploration */}
+        {relatedProducts.length > 0 && (
+          <SectionReveal>
+            <section
+              aria-label="Companion fragrances"
+              style={{
+                maxWidth: "1440px",
+                margin: "0 auto",
+                padding:
+                  "var(--ref-space-12) var(--sys-space-page-margin) var(--sys-space-section)",
+                borderTop: "1px solid var(--sys-color-border)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  flexWrap: "wrap",
+                  gap: "var(--ref-space-3)",
+                  marginBottom: "var(--ref-space-8)",
+                }}
+              >
+                <div>
+                  <p className="text-label" style={{ marginBottom: "6px" }}>
+                    Companion Explorations
+                  </p>
+                  <h2
+                    style={{
+                      fontFamily:
+                        "var(--font-editorial-display), Georgia, serif",
+                      fontSize: "var(--ref-font-size-heading)",
+                      fontWeight: 400,
+                    }}
+                  >
+                    Other States of Resin
+                  </h2>
+                </div>
+                <Link
+                  href="/collections"
+                  className="text-caption kodo-focus-ring"
+                  style={{
+                    color: "var(--sys-color-text-accent)",
+                    textDecoration: "none",
+                  }}
+                >
+                  View Full Collection &rarr;
+                </Link>
+              </div>
+
+              <div className="pdp-related-grid">
+                {relatedProducts.map((rel) => (
+                  <Link
+                    key={rel.id}
+                    href={`/products/${rel.slug}`}
+                    className="kodo-focus-ring"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      textDecoration: "none",
+                      color: "inherit",
+                      gap: "var(--ref-space-2)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "3 / 4",
+                        backgroundColor: "var(--ref-color-obsidian-20)",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Image
+                        src={rel.images.pureProduct}
+                        alt={`KODŌ ${rel.name} Eau de Parfum`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        style={{ objectFit: "contain" }}
+                      />
+                    </div>
+                    <p className="text-label" style={{ marginTop: "4px" }}>
+                      {rel.family}
+                    </p>
+                    <h3
+                      style={{
+                        fontFamily:
+                          "var(--font-editorial-display), Georgia, serif",
+                        fontSize: "var(--ref-font-size-title)",
+                        fontWeight: 400,
+                      }}
+                    >
+                      {rel.name} — {rel.subtitle}
+                    </h3>
+                    <p
+                      className="text-caption"
+                      style={{ color: "var(--sys-color-text-accent)" }}
+                    >
+                      From {formatCatalogPrice(rel.sizes[0]?.price ?? rel.price)}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </SectionReveal>
+        )}
       </main>
 
       <FooterDirectory />
@@ -287,19 +402,19 @@ export default async function ProductPage({ params }: PageProps) {
                 "@type": "ListItem",
                 position: 1,
                 name: "Home",
-                item: "https://kodo-fragrances.com",
+                item: baseUrl,
               },
               {
                 "@type": "ListItem",
                 position: 2,
                 name: "Collection",
-                item: "https://kodo-fragrances.com/collections",
+                item: `${baseUrl}/collections`,
               },
               {
                 "@type": "ListItem",
                 position: 3,
                 name: `${product.name} — ${product.subtitle}`,
-                item: `https://kodo-fragrances.com/products/${product.slug}`,
+                item: `${baseUrl}/products/${product.slug}`,
               },
             ],
           }),
@@ -308,6 +423,16 @@ export default async function ProductPage({ params }: PageProps) {
 
       {/* Scoped PDP Grid Styles */}
       <style>{`
+        .pdp-related-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: var(--ref-space-6);
+        }
+        @media (max-width: 767px) {
+          .pdp-related-grid {
+            grid-template-columns: minmax(0, 1fr);
+          }
+        }
         @media (min-width: 768px) {
           .pdp-grid {
             grid-template-columns: 1fr 1fr !important;

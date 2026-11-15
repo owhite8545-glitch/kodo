@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KODŌ — Olfactory Quiet Luxury Storefront
 
-## Getting Started
+A production-ready **Next.js 16 + React 19** luxury fragrance storefront built with an editorial OKLCH obsidian/alabaster/gold design system, `Playfair Display` + `DM Sans` typography, dual **Demo / Live Stripe** checkout architecture, HMAC-signed demo receipts, interactive collections filtering, and a complete editorial journal.
 
-First, run the development server:
+---
+
+## Key Capabilities
+
+- **Zero-Crash Dual Commerce Modes**
+  - **Demo Mode (`COMMERCE_MODE="demo"`, default):** Works cleanly out of the box with zero API keys—ideal for live previews, agency demos, and template evaluation. Server Actions validate catalog pricing and stock server-side and issue signed `HttpOnly` receipt cookies (`kodo_demo_token` + `kodo_demo_receipt`).
+  - **Live Stripe Mode (`COMMERCE_MODE="live"`):** Creates real Stripe Checkout Sessions (`stripe` v22+) and verifies payments via webhook (`/api/webhooks/stripe`) and session retrieval on `/checkout/success`.
+- **Single-File Brand Customization:** Rebrand the entire maison from [`src/config/site.ts`](src/config/site.ts) and currency/shipping/Stripe settings from [`src/config/commerce.ts`](src/config/commerce.ts).
+- **Zero-Error Hydration & Accessibility:** `useSyncExternalStore`-backed hydration and reduced-motion hooks prevent React SSR mismatches, paired with focus rings, `inert` overlays, skip links, and responsive `overflow-x: clip` grids.
+- **Full Storefront & Editorial Suite:**
+  - Flagship editorial homepage (`/`)
+  - Interactive collections filter & sort (`/collections`)
+  - Variant-aware Product Detail Pages with JSON-LD Product schema (`/products/[slug]`)
+  - Dynamic Editorial Journal index & article reader (`/journal`, `/journal/[slug]`)
+  - Story (`/story`), Atelier Studios (`/about`), Concierge Server Action form with optional webhook (`/concierge`), and legal/care documents (`/shipping`, `/privacy`, `/terms`)
+  - Dynamic `/robots.txt`, `/sitemap.xml`, `not-found.tsx`, `error.tsx`, and `global-error.tsx`
+
+---
+
+## Quick Start
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). The storefront boots immediately in **Demo Mode** without configuring Stripe or Redis.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Customization Guide
 
-## Learn More
+1. **Brand Identity, Copy & Navigation:** Edit [`src/config/site.ts`](src/config/site.ts) (`SITE_CONFIG.brand`, `studios`, `team`, `navigation`, `copy`).
+2. **Pricing, Currency & Courier Thresholds:** Edit [`src/config/commerce.ts`](src/config/commerce.ts) (`COMMERCE_CONFIG`, `SHIPPING_REGIONS`).
+3. **Catalog & Journal Essays:** Edit [`src/data/products.ts`](src/data/products.ts) and replace photography inside `public/images/products/`.
+4. **Live Payments:** Set `COMMERCE_MODE="live"`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` (pointing `/api/webhooks/stripe`), plus `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` for durable order persistence.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Verification Commands
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run typecheck   # TypeScript strict check
+npm run lint        # ESLint + React Compiler / a11y rules
+npm test            # Native Node test suite for pricing, schemas & HMAC receipts
+npm run build       # Production Next.js build
+```

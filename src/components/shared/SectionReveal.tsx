@@ -20,7 +20,15 @@ export function SectionReveal({ children, className }: { children: ReactNode; cl
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) return;
 
-    // Progressive enhancement: hide only after JS confirms availability
+    // If the section (or its top edge) is already near/inside/above the viewport,
+    // keep it immediately visible instead of fading tall sections on mobile.
+    const initialRect = el.getBoundingClientRect();
+    if (initialRect.top < window.innerHeight * 0.95) {
+      el.classList.add("kodo-reveal--visible");
+      return;
+    }
+
+    // Progressive enhancement: hide only below-the-fold sections after JS confirms availability
     el.classList.add("kodo-reveal--initialized");
 
     // Fallback: if IntersectionObserver is unavailable, show immediately
@@ -29,18 +37,23 @@ export function SectionReveal({ children, className }: { children: ReactNode; cl
       return;
     }
 
+    const reveal = () => {
+      el.classList.add("kodo-reveal--visible");
+      observer.disconnect();
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("kodo-reveal--visible");
-            observer.unobserve(entry.target);
+          if (entry.isIntersecting || entry.boundingClientRect.top < window.innerHeight) {
+            reveal();
+            break;
           }
         }
       },
       {
-        threshold: 0.15,
-        rootMargin: "0px 0px -60px 0px",
+        threshold: 0.01,
+        rootMargin: "0px 0px 100px 0px",
       },
     );
 

@@ -1,161 +1,105 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { useCartStore } from "@/store/cart-store";
-import { formatPrice, COMMERCE_CONFIG } from "@/config/commerce";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
-/* ═══════════════════════════════════════════════════════════
-   KODŌ — CartDrawer
-   Slides in from right. 450px on desktop, 100% on mobile.
-   Focus trapped inside. Background scroll locked.
-   ═══════════════════════════════════════════════════════════ */
+import { useCartStore } from "@/store/cart-store";
+import {
+  calculateOrderFinancials,
+  COMMERCE_CONFIG,
+  formatCents,
+} from "@/config/commerce";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 export function CartDrawer() {
   const isOpen = useCartStore((s) => s.isOpen);
-  const [isMounted, setIsMounted] = React.useState(isOpen);
-  const [isClosing, setIsClosing] = React.useState(false);
   const closeCart = useCartStore((s) => s.closeCart);
   const items = useCartStore((s) => s.items);
-  const removeItem = useCartStore((s) => s.removeItem);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
-  const totalPrice = useCartStore((s) => s.totalPrice);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const isHydrated = useHydrated();
 
-  // Focus trap and handle Esc
   useEffect(() => {
     if (!isOpen) return;
-
-    document.body.style.overflow = "hidden";
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         closeCart();
-        return;
-      }
-
-      // Focus trap
-      if (e.key === "Tab" && containerRef.current) {
-        const focusable = containerRef.current.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
       }
     };
+    window.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
     };
   }, [isOpen, closeCart]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      setIsClosing(false);
-    } else if (isMounted) {
-      setIsClosing(true);
-    }
-  }, [isOpen, isMounted]);
-
-  if (!isMounted) return null;
+  const activeItems = isHydrated ? items : [];
+  const financials = calculateOrderFinancials(
+    activeItems.map((item) => ({
+      unitPriceCents: Math.round(item.product.price * 100),
+      quantity: item.quantity,
+    }))
+  );
 
   return (
     <>
-      {/* Backdrop */}
       <div
+        className="kodo-drawer-backdrop"
+        data-open={isOpen}
         onClick={closeCart}
         aria-hidden="true"
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 300,
-          background: "oklch(12% 0.01 260 / 0.6)",
-          backdropFilter: "blur(4px)",
-          pointerEvents: isClosing ? "none" : "auto",
-          animation: isClosing
-            ? "fadeOut 200ms var(--ease-cinematic) forwards"
-            : "fadeIn 200ms var(--ease-cinematic) forwards",
-        }}
       />
 
-      {/* Drawer */}
-      <div
-        ref={containerRef}
-        onAnimationEnd={(e) => {
-          if (isClosing && e.target === containerRef.current) {
-            setIsMounted(false);
-            setIsClosing(false);
-          }
-        }}
-        role="dialog"
-        aria-modal="true"
+      <aside
+        className="kodo-cart-panel"
+        data-open={isOpen}
+        role={isOpen ? "dialog" : undefined}
+        aria-modal={isOpen ? "true" : undefined}
         aria-label="Shopping cart"
-        style={{
-          position: "fixed",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 301,
-          width: "min(450px, 100vw)",
-          background: "var(--sys-color-bg)",
-          borderLeft: "1px solid var(--sys-color-border)",
-          display: "flex",
-          flexDirection: "column",
-          pointerEvents: isClosing ? "none" : "auto",
-          animation: isClosing
-            ? "slideOutRight 280ms var(--ease-cinematic) forwards"
-            : "slideInRight 350ms var(--ease-cinematic) forwards",
-        }}
+        aria-hidden={!isOpen}
+        inert={!isOpen}
       >
-        {/* Header */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "var(--ref-space-3) var(--ref-space-4)",
+            paddingBottom: "var(--ref-space-4)",
             borderBottom: "1px solid var(--sys-color-border)",
-            minHeight: "var(--comp-nav-height)",
           }}
         >
-          <span className="text-label">Your Ritual</span>
+          <p className="text-label" style={{ color: "var(--sys-color-text-primary)" }}>
+            Your Ritual
+          </p>
           <button
+            type="button"
             onClick={closeCart}
             className="kodo-btn-utility kodo-focus-ring"
             aria-label="Close cart"
             style={{
-              fontSize: "var(--ref-font-size-small)",
-              letterSpacing: "var(--ref-letter-spacing-ultra)",
-              padding: "var(--ref-space-1)",
-              minWidth: "var(--ref-touch-target)",
-              minHeight: "var(--ref-touch-target)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "44px",
+              minHeight: "44px",
             }}
           >
             Close
           </button>
         </div>
 
-        {/* Items */}
         <div
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "var(--ref-space-4)",
+            paddingBlock: "var(--ref-space-6)",
           }}
         >
-          {items.length === 0 ? (
+          {activeItems.length === 0 ? (
             <div
               style={{
                 display: "flex",
@@ -163,6 +107,8 @@ export function CartDrawer() {
                 alignItems: "center",
                 justifyContent: "center",
                 height: "100%",
+                minHeight: "260px",
+                textAlign: "center",
                 gap: "var(--ref-space-3)",
               }}
             >
@@ -170,26 +116,36 @@ export function CartDrawer() {
                 style={{
                   fontFamily: "var(--font-editorial-display), Georgia, serif",
                   fontSize: "var(--ref-font-size-title)",
-                  color: "var(--sys-color-text-secondary)",
+                  color: "var(--sys-color-text-primary)",
                 }}
               >
                 The ritual awaits
               </p>
-              <p className="text-caption" style={{ textAlign: "center" }}>
+              <p
+                className="text-body"
+                style={{ color: "var(--sys-color-text-secondary)", maxWidth: "28ch" }}
+              >
                 Your collection is empty. Explore our scent taxonomy to begin.
               </p>
               <Link
                 href="/collections"
                 onClick={closeCart}
-                className="kodo-btn-outline"
-                style={{ textDecoration: "none" }}
+                className="kodo-btn-outline kodo-focus-ring"
+                style={{ marginTop: "var(--ref-space-2)" }}
               >
                 Explore Collections
               </Link>
             </div>
           ) : (
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "var(--ref-space-4)" }}>
-              {items.map((item) => (
+            <ul
+              style={{
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--ref-space-4)",
+              }}
+            >
+              {activeItems.map((item) => (
                 <li
                   key={item.lineKey}
                   style={{
@@ -199,102 +155,131 @@ export function CartDrawer() {
                     borderBottom: "1px solid var(--sys-color-border)",
                   }}
                 >
-                  {/* Product thumbnail */}
                   <div
                     style={{
-                      width: 80,
-                      height: 107,
-                      position: "relative",
-                      backgroundColor: "var(--sys-color-surface)",
+                      width: "72px",
+                      height: "92px",
                       flexShrink: 0,
                       overflow: "hidden",
+                      position: "relative",
+                      background: "var(--ref-color-obsidian-50)",
+                      border: "1px solid var(--sys-color-border)",
                     }}
                   >
                     <Image
-                      src={item.product.images.pureProduct}
+                      src={item.product.image}
                       alt={`KODŌ ${item.product.name} Eau de Parfum`}
                       fill
-                      sizes="80px"
-                      style={{ objectFit: "contain" }}
+                      sizes="72px"
+                      style={{ objectFit: "cover" }}
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-editorial-display), Georgia, serif",
-                        fontSize: "var(--ref-font-size-base)",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      {item.product.name}
-                    </p>
-                    <p className="text-caption" style={{ marginBottom: "var(--ref-space-1)" }}>
-                      {item.product.size}
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                        fontSize: "var(--ref-font-size-caption)",
-                        color: "var(--sys-color-text-accent)",
-                        fontVariantNumeric: "tabular-nums",
-                        marginBottom: "var(--ref-space-2)",
-                      }}
-                    >
-                      {formatPrice(Math.round(item.product.price * 100))}
-                    </p>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--ref-space-2)" }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div>
+                      <p
+                        style={{
+                          fontFamily:
+                            "var(--font-editorial-display), Georgia, serif",
+                          fontSize: "var(--ref-font-size-title)",
+                          color: "var(--sys-color-text-primary)",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {item.product.name}
+                      </p>
+                      <p
+                        className="text-caption"
+                        style={{
+                          color: "var(--sys-color-text-secondary)",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {item.product.size}
+                      </p>
+                      <p
+                        className="text-body"
+                        style={{
+                          color: "var(--sys-color-text-accent)",
+                          fontWeight: 500,
+                          marginTop: "var(--ref-space-1)",
+                        }}
+                      >
+                        {formatCents(Math.round(item.product.price * 100))}
+                      </p>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "var(--ref-space-2)",
+                        marginTop: "var(--ref-space-2)",
+                      }}
+                    >
                       <button
-                        onClick={() => updateQuantity(item.lineKey, item.quantity - 1)}
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(item.lineKey, item.quantity - 1)
+                        }
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         style={{
-                          width: 36,
-                          height: 36,
-                          minWidth: "var(--ref-touch-target)",
-                          minHeight: "var(--ref-touch-target)",
+                          minWidth: "44px",
+                          minHeight: "44px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           border: "1px solid var(--sys-color-border)",
-                          color: "var(--sys-color-text-primary)",
-                          fontSize: "var(--ref-font-size-caption)",
                         }}
                       >
                         −
                       </button>
                       <span
+                        className="text-caption"
                         style={{
-                          fontVariantNumeric: "tabular-nums",
-                          minWidth: "20px",
+                          minWidth: "24px",
                           textAlign: "center",
-                          fontSize: "var(--ref-font-size-caption)",
+                          color: "var(--sys-color-text-primary)",
                         }}
                       >
                         {item.quantity}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.lineKey, item.quantity + 1)}
+                        type="button"
+                        onClick={() =>
+                          updateQuantity(item.lineKey, item.quantity + 1)
+                        }
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Increase quantity of ${item.product.name}`}
                         style={{
-                          width: 36,
-                          height: 36,
-                          minWidth: "var(--ref-touch-target)",
-                          minHeight: "var(--ref-touch-target)",
+                          minWidth: "44px",
+                          minHeight: "44px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           border: "1px solid var(--sys-color-border)",
-                          color: "var(--sys-color-text-primary)",
-                          fontSize: "var(--ref-font-size-caption)",
                         }}
                       >
                         +
                       </button>
                       <button
+                        type="button"
                         onClick={() => removeItem(item.lineKey)}
                         className="kodo-btn-utility kodo-focus-ring"
                         aria-label={`Remove ${item.product.name} from cart`}
                         style={{
                           marginLeft: "auto",
-                          fontSize: "var(--ref-font-size-small)",
-                          letterSpacing: "var(--ref-letter-spacing-wide)",
-                          padding: "4px",
+                          minHeight: "44px",
+                          paddingInline: "8px",
+                          color: "var(--sys-color-text-secondary)",
                         }}
                       >
                         Remove
@@ -307,43 +292,54 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Footer with total and checkout */}
-        {items.length > 0 && (
+        {activeItems.length > 0 && (
           <div
             style={{
+              paddingTop: "var(--ref-space-4)",
               borderTop: "1px solid var(--sys-color-border)",
-              padding: "var(--ref-space-4)",
               display: "flex",
               flexDirection: "column",
               gap: "var(--ref-space-3)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+              }}
+            >
               <span className="text-label">Subtotal</span>
               <span
                 style={{
-                  fontFamily: "var(--font-utility-sans), system-ui, sans-serif",
-                  fontSize: "var(--ref-font-size-body-lg)",
-                  fontVariantNumeric: "tabular-nums",
+                  fontFamily: "var(--font-editorial-display), Georgia, serif",
+                  fontSize: "var(--ref-font-size-title)",
                   color: "var(--sys-color-text-primary)",
                 }}
               >
-                {formatPrice(Math.round(totalPrice() * 100))}
+                {formatCents(financials.subtotalCents)}
               </span>
             </div>
-            <p className="text-caption">{COMMERCE_CONFIG.shipping.policyLabel}</p>
+
+            <p className="text-caption" style={{ fontSize: "0.75rem" }}>
+              {financials.qualifiesFreeShipping
+                ? `${COMMERCE_CONFIG.shipping.complimentaryLabel} included.`
+                : `Add ${formatCents(
+                    financials.amountToFreeShippingCents
+                  )} for ${COMMERCE_CONFIG.shipping.complimentaryLabel.toLowerCase()}.`}
+            </p>
+
             <Link
               href="/checkout"
               onClick={closeCart}
-              className="kodo-btn-solid"
-              style={{ textDecoration: "none", width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }}
-              aria-label="Proceed to secure checkout"
+              className="kodo-btn-solid kodo-focus-ring"
+              style={{ width: "100%", textAlign: "center" }}
             >
-              Secure Checkout
+              Proceed to Checkout
             </Link>
           </div>
         )}
-      </div>
+      </aside>
     </>
   );
 }
