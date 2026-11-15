@@ -7,6 +7,7 @@ import { HomeClient } from "./HomeClient";
 import { FooterDirectory } from "@/components/global/FooterDirectory";
 import { SectionReveal } from "@/components/shared/SectionReveal";
 import { HeroFlacon } from "@/components/shared/HeroFlacon";
+import { HeroStage } from "@/components/shared/HeroStage";
 
 /* ═══════════════════════════════════════════════════════════
    KODŌ — Homepage (Server Component)
@@ -21,21 +22,8 @@ export default function HomePage() {
       <HomeClient />
 
       <main id="main-content" role="main">
-        {/* ─── ACT I: Hero Section (Phase B.1.2 Refined Composition) ─── */}
-        <section
-          aria-label="KODŌ Brand Introduction"
-          style={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "100vh",
-            paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-2))",
-            paddingBottom: "var(--ref-space-8)",
-            overflow: "hidden",
-          }}
-        >
+        {/* ─── ACT I: Hero Section (Phase B.1.2 Refined Composition + Chiaroscuro) ─── */}
+        <HeroStage>
           {/* Customized Brutalist Concrete Portal (Ma · 間) Backdrop */}
           <div aria-hidden="true" className="hero-ma-stage">
             <Image
@@ -63,6 +51,10 @@ export default function HomePage() {
               pointerEvents: "none",
             }}
           />
+
+          {/* Full-hero whisper champagne pointer veil & concrete grazing glint */}
+          <div aria-hidden="true" className="hero-chiaroscuro-veil" />
+          <div aria-hidden="true" className="hero-chiaroscuro-glint" />
 
           <div
             style={{
@@ -239,7 +231,7 @@ export default function HomePage() {
               }}
             />
           </div>
-        </section>
+        </HeroStage>
 
         {/* ─── Ma Space — Negative Breathing ─── */}
         <div className="ma-space" />
@@ -866,8 +858,8 @@ export default function HomePage() {
           right: 12px;
           bottom: 12px;
           width: 42%;
-          border-right: 1px solid oklch(98% 0.005 85 / 0.12);
-          border-bottom: 1px solid oklch(98% 0.005 85 / 0.12);
+          border-right: 1px solid oklch(82% 0.075 85 / calc(0.12 + 0.22 * var(--hero-active, 0)));
+          border-bottom: 1px solid oklch(82% 0.075 85 / calc(0.12 + 0.22 * var(--hero-active, 0)));
           -webkit-mask-image: linear-gradient(135deg, transparent 35%, black 85%);
           mask-image: linear-gradient(135deg, transparent 35%, black 85%);
           pointer-events: none;
@@ -880,12 +872,40 @@ export default function HomePage() {
           font-family: var(--font-editorial-display), Georgia, serif;
           font-size: clamp(1.35rem, 2vw, 1.85rem);
           line-height: 1;
-          color: oklch(94% 0.006 85 / 0.78);
+          color: oklch(88% 0.045 85 / calc(0.76 + 0.20 * var(--hero-active, 0)));
           letter-spacing: 0.04em;
           pointer-events: none;
           user-select: none;
           opacity: 0;
           animation: heroEyebrowReveal 700ms var(--ease-cinematic) 950ms forwards;
+        }
+
+        .hero-chiaroscuro-veil {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          opacity: var(--hero-active, 0);
+          background:
+            radial-gradient(240px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.08 85 / 0.065), transparent 68%),
+            radial-gradient(640px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(76% 0.08 85 / 0.09), oklch(74% 0.06 85 / 0.03) 40%, transparent 72%);
+          will-change: opacity;
+        }
+
+        .hero-chiaroscuro-glint {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          mix-blend-mode: soft-light;
+          opacity: var(--hero-active, 0);
+          background:
+            radial-gradient(460px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(86% 0.09 85 / 0.28), oklch(76% 0.075 85 / 0.09) 46%, transparent 72%);
+          will-change: opacity;
+        }
+
+        .hero-cta-group .kodo-btn-solid:hover {
+          box-shadow: 0 4px 24px -2px oklch(76% 0.08 85 / 0.28) !important;
         }
 
         .hero-editorial-grid {
@@ -1164,7 +1184,18 @@ export default function HomePage() {
           }
         }
 
+        @media (hover: none) and (pointer: coarse) {
+          .hero-chiaroscuro-veil,
+          .hero-chiaroscuro-glint {
+            display: none !important;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
+          .hero-chiaroscuro-veil,
+          .hero-chiaroscuro-glint {
+            display: none !important;
+          }
           .hero-ambient-halo {
             animation: none !important;
             opacity: 0.7 !important;
