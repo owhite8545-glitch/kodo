@@ -887,8 +887,8 @@ export default function HomePage() {
           pointer-events: none;
           opacity: var(--hero-active, 0);
           background:
-            radial-gradient(240px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.08 85 / 0.065), transparent 68%),
-            radial-gradient(640px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(76% 0.08 85 / 0.09), oklch(74% 0.06 85 / 0.03) 40%, transparent 72%);
+            radial-gradient(240px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.08 85 / 0.045), transparent 68%),
+            radial-gradient(640px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(76% 0.08 85 / 0.065), oklch(74% 0.06 85 / 0.022) 40%, transparent 72%);
           will-change: opacity;
         }
 
