@@ -52,9 +52,8 @@ export default function HomePage() {
             }}
           />
 
-          {/* Full-hero whisper champagne pointer veil & concrete grazing glint */}
+          {/* Subtle 72px pinpoint champagne pointer aura */}
           <div aria-hidden="true" className="hero-chiaroscuro-veil" />
-          <div aria-hidden="true" className="hero-chiaroscuro-glint" />
 
           <div
             style={{
@@ -887,20 +886,7 @@ export default function HomePage() {
           pointer-events: none;
           opacity: var(--hero-active, 0);
           background:
-            radial-gradient(240px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.08 85 / 0.045), transparent 68%),
-            radial-gradient(640px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(76% 0.08 85 / 0.065), oklch(74% 0.06 85 / 0.022) 40%, transparent 72%);
-          will-change: opacity;
-        }
-
-        .hero-chiaroscuro-glint {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          pointer-events: none;
-          mix-blend-mode: soft-light;
-          opacity: var(--hero-active, 0);
-          background:
-            radial-gradient(460px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(86% 0.09 85 / 0.28), oklch(76% 0.075 85 / 0.09) 46%, transparent 72%);
+            radial-gradient(72px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.07 85 / 0.035), transparent 70%);
           will-change: opacity;
         }
 
@@ -1185,15 +1171,13 @@ export default function HomePage() {
         }
 
         @media (hover: none) and (pointer: coarse) {
-          .hero-chiaroscuro-veil,
-          .hero-chiaroscuro-glint {
+          .hero-chiaroscuro-veil {
             display: none !important;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hero-chiaroscuro-veil,
-          .hero-chiaroscuro-glint {
+          .hero-chiaroscuro-veil {
             display: none !important;
           }
           .hero-ambient-halo {
