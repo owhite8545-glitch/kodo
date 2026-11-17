@@ -39,7 +39,7 @@ export default function HomePage() {
             <span className="hero-ma-seal">間</span>
           </div>
 
-          {/* Atmospheric breathing gradient background */}
+          {/* Atmospheric breathing gradient background (masked cleanly before hero fold) */}
           <div
             aria-hidden="true"
             className="hero-ambient-halo"
@@ -48,12 +48,13 @@ export default function HomePage() {
               inset: 0,
               background:
                 "radial-gradient(ellipse 70% 55% at 55% 45%, oklch(24% 0.03 85 / 0.35), transparent 75%)",
+              WebkitMaskImage:
+                "linear-gradient(180deg, black 0%, black 70%, transparent 100%)",
+              maskImage:
+                "linear-gradient(180deg, black 0%, black 70%, transparent 100%)",
               pointerEvents: "none",
             }}
           />
-
-          {/* Subtle 72px pinpoint champagne pointer aura */}
-          <div aria-hidden="true" className="hero-chiaroscuro-veil" />
 
           <div
             style={{
@@ -879,17 +880,6 @@ export default function HomePage() {
           animation: heroEyebrowReveal 700ms var(--ease-cinematic) 950ms forwards;
         }
 
-        .hero-chiaroscuro-veil {
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          pointer-events: none;
-          opacity: var(--hero-active, 0);
-          background:
-            radial-gradient(72px circle at var(--hero-mx, 62%) var(--hero-my, 48%), oklch(82% 0.07 85 / 0.035), transparent 70%);
-          will-change: opacity;
-        }
-
         .hero-cta-group .kodo-btn-solid:hover {
           box-shadow: 0 4px 24px -2px oklch(76% 0.08 85 / 0.28) !important;
         }
@@ -1170,16 +1160,7 @@ export default function HomePage() {
           }
         }
 
-        @media (hover: none) and (pointer: coarse) {
-          .hero-chiaroscuro-veil {
-            display: none !important;
-          }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-          .hero-chiaroscuro-veil {
-            display: none !important;
-          }
           .hero-ambient-halo {
             animation: none !important;
             opacity: 0.7 !important;

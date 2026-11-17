@@ -39,6 +39,7 @@ interface MistParticle {
   radius: number;
   life: number;
   decay: number;
+  alphaScale: number;
   flutterPhase: number;
   flutterFreq: number;
   glint: boolean;
@@ -62,14 +63,12 @@ function createAmbientMotes(
 ): AmbientMote[] {
   const motes: AmbientMote[] = [];
   for (let i = 0; i < count; i++) {
-    // Bias ~65% into the concrete Ma portal zone (35%..92% width)
+    // Balance full-viewport drift with a subtle enrichment in the Ma light corridor
     const inPortalBand = i % 3 !== 0;
     const baseXRatio = inPortalBand
-      ? 0.35 + Math.random() * 0.57
-      : 0.06 + Math.random() * 0.88;
-    const baseYRatio = inPortalBand
-      ? 0.1 + Math.random() * 0.8
-      : 0.08 + Math.random() * 0.84;
+      ? 0.25 + Math.random() * 0.67
+      : 0.05 + Math.random() * 0.9;
+    const baseYRatio = 0.04 + Math.random() * 0.92;
 
     const depth = 0.35 + Math.random() * 0.65;
     const rgb = KINPAKU_PALETTE[i % KINPAKU_PALETTE.length];
@@ -122,8 +121,8 @@ function drawMicroGlint(
 
 /**
  * KODŌ — HeroStage
- * Dual-physics chiaroscuro & Kinpaku gold particle canvas controller for the Hero:
- * 1. Ambient suspended incense & gold motes breathing within the Ma concrete portal.
+ * Full-homepage viewport-fixed Dual-Physics Kinpaku & Incense particle canvas:
+ * 1. Continuous across the entire Homepage with depth-layered scroll parallax and smooth gradual attenuation toward the footer.
  * 2. Fast cursor motion parts ambient motes with a subtle fluid wake & sheds falling gold mist droplets.
  * 3. Cursor stillness/dwell magnetizes nearby motes into a soft luminous Kintsugi orbit.
  */
@@ -143,12 +142,11 @@ export function HeroStage({ children }: HeroStageProps) {
     const stage = stageRef.current;
     const canvas = canvasRef.current;
 
-    if (!stage) return;
-
-    // Initial chiaroscuro lighting CSS tokens
-    stage.style.setProperty("--hero-mx", "62.00%");
-    stage.style.setProperty("--hero-my", "48.00%");
-    stage.style.setProperty("--hero-active", "0.000");
+    if (stage) {
+      stage.style.setProperty("--hero-mx", "62.00%");
+      stage.style.setProperty("--hero-my", "48.00%");
+      stage.style.setProperty("--hero-active", "0.000");
+    }
 
     if (prefersReducedMotion || !canvas) return;
 
@@ -166,10 +164,11 @@ export function HeroStage({ children }: HeroStageProps) {
     const trail: MistParticle[] = [];
 
     let rafId: number | null = null;
-    let isVisible = true;
     let lastTime = performance.now();
+    let lastScrollY = window.scrollY;
+    let canvasClearedAfterFade = false;
 
-    // Pointer & Chiaroscuro Lighting State
+    // Hero hairline & Kanji seal hover state
     let targetPctX = 62;
     let targetPctY = 48;
     let targetActive = 0;
@@ -187,20 +186,34 @@ export function HeroStage({ children }: HeroStageProps) {
     let pointerSpeed = 0;
     let dwellFactor = 0;
 
+    const getDocumentFade = (viewportY: number): number => {
+      const docHeight = Math.max(
+        height * 1.5,
+        document.documentElement.scrollHeight || height * 3
+      );
+      const docY = Math.max(0, window.scrollY + viewportY);
+      const progress = clamp(docY / docHeight, 0, 1);
+      if (progress <= 0.16) return 1;
+      const t = clamp((progress - 0.16) / 0.78, 0, 1);
+      return Math.pow(1 - t, 1.45);
+    };
+
     const syncLightingStyles = () => {
+      if (!stage) return;
       stage.style.setProperty("--hero-mx", `${currentPctX.toFixed(2)}%`);
       stage.style.setProperty("--hero-my", `${currentPctY.toFixed(2)}%`);
       stage.style.setProperty("--hero-active", currentActive.toFixed(3));
     };
 
     const resizeCanvas = () => {
-      const rect = stage.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
+      const nextWidth = window.innerWidth;
+      const nextHeight = window.innerHeight;
+      if (nextWidth <= 0 || nextHeight <= 0) return;
 
       const prevWidth = width;
       const prevHeight = height;
-      width = rect.width;
-      height = rect.height;
+      width = nextWidth;
+      height = nextHeight;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
 
       canvas.width = Math.round(width * dpr);
@@ -225,14 +238,16 @@ export function HeroStage({ children }: HeroStageProps) {
       y: number,
       vxMove: number,
       vyMove: number,
-      speed: number
+      speed: number,
+      cursorFade: number
     ) => {
       const count = speed > 18 ? 3 : speed > 7 ? 2 : 1;
+      const alphaScale = 0.35 + 0.65 * cursorFade;
       for (let i = 0; i < count; i++) {
         if (trail.length >= MAX_TRAIL_PARTICLES) {
           trail.shift();
         }
-        const rgb = KINPAKU_PALETTE[Math.floor(Math.random() * 2)]; // favor light champagne & brass gold
+        const rgb = KINPAKU_PALETTE[Math.floor(Math.random() * 2)];
         trail.push({
           x: x + (Math.random() - 0.5) * 14,
           y: y + (Math.random() - 0.5) * 10,
@@ -240,12 +255,32 @@ export function HeroStage({ children }: HeroStageProps) {
           vy: clamp(vyMove * 0.1, -1.0, 0.8) + 0.08 + Math.random() * 0.38,
           radius: 0.85 + Math.random() * 1.45,
           life: 1,
-          decay: 0.011 + Math.random() * 0.006, // ~1.0s - 1.5s at 60fps
+          decay: 0.011 + Math.random() * 0.006,
+          alphaScale,
           flutterPhase: Math.random() * Math.PI * 2,
           flutterFreq: 0.045 + Math.random() * 0.04,
           glint: Math.random() < 0.32,
           rgb,
         });
+      }
+    };
+
+    const handleScroll = () => {
+      const nextScrollY = window.scrollY;
+      const dy = nextScrollY - lastScrollY;
+      lastScrollY = nextScrollY;
+
+      if (dy !== 0 && height > 0) {
+        for (let i = 0; i < motes.length; i++) {
+          const m = motes[i];
+          const shift = dy * (0.18 + 0.22 * m.depth);
+          m.y = (((m.y - shift) % height) + height) % height;
+          const baseY = (((m.baseYRatio * height - shift) % height) + height) % height;
+          m.baseYRatio = baseY / height;
+        }
+        for (let i = 0; i < trail.length; i++) {
+          trail[i].y -= dy * 0.65;
+        }
       }
     };
 
@@ -255,11 +290,8 @@ export function HeroStage({ children }: HeroStageProps) {
         return;
       }
 
-      const rect = stage.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
-
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = e.clientX;
+      const y = e.clientY;
 
       if (!pointerInside) {
         prevPointerX = x;
@@ -283,13 +315,21 @@ export function HeroStage({ children }: HeroStageProps) {
         dwellFactor *= 0.85;
       }
 
-      if (pointerSpeed > 1.4) {
-        spawnMistDroplets(x, y, dx, dy, pointerSpeed);
+      const cursorFade = getDocumentFade(y);
+      if (pointerSpeed > 1.4 && cursorFade > 0.05) {
+        spawnMistDroplets(x, y, dx, dy, pointerSpeed, cursorFade);
       }
 
-      targetPctX = clamp((x / rect.width) * 100, 0, 100);
-      targetPctY = clamp((y / rect.height) * 100, 0, 100);
-      targetActive = 1;
+      if (stage) {
+        const rect = stage.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0 && y <= rect.bottom) {
+          targetPctX = clamp(((x - rect.left) / rect.width) * 100, 0, 100);
+          targetPctY = clamp(((y - rect.top) / rect.height) * 100, 0, 100);
+          targetActive = 1;
+        } else {
+          targetActive = 0;
+        }
+      }
     };
 
     const handlePointerLeave = () => {
@@ -298,7 +338,7 @@ export function HeroStage({ children }: HeroStageProps) {
     };
 
     const handleVisibilityChange = () => {
-      if (!document.hidden && isVisible && rafId === null) {
+      if (!document.hidden && rafId === null) {
         lastTime = performance.now();
         rafId = requestAnimationFrame(tick);
       }
@@ -306,13 +346,13 @@ export function HeroStage({ children }: HeroStageProps) {
 
     const tick = (now: number) => {
       rafId = null;
-      if (!isVisible || document.hidden) return;
+      if (document.hidden) return;
 
       const elapsedMs = Math.max(1, now - lastTime);
       lastTime = now;
       const dtScale = Math.min(elapsedMs / 16.667, 2.5);
 
-      // 1. Chiaroscuro pointer lighting Lerp
+      // 1. Sync Hero hairline/seal hover feedback
       const posFactor = 1 - Math.pow(1 - 0.085, dtScale);
       const fadeBase = targetActive > currentActive ? 0.12 : 0.055;
       const fadeFactor = 1 - Math.pow(1 - fadeBase, dtScale);
@@ -322,9 +362,21 @@ export function HeroStage({ children }: HeroStageProps) {
       syncLightingStyles();
 
       if (width > 0 && height > 0) {
+        const topFade = getDocumentFade(0);
+
+        // Skip work cleanly once scrolled completely past fade threshold
+        if (topFade <= 0.002 && trail.length === 0) {
+          if (!canvasClearedAfterFade) {
+            ctx.clearRect(0, 0, width, height);
+            canvasClearedAfterFade = true;
+          }
+          rafId = requestAnimationFrame(tick);
+          return;
+        }
+        canvasClearedAfterFade = false;
         ctx.clearRect(0, 0, width, height);
 
-        // 2. Update cursor motion decay & dwell stillness state
+        // 2. Cursor velocity decay & stillness detection
         pointerSpeed *= Math.pow(0.84, dtScale);
         if (pointerInside && pointerSpeed < 1.8) {
           dwellFactor += (1 - dwellFactor) * (1 - Math.pow(1 - 0.04, dtScale));
@@ -332,7 +384,10 @@ export function HeroStage({ children }: HeroStageProps) {
           dwellFactor *= Math.pow(0.86, dtScale);
         }
 
-        // 3. Ambient Motes — Drift + Fluid Repulsion/Wake OR Magnetic Orbit
+        const cursorFade = pointerInside ? getDocumentFade(pointerY) : 0;
+        const interactionWeight = 0.25 + 0.75 * cursorFade;
+
+        // 3. Ambient Motes — Depth drift + Fluid Repulsion/Wake OR Magnetic Orbit
         const damping = Math.pow(0.945, dtScale);
 
         for (let i = 0; i < motes.length; i++) {
@@ -346,12 +401,11 @@ export function HeroStage({ children }: HeroStageProps) {
 
           let magnetProximity = 0;
 
-          if (!isTouch && pointerInside) {
+          if (!isTouch && pointerInside && cursorFade > 0.02) {
             const dx = m.x - pointerX;
             const dy = m.y - pointerY;
             const dist = Math.hypot(dx, dy) || 0.001;
 
-            // Mode A: Fast cursor motion parts motes cleanly with gentle wake curl
             if (pointerSpeed >= 1.5 && dist < REPULSION_RADIUS) {
               const falloff = 1 - dist / REPULSION_RADIUS;
               const nx = dx / dist;
@@ -361,9 +415,9 @@ export function HeroStage({ children }: HeroStageProps) {
                 falloff *
                 clamp(pointerSpeed * 0.085, 0.25, 2.2) *
                 m.depth *
+                interactionWeight *
                 dtScale;
 
-              // Subtle perpendicular smoke curl aligned gently with cursor velocity
               const crossSign =
                 pointerVelX * ny - pointerVelY * nx >= 0 ? 1 : -1;
               const curlForce = repulseForce * 0.38 * crossSign;
@@ -372,23 +426,27 @@ export function HeroStage({ children }: HeroStageProps) {
               m.vy += ny * repulseForce + nx * curlForce;
             }
 
-            // Mode B: Stillness / dwell magnetizes nearby motes into Kintsugi orbit
             if (dwellFactor > 0.15 && dist < MAGNET_RADIUS) {
               const falloff = 1 - dist / MAGNET_RADIUS;
-              magnetProximity = falloff * dwellFactor;
+              magnetProximity = falloff * dwellFactor * interactionWeight;
 
               const dynamicAngle = m.orbitAngle + now * m.orbitSpeed;
-              const targetOrbitX = pointerX + Math.cos(dynamicAngle) * m.orbitRadius;
-              const targetOrbitY = pointerY + Math.sin(dynamicAngle) * m.orbitRadius;
+              const targetOrbitX =
+                pointerX + Math.cos(dynamicAngle) * m.orbitRadius;
+              const targetOrbitY =
+                pointerY + Math.sin(dynamicAngle) * m.orbitRadius;
 
               const springStrength =
-                (0.018 + 0.024 * m.depth) * dwellFactor * (0.45 + 0.55 * falloff) * dtScale;
+                (0.018 + 0.024 * m.depth) *
+                dwellFactor *
+                interactionWeight *
+                (0.45 + 0.55 * falloff) *
+                dtScale;
               m.vx += (targetOrbitX - m.x) * springStrength;
               m.vy += (targetOrbitY - m.y) * springStrength;
             }
           }
 
-          // Home equilibrium spring (yields gracefully while trapped in magnetic orbit)
           const homeSpring = 0.0065 * (1 - 0.85 * magnetProximity) * dtScale;
           m.vx += (homeX - m.x) * homeSpring;
           m.vy += (homeY - m.y) * homeSpring;
@@ -398,16 +456,17 @@ export function HeroStage({ children }: HeroStageProps) {
           m.x += m.vx * dtScale;
           m.y += m.vy * dtScale;
 
-          // Subtle luminescence pulse boosted cleanly when magnetized near cursor
+          const docFade = getDocumentFade(m.y);
+          if (docFade <= 0.005) continue;
+
           const twinkle =
             0.74 + 0.26 * Math.sin(now * m.twinkleSpeed + m.phase);
-          const alpha = clamp(
-            m.baseAlpha * twinkle + magnetProximity * 0.42,
-            0.05,
-            0.88
-          );
+          const alpha =
+            clamp(m.baseAlpha * twinkle + magnetProximity * 0.42, 0.04, 0.88) *
+            docFade;
 
-          // Soft ambient halo glow
+          if (alpha <= 0.004) continue;
+
           const glowRadius = m.radius * (2.6 + magnetProximity * 1.4);
           ctx.fillStyle = `rgba(${m.rgb[0]}, ${m.rgb[1]}, ${m.rgb[2]}, ${(
             alpha * (0.14 + magnetProximity * 0.16)
@@ -416,7 +475,6 @@ export function HeroStage({ children }: HeroStageProps) {
           ctx.arc(m.x, m.y, glowRadius, 0, Math.PI * 2);
           ctx.fill();
 
-          // Crisp gold core
           ctx.fillStyle = `rgba(${m.rgb[0]}, ${m.rgb[1]}, ${m.rgb[2]}, ${alpha.toFixed(
             3
           )})`;
@@ -424,7 +482,6 @@ export function HeroStage({ children }: HeroStageProps) {
           ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2);
           ctx.fill();
 
-          // Delicate 4-point calligraphic micro-glint on highlighted motes
           if ((m.sparkle || magnetProximity > 0.45) && twinkle > 0.85) {
             drawMicroGlint(
               ctx,
@@ -437,7 +494,7 @@ export function HeroStage({ children }: HeroStageProps) {
           }
         }
 
-        // 4. Falling Atomized Gold Mist Trail (spawned by pointer velocity)
+        // 4. Falling Atomized Gold Mist Trail (continuous across scroll + gradual attenuation)
         const dragX = Math.pow(0.975, dtScale);
         const dragY = Math.pow(0.982, dtScale);
 
@@ -455,14 +512,19 @@ export function HeroStage({ children }: HeroStageProps) {
           p.y += p.vy * dtScale;
           p.life -= p.decay * dtScale;
 
-          if (p.life <= 0 || p.y > height + 24) {
+          if (p.life <= 0 || p.y > height + 24 || p.y < -24) {
             trail.splice(i, 1);
             continue;
           }
 
-          // Smooth bell fade-out curve
+          const docFade = getDocumentFade(p.y);
+          if (docFade <= 0.005) continue;
+
           const easeLife = p.life * p.life * (3 - 2 * p.life);
-          const alpha = clamp(easeLife * 0.72, 0, 0.72);
+          const alpha =
+            clamp(easeLife * 0.72 * p.alphaScale, 0, 0.72) * docFade;
+          if (alpha <= 0.004) continue;
+
           const drawRadius = p.radius * (0.6 + 0.4 * p.life);
 
           ctx.fillStyle = `rgba(${p.rgb[0]}, ${p.rgb[1]}, ${p.rgb[2]}, ${(
@@ -497,76 +559,60 @@ export function HeroStage({ children }: HeroStageProps) {
 
     resizeCanvas();
 
-    const resizeObserver = new ResizeObserver(resizeCanvas);
-    resizeObserver.observe(stage);
-
-    const intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (!entry) return;
-        isVisible = entry.isIntersecting;
-        if (isVisible && !document.hidden && rafId === null) {
-          lastTime = performance.now();
-          rafId = requestAnimationFrame(tick);
-        } else if (!isVisible && rafId !== null) {
-          cancelAnimationFrame(rafId);
-          rafId = null;
-        }
-      },
-      { threshold: 0.02 }
-    );
-    intersectionObserver.observe(stage);
-
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     if (!isTouch) {
-      stage.addEventListener("pointermove", handlePointerMove, { passive: true });
-      stage.addEventListener("pointerleave", handlePointerLeave);
+      window.addEventListener("pointermove", handlePointerMove, { passive: true });
+      document.addEventListener("mouseleave", handlePointerLeave);
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     rafId = requestAnimationFrame(tick);
 
     return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("scroll", handleScroll);
       if (!isTouch) {
-        stage.removeEventListener("pointermove", handlePointerMove);
-        stage.removeEventListener("pointerleave", handlePointerLeave);
+        window.removeEventListener("pointermove", handlePointerMove);
+        document.removeEventListener("mouseleave", handlePointerLeave);
       }
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      resizeObserver.disconnect();
-      intersectionObserver.disconnect();
       if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 
   return (
-    <section
-      ref={stageRef}
-      aria-label="KODŌ Brand Introduction"
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-2))",
-        paddingBottom: "var(--ref-space-8)",
-        overflow: "hidden",
-      }}
-    >
-      {children}
+    <>
       <canvas
         ref={canvasRef}
         aria-hidden="true"
         className="hero-kinpaku-canvas"
         style={{
-          position: "absolute",
+          position: "fixed",
           inset: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 0,
+          width: "100vw",
+          height: "100vh",
+          zIndex: 1,
           pointerEvents: "none",
         }}
       />
-    </section>
+      <section
+        ref={stageRef}
+        aria-label="KODŌ Brand Introduction"
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          paddingTop: "calc(var(--comp-nav-height) + var(--ref-space-2))",
+          paddingBottom: "var(--ref-space-8)",
+          overflow: "hidden",
+        }}
+      >
+        {children}
+      </section>
+    </>
   );
 }
